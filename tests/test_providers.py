@@ -16,7 +16,7 @@ from contextlib import contextmanager
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
-from autodata.llm import OpenAICompatibleProvider, resolve_api_key
+from autodata.llm import OpenAICompatibleProvider, resolve_api_key, _parse_retry_after
 
 
 # --- fake requests -----------------------------------------------------------
@@ -142,6 +142,30 @@ def test_adaptation_is_sticky_across_calls():
         assert prov.complete("s", "u") == "a"
         assert prov.complete("s", "u") == "b"      # second call already omits temperature
     assert "temperature" not in fake.payloads[-1]
+
+
+# --- Retry-After parsing: both RFC 7231 forms -------------------------------
+def test_parse_retry_after_seconds_form():
+    assert _parse_retry_after("30") == 30.0
+    assert _parse_retry_after(" 12 ") == 12.0
+    assert _parse_retry_after("-5") == 0.0          # clamped to 0
+    assert _parse_retry_after(None) is None
+    assert _parse_retry_after("") is None
+    assert _parse_retry_after("not-a-number") is None
+
+
+def test_parse_retry_after_http_date_form():
+    # HTTP-date form: delay = (date - now). Inject `now` so the test is deterministic.
+    # 2015-10-21 07:28:00 GMT == 1445412480 epoch seconds.
+    target_epoch = 1445412480
+    # now is 100s before the target -> ~100s delay
+    delay = _parse_retry_after("Wed, 21 Oct 2015 07:28:00 GMT", now=target_epoch - 100)
+    assert delay is not None and abs(delay - 100.0) < 1.0
+    # a date already in the past -> clamped to 0
+    past = _parse_retry_after("Wed, 21 Oct 2015 07:28:00 GMT", now=target_epoch + 500)
+    assert past == 0.0
+    # malformed date -> None (caller falls back to default)
+    assert _parse_retry_after("Someday, never o'clock") is None
 
 
 # --- NIM 429: rate-limited; honor Retry-After and recover ------------------

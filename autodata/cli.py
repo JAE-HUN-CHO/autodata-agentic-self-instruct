@@ -111,7 +111,12 @@ def main(argv=None):
 
     papers_path = args.papers or cfg.get("papers_path", "examples")
     papers = load_papers(papers_path)
-    if args.limit is not None and args.limit > 0:
+    if args.limit is not None:
+        if args.limit < 0:
+            raise SystemExit(f"--limit must be >= 0, got {args.limit}")
+        # Slice for any non-negative limit so the "at most N" contract holds exactly:
+        # --limit 0 yields zero papers (a config/connectivity dry run that writes empty
+        # outputs), instead of silently falling through to the whole expensive corpus.
         papers = papers[: args.limit]
     pipeline = build_pipeline(cfg, args.offline)
 

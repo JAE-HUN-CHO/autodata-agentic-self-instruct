@@ -135,7 +135,10 @@ returns when the pipeline runs against it for more than a few calls.
 
 3. **`--limit N` CLI flag** (`autodata/cli.py`). Process at most `N` papers
    from the corpus. The tutorial uses `--limit 1` so the walk-through is
-   bounded; for a full corpus drop the flag.
+   bounded; for a full corpus drop the flag. `--limit 0` is an honest dry
+   run (loads config, builds providers, processes zero papers, writes empty
+   outputs) — handy for validating a NIM config without spending tokens. A
+   negative limit is rejected.
 
 4. **Tolerant rubric parser** (`autodata/subagents.py`, `_parse_rubric`).
    The challenger sometimes returns a rubric entry missing the `criterion`
@@ -149,9 +152,10 @@ returns when the pipeline runs against it for more than a few calls.
    retry path used a geometric `2**backoff` capped at 8 s — designed for
    transient 5xx — and exhausted three retries inside a rate-limit window
    that NIM expects you to wait ~30 s for. The provider now reads the
-   `Retry-After` header on 429, falls back to 30 s when absent, and caps
-   at 60 s. `max_retries` is also bumped to 5 in `tutorial_nim_config.yaml`
-   to survive multi-round bursts.
+   `Retry-After` header on 429 in either RFC 7231 form (integer seconds or
+   an HTTP-date), falls back to 30 s when absent, and caps at 60 s.
+   `max_retries` is also bumped to 5 in `tutorial_nim_config.yaml` to
+   survive multi-round bursts.
 
 ## Faithfulness to the paper
 

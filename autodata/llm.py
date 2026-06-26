@@ -14,6 +14,7 @@ Two implementations:
 from __future__ import annotations
 
 from typing import Protocol, Optional
+from datetime import timezone
 import hashlib
 import json
 import os
@@ -47,19 +48,37 @@ class _PendingResponse(Exception):
     consume. Carried separately so it is NOT swept into the transient retry path."""
 
 
-def _parse_retry_after(value: Optional[str]) -> Optional[float]:
-    """Parse the Retry-After response header.
+def _parse_retry_after(value: Optional[str], now: Optional[float] = None) -> Optional[float]:
+    """Parse the Retry-After response header into a delay in seconds.
 
-    Per RFC 7231 it can be either an integer number of seconds or an HTTP-date. NIM uses
-    the seconds form; we still tolerate a small float and ignore anything we can't parse
-    (the caller falls back to a default delay).
+    Per RFC 7231 the value is either a non-negative integer number of seconds (the form NIM
+    uses) or an HTTP-date marking when to retry. We handle both: the seconds form directly,
+    and the HTTP-date form by subtracting the current time. A date in the past yields 0.0.
+    Anything we can't parse returns None so the caller falls back to a default delay.
+
+    `now` (epoch seconds) is injectable for testing; defaults to the current wall-clock time.
     """
     if not value:
         return None
+    value = value.strip()
     try:
-        return max(0.0, float(value.strip()))
+        return max(0.0, float(value))
     except ValueError:
+        pass
+    # HTTP-date form, e.g. "Wed, 21 Oct 2015 07:28:00 GMT"
+    try:
+        from email.utils import parsedate_to_datetime
+
+        when = parsedate_to_datetime(value)
+    except (TypeError, ValueError):
         return None
+    if when is None:
+        return None
+    # parsedate_to_datetime may return a naive datetime (no tz); treat it as UTC.
+    if when.tzinfo is None:
+        when = when.replace(tzinfo=timezone.utc)
+    current = time.time() if now is None else now
+    return max(0.0, when.timestamp() - current)
 
 
 def resolve_api_key(value: str) -> str:
