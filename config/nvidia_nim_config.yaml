@@ -1,0 +1,64 @@
+# Agentic Self-Instruct -- NVIDIA NIM configuration.
+#
+# Runs the CS-paper pipeline against NVIDIA's hosted NIM API (build.nvidia.com), which exposes
+# an OpenAI-compatible chat endpoint at https://integrate.api.nvidia.com/v1. No code changes
+# needed -- it is the same provider used for vLLM/OpenAI.
+#
+#   export NVIDIA_API_KEY=nvapi-...
+#   python -m autodata.cli --config config/nvidia_nim_config.yaml --papers examples --out output
+#
+# Notes
+#   * api_key: "env:NVIDIA_API_KEY" reads the key from the environment, so no secret is
+#     committed.
+#   * Model IDs below are catalog slugs from build.nvidia.com -- check the catalog and swap in
+#     whatever you have access to. This mirrors the paper's roles (Kimi-K2 as the
+#     challenger/judge/quality-verifier, a large Qwen as the strong solver, a small Qwen as the
+#     weak solver). The only hard requirement is a genuine capability gap between
+#     strong_solver and weak_solver.
+#   * If a particular NIM model rejects `response_format: json_object`, the provider drops it
+#     automatically and relies on the prompt's "return only JSON" instruction; the JSON parser
+#     already tolerates code fences and preamble.
+#   * To run NIM models you self-host instead, point base_url at your own endpoint
+#     (e.g. http://localhost:8000/v1) and set api_key to "EMPTY".
+
+papers_path: examples
+
+acceptance_criteria:        # exact thresholds from Sec 3.1 "Criteria"
+  weak_avg_max: 0.65
+  weak_attempt_max: 0.75
+  strong_avg_min: 0.60      # set to 0.65 to match the Sec 3.1 prose
+  strong_avg_max: 0.95
+  gap_min: 0.20
+
+loop:
+  n_attempts: 3             # each solver invoked 3x to reduce variance
+  max_rounds: 12            # paper: mean 6.59 rounds, long tail past 10
+
+sampling:
+  challenger: 0.9
+  weak_solver: 0.7
+  strong_solver: 0.7
+  judge: 0.0
+  quality_verifier: 0.0
+
+models:
+  challenger:
+    model: "moonshotai/kimi-k2-instruct"
+    base_url: "https://integrate.api.nvidia.com/v1"
+    api_key: "env:NVIDIA_API_KEY"
+  quality_verifier:
+    model: "moonshotai/kimi-k2-instruct"
+    base_url: "https://integrate.api.nvidia.com/v1"
+    api_key: "env:NVIDIA_API_KEY"
+  judge:
+    model: "moonshotai/kimi-k2-instruct"
+    base_url: "https://integrate.api.nvidia.com/v1"
+    api_key: "env:NVIDIA_API_KEY"
+  strong_solver:
+    model: "qwen/qwen3-235b-a22b"
+    base_url: "https://integrate.api.nvidia.com/v1"
+    api_key: "env:NVIDIA_API_KEY"
+  weak_solver:
+    model: "qwen/qwen2.5-7b-instruct"
+    base_url: "https://integrate.api.nvidia.com/v1"
+    api_key: "env:NVIDIA_API_KEY"
