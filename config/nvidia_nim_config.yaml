@@ -11,10 +11,14 @@
 #   * api_key: "env:NVIDIA_API_KEY" reads the key from the environment, so no secret is
 #     committed.
 #   * Model IDs below are catalog slugs from build.nvidia.com -- check the catalog and swap in
-#     whatever you have access to. This mirrors the paper's roles (Kimi-K2 as the
-#     challenger/judge/quality-verifier, a large Qwen as the strong solver, a small Qwen as the
-#     weak solver). The only hard requirement is a genuine capability gap between
-#     strong_solver and weak_solver.
+#     whatever you have access to. These mirror the paper's exact roles (Sec 3.1): Kimi-K2.6 as
+#     the orchestrator/challenger/judge/quality-verifier, Qwen3.5-397B-A17B as the strong solver,
+#     and Qwen3.5-4B as the weak solver. The only hard requirement is a genuine capability gap
+#     between strong_solver and weak_solver.
+#   * Slugs verified against the live https://integrate.api.nvidia.com/v1/models catalog
+#     (2026-06-26). The paper's weak solver, Qwen3.5-4B, is not currently hosted on NIM, so we
+#     use the smallest available Qwen, qwen/qwen3-next-80b-a3b-instruct (3B active params),
+#     which preserves the strong-vs-weak gap. Swap in a self-hosted Qwen3.5-4B if you have one.
 #   * If a particular NIM model rejects `response_format: json_object`, the provider drops it
 #     automatically and relies on the prompt's "return only JSON" instruction; the JSON parser
 #     already tolerates code fences and preamble.
@@ -43,22 +47,22 @@ sampling:
 
 models:
   challenger:
-    model: "moonshotai/kimi-k2-instruct"
+    model: "moonshotai/kimi-k2.6"
     base_url: "https://integrate.api.nvidia.com/v1"
     api_key: "env:NVIDIA_API_KEY"
   quality_verifier:
-    model: "moonshotai/kimi-k2-instruct"
+    model: "moonshotai/kimi-k2.6"
     base_url: "https://integrate.api.nvidia.com/v1"
     api_key: "env:NVIDIA_API_KEY"
   judge:
-    model: "moonshotai/kimi-k2-instruct"
+    model: "moonshotai/kimi-k2.6"
     base_url: "https://integrate.api.nvidia.com/v1"
     api_key: "env:NVIDIA_API_KEY"
   strong_solver:
-    model: "qwen/qwen3-235b-a22b"
+    model: "qwen/qwen3.5-397b-a17b"
     base_url: "https://integrate.api.nvidia.com/v1"
     api_key: "env:NVIDIA_API_KEY"
   weak_solver:
-    model: "qwen/qwen2.5-7b-instruct"
+    model: "qwen/qwen3-next-80b-a3b-instruct"
     base_url: "https://integrate.api.nvidia.com/v1"
     api_key: "env:NVIDIA_API_KEY"
