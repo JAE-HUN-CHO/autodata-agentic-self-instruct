@@ -14,10 +14,12 @@ Two implementations:
 from __future__ import annotations
 
 from typing import Protocol, Optional
+from datetime import timezone
 import hashlib
 import json
 import os
 import re
+import threading
 import time
 
 
@@ -45,6 +47,39 @@ _ENV_REF = re.compile(r"^(?:env:(?P<a>[A-Za-z_][A-Za-z0-9_]*)|\$\{(?P<b>[A-Za-z_
 class _PendingResponse(Exception):
     """Raised for an async/pending (HTTP 202) response that the synchronous client can't
     consume. Carried separately so it is NOT swept into the transient retry path."""
+
+
+def _parse_retry_after(value: Optional[str], now: Optional[float] = None) -> Optional[float]:
+    """Parse the Retry-After response header into a delay in seconds.
+
+    Per RFC 7231 the value is either a non-negative integer number of seconds (the form NIM
+    uses) or an HTTP-date marking when to retry. We handle both: the seconds form directly,
+    and the HTTP-date form by subtracting the current time. A date in the past yields 0.0.
+    Anything we can't parse returns None so the caller falls back to a default delay.
+
+    `now` (epoch seconds) is injectable for testing; defaults to the current wall-clock time.
+    """
+    if not value:
+        return None
+    value = value.strip()
+    try:
+        return max(0.0, float(value))
+    except ValueError:
+        pass
+    # HTTP-date form, e.g. "Wed, 21 Oct 2015 07:28:00 GMT"
+    try:
+        from email.utils import parsedate_to_datetime
+
+        when = parsedate_to_datetime(value)
+    except (TypeError, ValueError):
+        return None
+    if when is None:
+        return None
+    # parsedate_to_datetime may return a naive datetime (no tz); treat it as UTC.
+    if when.tzinfo is None:
+        when = when.replace(tzinfo=timezone.utc)
+    current = time.time() if now is None else now
+    return max(0.0, when.timestamp() - current)
 
 
 def resolve_api_key(value: str) -> str:
@@ -96,42 +131,54 @@ class OpenAICompatibleProvider:
         self.name = name or model
         self.timeout = timeout
         self.max_retries = max_retries
-        # adaptation state, learned from 400s and remembered for subsequent calls
+        # Adaptation state, learned from 400s and remembered for subsequent calls. A single
+        # provider instance is intentionally shared across the orchestrator's parallel solver
+        # attempts (so the 400→adapt lesson is learned once, not re-paid per worker). These
+        # flags are guarded by a lock and only ever transition one way (enabled → disabled),
+        # so concurrent adaptation converges deterministically rather than thrashing.
         self._send_temperature = True
         self._token_param = "max_tokens"
         self._send_json_format = True
+        self._adapt_lock = threading.Lock()
 
     def _adapt_from_400(self, body: str, json_mode: bool) -> bool:
         """Mutate request shape based on a 400 body. Returns True if something changed
         (so the call should be retried without consuming the retry budget)."""
         low = body.lower()
         changed = False
-        if self._send_temperature and "temperature" in low:
-            self._send_temperature = False  # reasoning models: only default temperature allowed
-            changed = True
-        if self._token_param == "max_tokens" and "max_completion_tokens" in low:
-            self._token_param = "max_completion_tokens"
-            changed = True
-        if json_mode and self._send_json_format and (
-            "response_format" in low or "json_object" in low or "json mode" in low
-        ):
-            self._send_json_format = False  # backend can't constrain to JSON; prompts still ask for it
-            changed = True
+        with self._adapt_lock:
+            if self._send_temperature and "temperature" in low:
+                self._send_temperature = False  # reasoning models: only default temperature allowed
+                changed = True
+            if self._token_param == "max_tokens" and "max_completion_tokens" in low:
+                self._token_param = "max_completion_tokens"
+                changed = True
+            if json_mode and self._send_json_format and (
+                "response_format" in low or "json_object" in low or "json mode" in low
+            ):
+                self._send_json_format = False  # backend can't constrain to JSON; prompts still ask for it
+                changed = True
         return changed
 
     def _build_payload(self, system: str, user: str, temperature: float,
                        json_mode: bool, max_tokens: int) -> dict:
+        # Snapshot the adaptation flags under the lock so a payload is built from one
+        # consistent view even if another thread is adapting concurrently.
+        with self._adapt_lock:
+            send_temperature = self._send_temperature
+            token_param = self._token_param
+            send_json_format = self._send_json_format
         payload: dict = {
             "model": self.model,
             "messages": [
                 {"role": "system", "content": system},
                 {"role": "user", "content": user},
             ],
-            self._token_param: max_tokens,
+            token_param: max_tokens,
         }
-        if self._send_temperature:
+        if send_temperature:
             payload["temperature"] = temperature
-        if json_mode and self._send_json_format:
+        if json_mode and send_json_format:
             payload["response_format"] = {"type": "json_object"}
         return payload
 
@@ -168,6 +215,18 @@ class OpenAICompatibleProvider:
                         f"this model is running in async mode, which this synchronous client "
                         f"does not poll"
                     )
+                if resp.status_code == 429:
+                    # Rate-limited. NIM (and most OpenAI-compatible gateways) send a
+                    # Retry-After header — honor it instead of the geometric backoff, which is
+                    # tuned for transient 5xx and is far too short to clear a rate-limit window.
+                    retry_after = _parse_retry_after(resp.headers.get("Retry-After"))
+                    last_err = RuntimeError(f"429 Too Many Requests ({resp.text[:120]})")
+                    attempts_left -= 1
+                    if attempts_left <= 0:
+                        break
+                    # cap so a hostile / misconfigured server can't pin us indefinitely
+                    time.sleep(min(retry_after if retry_after is not None else 30, 60))
+                    continue
                 resp.raise_for_status()
                 data = resp.json()
                 return data["choices"][0]["message"]["content"]

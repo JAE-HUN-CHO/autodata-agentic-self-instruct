@@ -14,6 +14,7 @@ from autodata import (
     Challenger, Solver, QualityVerifier, RubricJudge, MockProvider,
     ACCEPTED, TOO_EASY,
 )
+from autodata.subagents import _parse_rubric
 
 
 def make_pipeline(max_rounds=12, criteria=None, strong_strength="strong", weak_strength="weak"):
@@ -81,6 +82,71 @@ def test_dataset_serialization_roundtrip():
     d = res.to_dict()
     assert d["paper_id"] == "p3"
     assert "rounds" in d and len(d["rounds"]) >= 1
+
+
+def test_parse_rubric_skips_malformed_entries():
+    # Real NIM challenger outputs occasionally drop a key, wrap the rubric in a dict, or
+    # use an alias like "name"/"points". The parser should keep valid entries and drop the
+    # rest rather than raising mid-pipeline.
+    rubric = _parse_rubric([
+        {"criterion": "good entry", "weight": 5, "category": "positive"},
+        {"weight": 3, "category": "positive"},                   # missing criterion -> drop
+        {"criterion": "missing weight"},                          # missing weight -> drop
+        {"criterion": "non-numeric weight", "weight": "five"},   # bad weight -> drop
+        {"name": "alias key", "points": -2},                      # name+points aliases -> kept
+        "not a dict",                                            # wrong type -> drop
+        {"criterion": "second good", "weight": -4},               # neg weight -> auto-category
+    ])
+    crits = [(c.criterion, c.weight, c.category) for c in rubric]
+    assert crits == [
+        ("good entry", 5, "positive"),
+        ("alias key", -2, "negative"),
+        ("second good", -4, "negative"),
+    ]
+
+
+def test_parse_rubric_forces_category_to_match_weight_sign():
+    # The judge keys scoring off `category` alone, so a contradictory pair must be normalized:
+    # a negative weight is always "negative" (a penalty), a non-negative weight "positive",
+    # regardless of what the model claimed. Otherwise a penalty would be miscounted as credit.
+    rubric = _parse_rubric([
+        {"criterion": "penalty mislabeled positive", "weight": -4, "category": "positive"},
+        {"criterion": "credit mislabeled negative", "weight": 6, "category": "negative"},
+        {"criterion": "garbage category", "weight": 3, "category": "banana"},
+    ])
+    cats = {c.criterion: c.category for c in rubric}
+    assert cats["penalty mislabeled positive"] == "negative"
+    assert cats["credit mislabeled negative"] == "positive"
+    assert cats["garbage category"] == "positive"
+
+
+def test_parse_rubric_handles_dict_wrapper_and_garbage():
+    assert _parse_rubric(None) == []
+    assert _parse_rubric("foo") == []
+    # one level of dict unwrap
+    out = _parse_rubric({"items": [{"criterion": "x", "weight": 1}]})
+    assert len(out) == 1 and out[0].criterion == "x"
+
+
+def test_parallel_attempts_matches_serial():
+    # Parallel and serial attempt dispatch must produce identical accept/reject decisions
+    # and matching per-round score sets when the upstream providers are deterministic.
+    pipe_serial = make_pipeline()
+    pipe_serial.parallel_attempts = False
+    pipe_parallel = make_pipeline()
+    pipe_parallel.parallel_attempts = True
+
+    res_s = pipe_serial.run_paper("p4", "deterministic text")
+    res_p = pipe_parallel.run_paper("p4", "deterministic text")
+
+    assert res_s.accepted == res_p.accepted
+    assert res_s.n_rounds == res_p.n_rounds
+    # MockProvider is deterministic in input -> output, so the per-round score multisets
+    # should match exactly regardless of dispatch order.
+    for rs, rp in zip(res_s.rounds, res_p.rounds):
+        assert rs.status == rp.status
+        assert sorted(rs.weak_scores) == sorted(rp.weak_scores)
+        assert sorted(rs.strong_scores) == sorted(rp.strong_scores)
 
 
 if __name__ == "__main__":
