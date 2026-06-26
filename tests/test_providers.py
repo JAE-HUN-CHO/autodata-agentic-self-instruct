@@ -224,6 +224,133 @@ def test_async_202_raises_without_retrying():
     assert fake._responses == []
 
 
+# --- _parse_retry_after edge cases: float, zero, and boundary -----------------
+def test_parse_retry_after_zero_and_float():
+    # "0" must return 0.0, not None (it's a valid non-negative integer per RFC 7231)
+    assert _parse_retry_after("0") == 0.0
+    # float strings are accepted (not part of RFC 7231 but sent by some gateways)
+    result = _parse_retry_after("1.5")
+    assert result is not None and abs(result - 1.5) < 1e-9
+    # "0.0" should also parse as 0.0
+    assert _parse_retry_after("0.0") == 0.0
+
+
+# --- 429 with all retries exhausted raises RuntimeError ----------------------
+def test_429_exhausted_retries_raises():
+    import autodata.llm as llm_mod
+    # Three 429s; max_retries=3 -> all consumed, must raise
+    fake = _FakeRequests([
+        _FakeResp(429, body="rate limited", headers={"Retry-After": "0"}),
+        _FakeResp(429, body="rate limited", headers={"Retry-After": "0"}),
+        _FakeResp(429, body="rate limited", headers={"Retry-After": "0"}),
+    ])
+    original_sleep = llm_mod.time.sleep
+    llm_mod.time.sleep = lambda s: None
+    try:
+        with _with_fake_requests(fake):
+            _provider(max_retries=3).complete("s", "u")
+    except RuntimeError as e:
+        assert "429" in str(e) or "completion failed" in str(e)
+    else:
+        raise AssertionError("expected RuntimeError when all retries are 429s")
+    finally:
+        llm_mod.time.sleep = original_sleep
+
+
+# --- 429: retry-after delay is capped at 60 seconds -------------------------
+def test_429_retry_after_capped_at_60():
+    import autodata.llm as llm_mod
+    # Server sends Retry-After: 999 (far too large); we must cap at 60
+    fake = _FakeRequests([
+        _FakeResp(429, body="rate limited", headers={"Retry-After": "999"}),
+        _FakeResp(200, content="ok"),
+    ])
+    slept = []
+    original_sleep = llm_mod.time.sleep
+    llm_mod.time.sleep = lambda s: slept.append(s)
+    try:
+        with _with_fake_requests(fake):
+            out = _provider().complete("s", "u")
+    finally:
+        llm_mod.time.sleep = original_sleep
+    assert out == "ok"
+    assert len(slept) == 1 and slept[0] == 60  # capped at 60, not 999
+
+
+# --- thread-safe adaptation: concurrent 400s converge without double-flip ----
+def test_thread_safe_adaptation_concurrent():
+    """Two threads that both see a temperature-400 must each return True from
+    _adapt_from_400 once (the first write), and neither must un-flip the flag
+    after the first thread flipped it, because transitions are one-way."""
+    import threading
+    prov = _provider()
+    results = []
+
+    def do_adapt():
+        # body mentions "temperature" so the temperature adaptation triggers
+        changed = prov._adapt_from_400("temperature is not supported", json_mode=False)
+        results.append(changed)
+
+    threads = [threading.Thread(target=do_adapt) for _ in range(8)]
+    for t in threads:
+        t.start()
+    for t in threads:
+        t.join()
+
+    # Exactly one thread should have observed changed=True (the first to flip)
+    # All subsequent threads see _send_temperature already False, so changed=False.
+    assert results.count(True) == 1
+    assert results.count(False) == 7
+    # The flag is now False and stays False (one-way transition)
+    assert prov._send_temperature is False
+
+
+# --- _build_payload reflects adapted state consistently ----------------------
+def test_build_payload_reflects_adapted_state():
+    """After adaptation disables temperature and json_format, _build_payload must
+    omit those fields and use the updated token param."""
+    prov = _provider()
+    # initial state: temperature, max_tokens, response_format all present
+    p_before = prov._build_payload("sys", "usr", 0.9, True, 128)
+    assert "temperature" in p_before
+    assert "max_tokens" in p_before
+    assert "response_format" in p_before
+
+    # adapt: disable temperature, swap token param, disable json format
+    prov._adapt_from_400("temperature is unsupported max_completion_tokens json mode", json_mode=True)
+
+    p_after = prov._build_payload("sys", "usr", 0.9, True, 128)
+    assert "temperature" not in p_after
+    assert "max_tokens" not in p_after
+    assert p_after.get("max_completion_tokens") == 128
+    assert "response_format" not in p_after
+
+
+# --- 429 with Retry-After as HTTP-date form ----------------------------------
+def test_429_honors_http_date_retry_after():
+    """A Retry-After header in HTTP-date format should also be honored; because
+    we can't control 'now' inside the provider, we just verify the provider
+    recovers correctly when the delay resolves to a small positive value."""
+    import autodata.llm as llm_mod
+    # Use a fixed past HTTP-date; _parse_retry_after will clamp it to 0.0
+    fake = _FakeRequests([
+        _FakeResp(429, body="rate limited",
+                  headers={"Retry-After": "Wed, 21 Oct 2015 07:28:00 GMT"}),
+        _FakeResp(200, content="ok"),
+    ])
+    slept = []
+    original_sleep = llm_mod.time.sleep
+    llm_mod.time.sleep = lambda s: slept.append(s)
+    try:
+        with _with_fake_requests(fake):
+            out = _provider().complete("s", "u")
+    finally:
+        llm_mod.time.sleep = original_sleep
+    assert out == "ok"
+    # The HTTP-date is in the past -> clamped to 0.0
+    assert len(slept) == 1 and slept[0] == 0.0
+
+
 if __name__ == "__main__":
     fns = [v for k, v in sorted(globals().items()) if k.startswith("test_") and callable(v)]
     passed = 0
