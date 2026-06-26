@@ -8,10 +8,12 @@ Run:  python tests/test_cli.py   (or)   python -m pytest -q
 """
 from __future__ import annotations
 
+import io
 import json
 import os
 import sys
 import tempfile
+from contextlib import redirect_stdout
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
@@ -22,16 +24,24 @@ CONFIG = os.path.join(REPO_ROOT, "config", "cs_config.yaml")
 PAPERS = os.path.join(REPO_ROOT, "examples")  # ships two demo papers
 
 
-def _run(out_dir, *extra):
-    main(["--config", CONFIG, "--offline", "--papers", PAPERS, "--out", out_dir, *extra])
+def _run(out_dir, *extra) -> str:
+    """Run the CLI offline and return its captured stdout."""
+    buf = io.StringIO()
+    with redirect_stdout(buf):
+        main(["--config", CONFIG, "--offline", "--papers", PAPERS, "--out", out_dir, *extra])
+    return buf.getvalue()
 
 
 def test_limit_one_processes_single_paper():
     with tempfile.TemporaryDirectory() as out:
-        _run(out, "--limit", "1")
+        stdout = _run(out, "--limit", "1")
         with open(os.path.join(out, "stats.json"), encoding="utf-8") as f:
             stats = json.load(f)
         assert stats["papers_processed"] == 1
+        # The per-paper completion line is a user-visible contract added with --limit;
+        # pin it so a format change or a dropped log line is caught here.
+        assert "done in" in stdout
+        assert "accepted=" in stdout and "rounds=" in stdout
 
 
 def test_limit_zero_processes_nothing():
