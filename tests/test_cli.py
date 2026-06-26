@@ -67,6 +67,55 @@ def test_negative_limit_is_rejected():
             raise AssertionError("expected SystemExit for negative --limit")
 
 
+def test_build_pipeline_parallel_attempts_from_config():
+    """build_pipeline must pass parallel_attempts from cfg['loop'] to
+    AgenticSelfInstruct. When the key is present and True, the pipeline's flag
+    is True; when it's False, the flag is False; when absent, it defaults to True
+    (the AgenticSelfInstruct default matches the new CLI default)."""
+    from autodata.cli import build_pipeline
+
+    base_cfg = {
+        "models": {
+            "challenger":       {"model": "m"},
+            "weak_solver":      {"model": "m"},
+            "strong_solver":    {"model": "m"},
+            "judge":            {"model": "m"},
+            "quality_verifier": {"model": "m"},
+        },
+        "acceptance_criteria": {},
+        "loop": {"n_attempts": 2, "max_rounds": 3, "parallel_attempts": True},
+        "sampling": {},
+    }
+
+    pipe_true = build_pipeline(dict(base_cfg, loop={"parallel_attempts": True}), offline=True)
+    assert pipe_true.parallel_attempts is True
+
+    pipe_false = build_pipeline(dict(base_cfg, loop={"parallel_attempts": False}), offline=True)
+    assert pipe_false.parallel_attempts is False
+
+    # When the key is absent, build_pipeline defaults to True
+    pipe_default = build_pipeline(dict(base_cfg, loop={}), offline=True)
+    assert pipe_default.parallel_attempts is True
+
+
+def test_limit_processes_exactly_n_papers():
+    """--limit N must process exactly N papers when the corpus is larger than N.
+    The examples directory has 2 papers; limit=2 must process both."""
+    with tempfile.TemporaryDirectory() as out:
+        _run(out, "--limit", "2")
+        with open(os.path.join(out, "stats.json"), encoding="utf-8") as f:
+            stats = json.load(f)
+        assert stats["papers_processed"] == 2
+
+
+def test_stdout_contains_timing_lines_for_each_paper():
+    """The per-paper 'done in X.Xs' lines must appear once for each processed paper."""
+    with tempfile.TemporaryDirectory() as out:
+        stdout = _run(out, "--limit", "2")
+    done_lines = [l for l in stdout.splitlines() if "done in" in l]
+    assert len(done_lines) == 2
+
+
 if __name__ == "__main__":
     fns = [v for k, v in sorted(globals().items()) if k.startswith("test_") and callable(v)]
     passed = 0

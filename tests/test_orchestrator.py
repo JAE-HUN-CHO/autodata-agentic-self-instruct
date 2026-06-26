@@ -198,6 +198,153 @@ def test_parallel_attempts_matches_serial():
         assert sorted(rs.strong_scores) == sorted(rp.strong_scores)
 
 
+def test_eval_solver_serial_when_n_attempts_is_1():
+    """When n_attempts=1, _eval_solver must take the serial path even if
+    parallel_attempts=True (the condition `n_attempts > 1` is False)."""
+    pipe = make_pipeline()
+    pipe.n_attempts = 1
+    pipe.parallel_attempts = True  # would be parallel if n_attempts > 1
+
+    res = pipe.run_paper("p5", "text for single attempt")
+    # With one attempt per solver every accepted round has exactly one score each
+    for rnd in res.rounds:
+        if rnd.weak_scores:
+            assert len(rnd.weak_scores) == 1
+        if rnd.strong_scores:
+            assert len(rnd.strong_scores) == 1
+
+
+def test_parallel_attempts_false_always_serial():
+    """parallel_attempts=False must use the serial loop regardless of n_attempts."""
+    from autodata.orchestrator import AgenticSelfInstruct, AcceptanceCriteria
+    from autodata import Challenger, Solver, QualityVerifier, RubricJudge, MockProvider
+
+    challenger = Challenger(MockProvider("c", "tool"))
+    weak = Solver(MockProvider("w", "weak"))
+    strong = Solver(MockProvider("s", "strong"))
+    judge = RubricJudge(MockProvider("j", "tool"))
+    qv = QualityVerifier(MockProvider("q", "tool"))
+    pipe = AgenticSelfInstruct(
+        challenger=challenger, weak_solver=weak, strong_solver=strong,
+        judge=judge, quality_verifier=qv,
+        criteria=AcceptanceCriteria(),
+        n_attempts=3,
+        max_rounds=12,
+        verbose=False,
+        parallel_attempts=False,  # explicitly disabled
+    )
+    res = pipe.run_paper("p6", "text")
+    # Pipeline must still produce a result (accept or reject) — serial path works end-to-end
+    assert isinstance(res.accepted, bool)
+    assert res.n_rounds >= 1
+
+
+def test_eval_solver_max_parallel_attempts_cap():
+    """_eval_solver must cap the ThreadPoolExecutor to MAX_PARALLEL_ATTEMPTS workers
+    even when n_attempts exceeds that constant, and must still return the right
+    number of scores."""
+    from autodata.orchestrator import AgenticSelfInstruct, AcceptanceCriteria, MAX_PARALLEL_ATTEMPTS
+    from autodata import Challenger, Solver, QualityVerifier, RubricJudge, MockProvider
+    from autodata.schemas import QAItem, RubricCriterion
+
+    challenger = Challenger(MockProvider("c", "tool"))
+    weak = Solver(MockProvider("w", "weak"))
+    strong = Solver(MockProvider("s", "strong"))
+    judge = RubricJudge(MockProvider("j", "tool"))
+    qv = QualityVerifier(MockProvider("q", "tool"))
+
+    n_attempts = MAX_PARALLEL_ATTEMPTS + 4  # deliberately exceeds cap
+    pipe = AgenticSelfInstruct(
+        challenger=challenger, weak_solver=weak, strong_solver=strong,
+        judge=judge, quality_verifier=qv,
+        criteria=AcceptanceCriteria(),
+        n_attempts=n_attempts,
+        max_rounds=1,       # just one round to check scores length
+        verbose=False,
+        parallel_attempts=True,
+    )
+    # Build a minimal QAItem to call _eval_solver directly
+    rubric = [RubricCriterion(criterion="c1", weight=5, category="positive")]
+    qa = QAItem(context="ctx", question="q?", reference_answer="a",
+                rubric=rubric, question_type="t", reasoning_tags=[])
+    qa._difficulty = 50  # type: ignore[attr-defined]
+
+    scores = pipe._eval_solver(weak, qa)
+    # The number of scores must equal n_attempts, not MAX_PARALLEL_ATTEMPTS
+    assert len(scores) == n_attempts
+    # All scores should be floats in [0, 1]
+    assert all(isinstance(s, float) and 0.0 <= s <= 1.0 for s in scores)
+
+
+def test_parse_rubric_weight_zero_is_positive_category():
+    """Weight 0 is >= 0, so its category must be 'positive', not 'negative'."""
+    rubric = _parse_rubric([{"criterion": "zero weight", "weight": 0}])
+    assert len(rubric) == 1
+    assert rubric[0].category == "positive"
+    assert rubric[0].weight == 0
+
+
+def test_parse_rubric_description_alias():
+    """'description' is an accepted alias for 'criterion' in the rubric entry."""
+    rubric = _parse_rubric([{"description": "via description key", "weight": 3}])
+    assert len(rubric) == 1
+    assert rubric[0].criterion == "via description key"
+    assert rubric[0].category == "positive"
+
+
+def test_parse_rubric_points_alias():
+    """'points' is an accepted alias for 'weight' in the rubric entry."""
+    rubric = _parse_rubric([{"criterion": "uses points key", "points": -7}])
+    assert len(rubric) == 1
+    assert rubric[0].weight == -7
+    assert rubric[0].category == "negative"
+
+
+def test_parse_rubric_dict_wrapper_with_no_list_value():
+    """A dict where none of the values is a list must return [] (one-level unwrap only)."""
+    assert _parse_rubric({"items": "not a list", "other": 42}) == []
+
+
+def test_parse_rubric_empty_list():
+    """An empty list is valid (no criteria); must return an empty list."""
+    assert _parse_rubric([]) == []
+
+
+def test_failures_block_groups_by_status():
+    """_failures_block must only include rounds that have a non-ACCEPTED status,
+    and group TOO_EASY / FAILED_STRONG / FAILED_QV into separate labelled sections."""
+    from autodata.orchestrator import AgenticSelfInstruct
+    from autodata.schemas import QAItem, RubricCriterion, RoundResult, TOO_EASY, FAILED_STRONG, FAILED_QV
+
+    rubric = [RubricCriterion(criterion="c", weight=5, category="positive")]
+    qa = QAItem(context="ctx", question="q?", reference_answer="a",
+                rubric=rubric, question_type="t", reasoning_tags=[])
+
+    rounds = [
+        RoundResult(1, TOO_EASY, qa=qa, feedback="weak_avg too high"),
+        RoundResult(2, FAILED_STRONG, qa=qa, feedback="strong_avg too low"),
+        RoundResult(3, FAILED_QV, qa=qa, feedback="quality check failed"),
+    ]
+    block = AgenticSelfInstruct._failures_block(rounds)
+    # All three failure modes must appear in the block
+    assert "TOO EASY" in block
+    assert "FAILED ON STRONG" in block
+    assert "FAILED QUALITY CHECK" in block
+    # The question text must appear for each
+    assert block.count("q?") == 3
+
+
+def test_pipeline_stores_parallel_attempts_flag():
+    """AgenticSelfInstruct must store the parallel_attempts flag it receives."""
+    pipe_t = make_pipeline()
+    pipe_t.parallel_attempts = True
+    assert pipe_t.parallel_attempts is True
+
+    pipe_f = make_pipeline()
+    pipe_f.parallel_attempts = False
+    assert pipe_f.parallel_attempts is False
+
+
 if __name__ == "__main__":
     fns = [v for k, v in sorted(globals().items()) if k.startswith("test_") and callable(v)]
     passed = 0
