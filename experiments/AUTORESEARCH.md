@@ -56,18 +56,26 @@ corpus is the most direct path to the paper's reported rate.
 
 ### 4. Domain matters more than the strong/weak gap
 
-The three papers that consistently REJECTED across Phases 0–3 are all
-fp8-training / gradient-clipping internals (`sample_paper_alpha`,
-`tutorial_paper`) or numeric-heavy ML systems (`icl_paper`, `rag_paper`
-both have specific numbers like `T=1.85` or `8B/27B/70B`). Their rubrics
-ask the solver to recall specific numerical mechanisms; the strong solver
-gives plausible-but-generic answers that hit some rubric items but rarely
-enough to clear `strong_avg >= 0.60`.
+The paper that REJECTED every time it ran (Phases 0–3) is
+`sample_paper_alpha` — fp8-training / gradient-clipping internals.
+`icl_paper` and `rag_paper` (Phase 3 only) are numeric-heavy ML systems
+(specific numbers like `T = 1.85` or `8B/27B/70B`) and both REJECTED
+the only time they ran. Their rubrics ask the solver to recall specific
+numerical mechanisms; the strong solver gives plausible-but-generic
+answers that hit some rubric items but rarely enough to clear
+`strong_avg >= 0.60`.
 
-The two ACCEPTED papers (`sample_paper_beta`, `tutorial_paper` in
-Phase 3) were both at moments when the challenger happened to ask a
-*conceptual* question ("how does X influence Y?") rather than a
-*recall* one ("what value of k did the paper use?").
+`tutorial_paper` (also fp8 internals) is interesting because it sits
+near the gate: REJECTED in Phase 0b and Phase 2, ACCEPTED in Phase 1
+(r11) and Phase 3 (r2). Whether it lands above 0.60 depends on whether
+the challenger samples a question that lets the strong solver hit the
+rubric, which is high-variance on a 3–5 paper run. `sample_paper_beta`
+(legal-document reranker, the most conceptual paper in the corpus) is
+the only paper that accepted in three of four runs (0, 2, 3).
+
+When ACCEPTED rounds happen, the challenger has phrased the prompt as
+a *conceptual* "how does X influence Y?" question rather than a
+*recall* "what value of k did the paper use?" question.
 
 ### 5. Failure-mode mix is inverted vs the paper
 

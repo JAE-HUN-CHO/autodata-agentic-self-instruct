@@ -138,11 +138,15 @@ class AgenticSelfInstruct:
             # challenger as a regular FAILED_QV.
             n_pos = sum(1 for c in qa.rubric if c.is_positive)
             n_neg = sum(1 for c in qa.rubric if not c.is_positive)
-            if not qa.rubric or n_pos < 1 or qa.max_positive_weight() <= 0:
+            # Sum raw positive weights directly. QAItem.max_positive_weight() applies an
+            # `or 1` fallback for the divide-by-zero guard in scoring, which would let a
+            # rubric of only `weight=0` positive criteria slip past this gate.
+            positive_weight_sum = sum(c.weight for c in qa.rubric if c.is_positive)
+            if not qa.rubric or n_pos < 1 or positive_weight_sum <= 0:
                 msg = (
                     f"rubric is unusable after parse: total={len(qa.rubric)}, "
                     f"positive={n_pos}, negative={n_neg}, "
-                    f"max_positive_weight={qa.max_positive_weight()}"
+                    f"positive_weight_sum={positive_weight_sum}"
                 )
                 rounds.append(RoundResult(round_no, FAILED_QV, qa=qa, feedback=msg))
                 self._log(f"  [{paper_id}] r{round_no}: FAILED_QV ({msg}) [{time.time()-t0:.1f}s]")

@@ -177,6 +177,21 @@ def test_orchestrator_rejects_rubric_with_no_positive_criteria():
     assert "positive=0" in res.rounds[0].feedback
 
 
+def test_orchestrator_rejects_rubric_with_zero_positive_weight_sum():
+    # The gate's third branch: a rubric that has a positive criterion but whose total
+    # positive weight is 0. QAItem.max_positive_weight() would have masked this with its
+    # `or 1` fallback; the gate's direct positive-weight sum catches it.
+    qa = QAItem(
+        context="ctx", question="q", reference_answer="ref",
+        rubric=[RubricCriterion(criterion="Trivial check", weight=0, category="positive")],
+    )
+    pipe = _pipeline_with_stub_challenger(qa, max_rounds=2)
+    res = pipe.run_paper("p_zero_weight", "text")
+    assert res.accepted is False
+    assert all(r.status == FAILED_QV for r in res.rounds)
+    assert "positive_weight_sum=0" in res.rounds[0].feedback
+
+
 def test_parallel_attempts_matches_serial():
     # Parallel and serial attempt dispatch must produce identical accept/reject decisions
     # and matching per-round score sets when the upstream providers are deterministic.

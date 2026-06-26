@@ -39,7 +39,7 @@ Per-round strong solver average (* = within 0.10 of the 0.65 acceptance line):
 | Round | Status | strong_avg |
 |------:|:-------|-----------:|
 | 1  | TOO_EASY (weak 0.679) | — |
-| 2  | FAILED_STRONG          | **0.517** * |
+| 2  | FAILED_STRONG          | 0.517 |
 | 3  | TOO_EASY (degenerate weak 0.000) | — |
 | 4  | FAILED_STRONG          | 0.028 |
 | 5  | FAILED_STRONG          | 0.241 |
