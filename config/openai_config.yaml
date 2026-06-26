@@ -1,0 +1,58 @@
+# Agentic Self-Instruct -- OpenAI configuration.
+#
+# Runs the CS-paper pipeline against the OpenAI API (https://api.openai.com/v1), which is the
+# same OpenAI-compatible chat interface the code already speaks. No code changes needed.
+#
+#   export OPENAI_API_KEY=sk-...
+#   python -m autodata.cli --config config/openai_config.yaml --papers examples --out output
+#
+# Notes
+#   * api_key: "env:OPENAI_API_KEY" reads the key from the environment, so no secret is
+#     committed. "${OPENAI_API_KEY}" works too.
+#   * Use standard chat models (gpt-4.1, gpt-4o, gpt-4o-mini). Reasoning models (o1/o3/gpt-5
+#     family) are also supported: the provider auto-drops `temperature` and switches to
+#     `max_completion_tokens` on the first 400, but they are slower/costlier for this loop.
+#   * The win of the loop comes from a real strong-vs-weak capability gap, so pair a bigger
+#     model (strong_solver) with a smaller one (weak_solver).
+
+papers_path: examples
+
+acceptance_criteria:        # exact thresholds from Sec 3.1 "Criteria"
+  weak_avg_max: 0.65
+  weak_attempt_max: 0.75
+  strong_avg_min: 0.60      # set to 0.65 to match the Sec 3.1 prose
+  strong_avg_max: 0.95
+  gap_min: 0.20
+
+loop:
+  n_attempts: 3             # each solver invoked 3x to reduce variance
+  max_rounds: 12            # paper: mean 6.59 rounds, long tail past 10
+
+sampling:
+  challenger: 0.9
+  weak_solver: 0.7
+  strong_solver: 0.7
+  judge: 0.0
+  quality_verifier: 0.0
+
+models:
+  challenger:
+    model: "gpt-4.1"
+    base_url: "https://api.openai.com/v1"
+    api_key: "env:OPENAI_API_KEY"
+  quality_verifier:
+    model: "gpt-4.1"
+    base_url: "https://api.openai.com/v1"
+    api_key: "env:OPENAI_API_KEY"
+  judge:
+    model: "gpt-4.1"
+    base_url: "https://api.openai.com/v1"
+    api_key: "env:OPENAI_API_KEY"
+  strong_solver:
+    model: "gpt-4.1"
+    base_url: "https://api.openai.com/v1"
+    api_key: "env:OPENAI_API_KEY"
+  weak_solver:
+    model: "gpt-4.1-mini"
+    base_url: "https://api.openai.com/v1"
+    api_key: "env:OPENAI_API_KEY"

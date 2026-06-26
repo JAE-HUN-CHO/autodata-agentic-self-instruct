@@ -16,6 +16,8 @@ from __future__ import annotations
 from typing import Protocol, Optional
 import hashlib
 import json
+import os
+import re
 import time
 
 
@@ -35,9 +37,45 @@ class LLMProvider(Protocol):
 
 
 # ---------------------------------------------------------------------------
-# Real provider: OpenAI-compatible (works with vLLM, OpenAI, most gateways).
+# Real provider: OpenAI-compatible (works with vLLM, OpenAI, NVIDIA NIM, gateways).
 # ---------------------------------------------------------------------------
+_ENV_REF = re.compile(r"^(?:env:(?P<a>[A-Za-z_][A-Za-z0-9_]*)|\$\{(?P<b>[A-Za-z_][A-Za-z0-9_]*)\})$")
+
+
+def resolve_api_key(value: str) -> str:
+    """Resolve an api_key config value.
+
+    Supports three forms so keys never have to live in committed YAML:
+      * "env:OPENAI_API_KEY"  -> read from that environment variable
+      * "${OPENAI_API_KEY}"   -> same, shell-style
+      * "sk-..."              -> used verbatim (incl. the vLLM placeholder "EMPTY")
+    """
+    if not value:
+        return "EMPTY"
+    m = _ENV_REF.match(value.strip())
+    if m:
+        var = m.group("a") or m.group("b")
+        key = os.environ.get(var, "")
+        if not key:
+            raise RuntimeError(
+                f"api_key references environment variable {var!r}, but it is unset. "
+                f"Export it, e.g.  export {var}=<your-key>"
+            )
+        return key
+    return value
+
+
 class OpenAICompatibleProvider:
+    """Talks to any OpenAI /v1/chat/completions endpoint: vLLM, OpenAI, NVIDIA NIM, gateways.
+
+    Adapts automatically to backend quirks so the same code runs against all of them:
+      * OpenAI reasoning models (o1/o3/gpt-5 family) reject a custom `temperature` and want
+        `max_completion_tokens` instead of `max_tokens`;
+      * some NIM models don't accept `response_format: json_object`.
+    On the relevant HTTP 400 we drop/swap the offending field once and retry, so callers
+    don't have to know which family a model belongs to.
+    """
+
     def __init__(
         self,
         model: str,
@@ -49,10 +87,48 @@ class OpenAICompatibleProvider:
     ):
         self.model = model
         self.base_url = base_url.rstrip("/")
-        self.api_key = api_key
+        self.api_key = resolve_api_key(api_key)
         self.name = name or model
         self.timeout = timeout
         self.max_retries = max_retries
+        # adaptation state, learned from 400s and remembered for subsequent calls
+        self._send_temperature = True
+        self._token_param = "max_tokens"
+        self._send_json_format = True
+
+    def _adapt_from_400(self, body: str, json_mode: bool) -> bool:
+        """Mutate request shape based on a 400 body. Returns True if something changed
+        (so the call should be retried without consuming the retry budget)."""
+        low = body.lower()
+        changed = False
+        if self._send_temperature and "temperature" in low:
+            self._send_temperature = False  # reasoning models: only default temperature allowed
+            changed = True
+        if self._token_param == "max_tokens" and "max_completion_tokens" in low:
+            self._token_param = "max_completion_tokens"
+            changed = True
+        if json_mode and self._send_json_format and (
+            "response_format" in low or "json_object" in low or "json mode" in low
+        ):
+            self._send_json_format = False  # backend can't constrain to JSON; prompts still ask for it
+            changed = True
+        return changed
+
+    def _build_payload(self, system: str, user: str, temperature: float,
+                       json_mode: bool, max_tokens: int) -> dict:
+        payload: dict = {
+            "model": self.model,
+            "messages": [
+                {"role": "system", "content": system},
+                {"role": "user", "content": user},
+            ],
+            self._token_param: max_tokens,
+        }
+        if self._send_temperature:
+            payload["temperature"] = temperature
+        if json_mode and self._send_json_format:
+            payload["response_format"] = {"type": "json_object"}
+        return payload
 
     def complete(
         self,
@@ -64,32 +140,28 @@ class OpenAICompatibleProvider:
     ) -> str:
         import requests  # imported lazily so offline/mock runs need no deps
 
-        payload: dict = {
-            "model": self.model,
-            "messages": [
-                {"role": "system", "content": system},
-                {"role": "user", "content": user},
-            ],
-            "temperature": temperature,
-            "max_tokens": max_tokens,
-        }
-        if json_mode:
-            # vLLM and OpenAI both honor this; harmless if the backend ignores it.
-            payload["response_format"] = {"type": "json_object"}
-
         url = f"{self.base_url}/chat/completions"
         headers = {"Authorization": f"Bearer {self.api_key}", "Content-Type": "application/json"}
 
         last_err: Optional[Exception] = None
-        for attempt in range(self.max_retries):
+        attempts_left = self.max_retries
+        backoff = 0
+        while attempts_left > 0:
+            payload = self._build_payload(system, user, temperature, json_mode, max_tokens)
             try:
                 resp = requests.post(url, headers=headers, json=payload, timeout=self.timeout)
+                if resp.status_code == 400 and self._adapt_from_400(resp.text, json_mode):
+                    continue  # retry immediately with the adapted payload; not a real failure
                 resp.raise_for_status()
                 data = resp.json()
                 return data["choices"][0]["message"]["content"]
-            except Exception as e:  # network / 5xx / malformed -> retry with backoff
+            except Exception as e:  # network / 5xx / non-adaptable 400 -> retry with backoff
                 last_err = e
-                time.sleep(min(2 ** attempt, 8))
+                attempts_left -= 1
+                if attempts_left <= 0:
+                    break
+                time.sleep(min(2 ** backoff, 8))
+                backoff += 1
         raise RuntimeError(f"[{self.name}] completion failed after {self.max_retries} tries: {last_err}")
 
 
@@ -197,4 +269,6 @@ def build_provider(cfg: dict, role: str, offline: bool) -> LLMProvider:
         base_url=cfg.get("base_url", "http://localhost:8000/v1"),
         api_key=cfg.get("api_key", "EMPTY"),
         name=role,
+        timeout=cfg.get("timeout", 120),
+        max_retries=cfg.get("max_retries", 3),
     )

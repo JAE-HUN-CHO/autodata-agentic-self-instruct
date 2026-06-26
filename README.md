@@ -30,7 +30,8 @@ pip install -r requirements.txt   # pyyaml, requests
 
 ```bash
 python -m autodata.cli --config config/cs_config.yaml --offline --papers examples --out output
-python tests/test_orchestrator.py        # 6 tests
+python tests/test_orchestrator.py        # 6 tests (loop / acceptance criteria)
+python tests/test_providers.py           # 6 tests (OpenAI / NIM provider, no network)
 ```
 
 The mock starts each paper with an "easy, high-level" question and escalates difficulty each
@@ -63,6 +64,37 @@ python -m autodata.cli --config config/cs_config.yaml --papers /path/to/papers -
 
 Put one `.txt`/`.md` source document per paper in the `--papers` directory.
 
+## Run against hosted APIs (OpenAI / NVIDIA NIM)
+
+Every subagent speaks the OpenAI-compatible `/v1/chat/completions` interface, so the same code
+runs unchanged against OpenAI and NVIDIA NIM — only the config differs. Two ready-made configs
+ship in `config/`, and API keys are read from the environment (never committed):
+
+```bash
+# OpenAI
+export OPENAI_API_KEY=sk-...
+python -m autodata.cli --config config/openai_config.yaml --papers examples --out output
+
+# NVIDIA NIM (build.nvidia.com hosted endpoint)
+export NVIDIA_API_KEY=nvapi-...
+python -m autodata.cli --config config/nvidia_nim_config.yaml --papers examples --out output
+```
+
+`api_key` accepts `env:VAR_NAME`, `${VAR_NAME}`, or a literal value. Each role can point at its
+own `base_url`/`model`, so you can even mix providers (e.g. strong solver on OpenAI, weak solver
+on NIM). The only hard requirement is a genuine capability gap between `strong_solver` and
+`weak_solver` — that gap is what the acceptance criteria select for.
+
+Backend quirks are handled automatically, so you don't pick a code path per model family:
+
+- **OpenAI reasoning models** (o1/o3/gpt-5 family) reject a custom `temperature` and require
+  `max_completion_tokens` instead of `max_tokens`. On the first `400`, the provider drops
+  `temperature` and switches the token field, then retries — without spending a retry. (Standard
+  chat models like `gpt-4.1`/`gpt-4o` need none of this and are the cheaper default.)
+- **NIM models that can't constrain output to JSON** (`response_format: json_object`) get that
+  field dropped automatically; the prompts still ask for JSON and the parser tolerates code
+  fences / preamble.
+
 ## Acceptance criteria (exact, Sec 3.1)
 
 A question is accepted only when **all** hold across `n_attempts` (=3) solver runs:
@@ -89,9 +121,12 @@ autodata/
   rubric_eval.py    RubricJudge: per-criterion -> normalized weighted score
   orchestrator.py   AgenticSelfInstruct loop + AcceptanceCriteria (exact thresholds)
   cli.py            corpus runner -> dataset.jsonl + trajectories + stats
-config/cs_config.yaml
+config/cs_config.yaml          vLLM / self-hosted (paper's model lineup)
+config/openai_config.yaml      OpenAI API
+config/nvidia_nim_config.yaml  NVIDIA NIM (build.nvidia.com)
 examples/            two tiny demo "papers"
-tests/test_orchestrator.py
+tests/test_orchestrator.py     loop + acceptance-criteria tests
+tests/test_providers.py        OpenAI/NIM provider tests (offline, fake requests)
 ai-docs/             paper2code intermediate artifacts (phases 1-3)
 ```
 
