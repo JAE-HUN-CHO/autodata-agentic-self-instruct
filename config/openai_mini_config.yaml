@@ -1,0 +1,72 @@
+# Agentic Self-Instruct -- OpenAI "mini-tier" configuration (cheap/fast experiment).
+#
+# Same OpenAI-compatible interface as openai_config.yaml, but every role runs on a
+# mini/nano model so a full corpus run costs cents and finishes in minutes.
+#
+#   export OPENAI_API_KEY=sk-...
+#   python -m autodata.cli --config config/openai_mini_config.yaml --papers tutorial/papers \
+#       --out output --limit 1
+#
+# Model choice
+#   * challenger / judge / quality_verifier / strong_solver -> gpt-4.1-mini
+#   * weak_solver                                            -> gpt-4.1-nano
+#   The accept loop only needs a *gap* between strong and weak, so pairing mini (strong)
+#   with nano (weak) keeps the whole run in the cheapest tier.
+#   gpt-4.1-* are standard chat models (no slow reasoning, no temperature/token quirks).
+#
+# Observed result (tutorial_paper, 2026-06-26): 0 / 1 accepted, REJECTED after 6 rounds.
+# The mini-vs-nano capability gap is too small: questions easy enough for nano to pass were
+# TOO_EASY, and questions hard enough to stump nano also stumped mini (strong_avg fell to
+# 0.51 -> 0.13 -> 0.04 as the challenger escalated), so the >=0.20 gap never opened. This is
+# the acceptance criteria working as intended -- it refuses to certify data without a real
+# gap. For accepted examples, make `strong_solver` a genuinely stronger model (e.g. gpt-4.1
+# or gpt-5-mini) while keeping `weak_solver` on gpt-4.1-nano. The run still completed all 6
+# rounds with no crashes or rate-limit failures, exercising the pipeline end-to-end on OpenAI.
+
+papers_path: tutorial/papers
+
+acceptance_criteria:        # paper Sec 3.1 thresholds, unchanged
+  weak_avg_max: 0.65
+  weak_attempt_max: 0.75
+  strong_avg_min: 0.60
+  strong_avg_max: 0.95
+  gap_min: 0.20
+
+loop:
+  n_attempts: 2             # cheap-run speedup; paper default = 3
+  max_rounds: 6             # cheap-run speedup; paper default = 12
+  parallel_attempts: true
+
+sampling:
+  challenger: 0.9
+  weak_solver: 0.7
+  strong_solver: 0.7
+  judge: 0.0
+  quality_verifier: 0.0
+
+models:
+  challenger:
+    model: "gpt-4.1-mini"
+    base_url: "https://api.openai.com/v1"
+    api_key: "env:OPENAI_API_KEY"
+    max_retries: 5
+  quality_verifier:
+    model: "gpt-4.1-mini"
+    base_url: "https://api.openai.com/v1"
+    api_key: "env:OPENAI_API_KEY"
+    max_retries: 5
+  judge:
+    model: "gpt-4.1-mini"
+    base_url: "https://api.openai.com/v1"
+    api_key: "env:OPENAI_API_KEY"
+    max_retries: 5
+  strong_solver:
+    model: "gpt-4.1-mini"
+    base_url: "https://api.openai.com/v1"
+    api_key: "env:OPENAI_API_KEY"
+    max_retries: 5
+  weak_solver:
+    model: "gpt-4.1-nano"
+    base_url: "https://api.openai.com/v1"
+    api_key: "env:OPENAI_API_KEY"
+    max_retries: 5
