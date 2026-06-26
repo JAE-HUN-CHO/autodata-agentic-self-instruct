@@ -1,0 +1,1100 @@
+{
+  "paper_id": "rag_paper",
+  "accepted": false,
+  "accepted_qa": null,
+  "n_rounds": 12,
+  "rounds": [
+    {
+      "round": 1,
+      "status": "FAILED_STRONG",
+      "qa": {
+        "context": "In retrieval-augmented generation systems for open-domain question answering, a reranker is used after retrieving many candidate passages to select a smaller set for a generator model. The reranker's calibration—that is, how well its confidence scores correspond to true correctness—affects the diversity and accuracy of retrieved passages. Overconfident rerankers may suppress relevant passages from minority or low-frequency sources, which can degrade downstream answer quality, especially on less common or longer-tail queries.",
+        "question": "How does temperature scaling of the reranker's logits influence retrieval diversity and downstream answer accuracy on long-tail queries, and why does this method achieve these effects without retraining or additional inference cost?",
+        "reference_answer": "Temperature scaling widens the reranker’s score distribution by scaling logits with a temperature T > 1, reducing overconfidence in top-k rankings. This adjustment allows lower-confidence but correct passages, especially from minority or long-tail sources, to surface into the final top-5 selection. Empirically, this recovers about 70% of the precision gap between head and tail queries, increasing top-5 precision from 0.42 to 0.61 and improving downstream exact match accuracy by 5.3 points (38.1% to 43.4%) on long-tail queries. The method requires only fitting a single scalar temperature on a held-out calibration set and applies a simple multiplication at inference, incurring zero retraining or additional inference costs. This simplicity makes it an efficient yet effective calibration approach.",
+        "rubric": [
+          {
+            "criterion": "Identifies that temperature scaling reduces reranker overconfidence",
+            "weight": 8,
+            "category": "positive"
+          },
+          {
+            "criterion": "Explains how score distribution widening affects passage diversity",
+            "weight": 7,
+            "category": "positive"
+          },
+          {
+            "criterion": "Connects improved diversity to higher top-5 precision on tail queries",
+            "weight": 9,
+            "category": "positive"
+          },
+          {
+            "criterion": "Quantifies impact on downstream exact match accuracy",
+            "weight": 8,
+            "category": "positive"
+          },
+          {
+            "criterion": "Notes that the method requires no reranker retraining",
+            "weight": 6,
+            "category": "positive"
+          },
+          {
+            "criterion": "Mentions inference cost remains effectively unchanged",
+            "weight": 6,
+            "category": "positive"
+          },
+          {
+            "criterion": "Understands calibration is fit on a held-out dataset",
+            "weight": 5,
+            "category": "positive"
+          },
+          {
+            "criterion": "Acknowledges that temperature is a single scalar applied uniformly",
+            "weight": 5,
+            "category": "positive"
+          },
+          {
+            "criterion": "Explains why the method particularly benefits long-tail queries",
+            "weight": 7,
+            "category": "positive"
+          },
+          {
+            "criterion": "Fails to distinguish the effect of temperature scaling from retriever recall variations",
+            "weight": -6,
+            "category": "negative"
+          },
+          {
+            "criterion": "Incorrectly claims retraining or increased inference cost is required",
+            "weight": -8,
+            "category": "negative"
+          },
+          {
+            "criterion": "Confuses generator calibration with reranker calibration impact",
+            "weight": -7,
+            "category": "negative"
+          },
+          {
+            "criterion": "Overlooks the role of recalibrating confidence scores in surfacing minority sources",
+            "weight": -6,
+            "category": "negative"
+          },
+          {
+            "criterion": "Incorrectly assumes temperature scaling improves results without the presence of gold passages in retrieval",
+            "weight": -5,
+            "category": "negative"
+          }
+        ],
+        "question_type": "reranker calibration impact analysis",
+        "reasoning_tags": [
+          "statistical_reasoning",
+          "performance_tradeoff",
+          "experimental_design"
+        ]
+      },
+      "weak_scores": [
+        0.5573770491803278,
+        0.5573770491803278,
+        0.5573770491803278
+      ],
+      "strong_scores": [
+        0.639344262295082,
+        0.639344262295082,
+        0.639344262295082
+      ],
+      "gap": 0.08196721311475419,
+      "feedback": "gap 0.082 < 0.2"
+    },
+    {
+      "round": 2,
+      "status": "FAILED_STRONG",
+      "qa": {
+        "context": "In retrieval-augmented generation systems for open-domain QA, rerankers reorder candidate passages scored by an initial retriever to improve answer accuracy. However, overconfidence in reranker scores can bias selection toward majority-source passages and obscure relevant minority-source evidence, particularly harming long-tail query performance. Calibration methods like temperature scaling adjust score distributions to better reflect uncertainty, potentially altering which passages appear in the top-k outputs.",
+        "question": "How does temperature scaling specifically modify the reranker’s score distribution characteristics, and why does this modification enable improved retrieval of gold passages for long-tail queries despite no changes to the underlying retriever or reranker parameters?",
+        "reference_answer": "Temperature scaling increases the entropy of the reranker's score distribution by scaling down the logits (with an optimal temperature >1), which reduces overconfidence and smooths score differences among candidates. This adjustment allows lower-confidence but correct gold passages, often from minority sources, to surface into the top-5 reranked list. Since the retriever already includes these gold passages in its top-100 results, the calibrated reranker can better recognize them without retraining or changing model weights, improving top-5 precision and downstream answer accuracy on long-tail queries.",
+        "rubric": [
+          {
+            "criterion": "Identifies that temperature scaling adjusts the logits by a scalar to reduce overconfidence",
+            "weight": 8,
+            "category": "positive"
+          },
+          {
+            "criterion": "Explains that this scaling increases score entropy, reducing score peak sharpness",
+            "weight": 7,
+            "category": "positive"
+          },
+          {
+            "criterion": "Connects increased entropy to surfacing of relevant lower-confidence passages",
+            "weight": 9,
+            "category": "positive"
+          },
+          {
+            "criterion": "Highlights that the retriever’s recall ensures gold passages are present before reranking",
+            "weight": 6,
+            "category": "positive"
+          },
+          {
+            "criterion": "Describes why no retraining is needed since model parameters remain unchanged",
+            "weight": 5,
+            "category": "positive"
+          },
+          {
+            "criterion": "Mentions that improved top-5 precision translates to higher downstream answer accuracy",
+            "weight": 7,
+            "category": "positive"
+          },
+          {
+            "criterion": "Acknowledges that temperature is fit on a calibration set separate from training data",
+            "weight": 4,
+            "category": "positive"
+          },
+          {
+            "criterion": "Clarifies that calibration is a post-processing step on reranker logits rather than a model update",
+            "weight": 6,
+            "category": "positive"
+          },
+          {
+            "criterion": "Avoids conflating retriever recall issues with reranker calibration effects",
+            "weight": -6,
+            "category": "negative"
+          },
+          {
+            "criterion": "Does not misattribute benefits to generator-time reranker calibration",
+            "weight": -7,
+            "category": "negative"
+          },
+          {
+            "criterion": "Does not claim temperature scaling alters ranking order arbitrarily without justification",
+            "weight": -5,
+            "category": "negative"
+          },
+          {
+            "criterion": "Refrains from suggesting that calibration alone improves retriever recall",
+            "weight": -6,
+            "category": "negative"
+          },
+          {
+            "criterion": "Does not confuse the meaning of entropy in relation to score distribution",
+            "weight": -4,
+            "category": "negative"
+          }
+        ],
+        "question_type": "calibration impact on reranker decision boundaries",
+        "reasoning_tags": [
+          "statistical_reasoning",
+          "model_calibration",
+          "performance_analysis"
+        ]
+      },
+      "weak_scores": [
+        0.25,
+        0.1346153846153846,
+        0.019230769230769232
+      ],
+      "strong_scores": [
+        0.25,
+        0.1346153846153846,
+        0.1346153846153846
+      ],
+      "gap": null,
+      "feedback": "strong_avg 0.173 < 0.6"
+    },
+    {
+      "round": 3,
+      "status": "FAILED_STRONG",
+      "qa": {
+        "context": "In retrieval-augmented generation (RAG) systems for open-domain question answering, the reranker plays a crucial role in selecting the most relevant passages from a large retrieved candidate set. However, calibration issues in the reranker's scoring can lead to overconfidence, especially on low-frequency or long-tail queries, resulting in poorer passage diversity and downstream answer accuracy.",
+        "question": "Considering the observed overconfidence of the reranker on long-tail queries and the application of temperature scaling, how does adjusting the score distribution entropy affect the diversity of top-ranked passages, and what implications does this have for balancing precision and recall in the pipeline without modifying the retriever itself?",
+        "reference_answer": "Adjusting the reranker's logits via temperature scaling increases score distribution entropy by softening the peakedness of reranker scores. This decrease in overconfidence enables lower-scoring but correct passages, often from minority sources relevant to long-tail queries, to be promoted into the top-5. Consequently, this increases diversity among top passages, improving retrieval precision on long-tail queries from 0.42 to 0.61 without changing retriever recall (which remains above 0.85). This balance allows the pipeline to recover much of the accuracy gap caused by the reranker's biased scoring, improving downstream answer exact match accuracy by 5.3 points, all achieved without retraining or additional inference cost. Hence, increasing entropy reduces harmful score concentration, enabling a better precision-recall tradeoff through calibration alone.",
+        "rubric": [
+          {
+            "criterion": "Identifies that reranker overconfidence manifests as low entropy in score distributions",
+            "weight": 8,
+            "category": "positive"
+          },
+          {
+            "criterion": "Explains how increasing entropy via temperature scaling promotes diversity in top-ranked passages",
+            "weight": 9,
+            "category": "positive"
+          },
+          {
+            "criterion": "Connects increased passage diversity to improved precision on long-tail queries",
+            "weight": 7,
+            "category": "positive"
+          },
+          {
+            "criterion": "Articulates that retriever recall remains unchanged, isolating reranker impact",
+            "weight": 6,
+            "category": "positive"
+          },
+          {
+            "criterion": "Reasoning includes the tradeoff between precision and recall mediated by reranker calibration",
+            "weight": 7,
+            "category": "positive"
+          },
+          {
+            "criterion": "Acknowledges that improvements occur without retraining or inference overhead",
+            "weight": 5,
+            "category": "positive"
+          },
+          {
+            "criterion": "References downstream answer accuracy gains tied to improved top-k passage selection",
+            "weight": 6,
+            "category": "positive"
+          },
+          {
+            "criterion": "Describes how the calibration set size and domain affect temperature fitting reliability",
+            "weight": 4,
+            "category": "positive"
+          },
+          {
+            "criterion": "Avoids confusing retriever recall changes with reranker calibration effects",
+            "weight": -7,
+            "category": "negative"
+          },
+          {
+            "criterion": "Does not attribute downstream answer gains solely to reranker score changes without passage diversity context",
+            "weight": -6,
+            "category": "negative"
+          },
+          {
+            "criterion": "Avoids claiming any generator-time reranker scaling effect, as it is unsupported",
+            "weight": -5,
+            "category": "negative"
+          },
+          {
+            "criterion": "Does not conflate calibration with retriever or generator model retraining",
+            "weight": -8,
+            "category": "negative"
+          }
+        ],
+        "question_type": "reranker calibration impact analysis",
+        "reasoning_tags": [
+          "statistical_reasoning",
+          "tradeoff_analysis",
+          "system_performance"
+        ]
+      },
+      "weak_scores": [
+        0.0,
+        0.4230769230769231,
+        0.17307692307692307
+      ],
+      "strong_scores": [
+        0.0,
+        0.17307692307692307,
+        0.0
+      ],
+      "gap": null,
+      "feedback": "strong_avg 0.058 < 0.6"
+    },
+    {
+      "round": 4,
+      "status": "TOO_EASY",
+      "qa": {
+        "context": "In retrieval-augmented generation systems for open-domain question answering, rerankers refine the passage selection from initial retrievals. These rerankers can be overconfident, particularly on long-tail queries where gold passages come from less frequent sources. Overconfidence leads to suppressing diverse but relevant passages, reducing answer accuracy. Calibration methods like temperature scaling have been proposed to address this issue by adjusting score distributions.",
+        "question": "How does the reranker’s overconfidence specifically impact the representation of passages from minority sources in the top-ranked set, and in what way does temperature scaling recalibrate these confidences to improve the retrieval diversity and downstream answer accuracy for long-tail queries?",
+        "reference_answer": "The reranker's overconfidence manifests as sharply peaked score distributions that assign disproportionately high scores to passages from majority or frequent sources, effectively hiding relevant passages from minority or long-tail sources in the top-5 results despite their presence in the top-100. Temperature scaling widens the reranker's score distribution by increasing entropy, lowering the confidence in dominant passages and allowing lower-scored, but correct, minority-source passages to surface in the top ranks. This recalibration leads to a 70% recovery in long-tail top-5 precision and a 5.3-point absolute increase in downstream answer accuracy, confirming that improving calibration enhances retrieval diversity and answer faithfulness.",
+        "rubric": [
+          {
+            "criterion": "Identifies how overconfidence skews reranker scores against minority sources",
+            "weight": 8,
+            "category": "positive"
+          },
+          {
+            "criterion": "Explains the role of score distribution sharpness (entropy) in passage selection",
+            "weight": 7,
+            "category": "positive"
+          },
+          {
+            "criterion": "Describes the effect of temperature scaling on reranker logits and resulting score distribution",
+            "weight": 9,
+            "category": "positive"
+          },
+          {
+            "criterion": "Connects calibration improvements to increased passage diversity in top-k retrieval",
+            "weight": 8,
+            "category": "positive"
+          },
+          {
+            "criterion": "Links passage diversity enhancement to measurable gains in downstream answer accuracy",
+            "weight": 7,
+            "category": "positive"
+          },
+          {
+            "criterion": "Notes that this improvement occurs without retraining or adding inference cost",
+            "weight": 5,
+            "category": "positive"
+          },
+          {
+            "criterion": "Acknowledges that temperature scaling is fit on a held-out calibration set",
+            "weight": 4,
+            "category": "positive"
+          },
+          {
+            "criterion": "Avoids conflating retriever recall issues with reranker calibration effects",
+            "weight": 6,
+            "category": "positive"
+          },
+          {
+            "criterion": "Does not incorrectly state that temperature scaling modifies retriever or generator",
+            "weight": 6,
+            "category": "positive"
+          },
+          {
+            "criterion": "Does not claim that calibration guarantees perfect retrieval or answer accuracy",
+            "weight": 5,
+            "category": "positive"
+          },
+          {
+            "criterion": "Avoids attributing changes in GPT-4 factuality scores to unrelated factors",
+            "weight": 4,
+            "category": "positive"
+          }
+        ],
+        "question_type": "reranker calibration impact on minority source retrieval",
+        "reasoning_tags": [
+          "statistical_reasoning",
+          "tradeoff_analysis",
+          "model_calibration"
+        ]
+      },
+      "weak_scores": [
+        0.8695652173913043,
+        0.7681159420289855,
+        0.8695652173913043
+      ],
+      "strong_scores": [],
+      "gap": null,
+      "feedback": "weak_avg 0.836 > 0.65"
+    },
+    {
+      "round": 5,
+      "status": "FAILED_STRONG",
+      "qa": {
+        "context": "In retrieval-augmented generation for open-domain QA, a reranker rescores candidate passages retrieved initially. The reranker’s uncalibrated scores often become overconfident, especially on long-tail queries, skewing top-ranked passage selection. Temperature scaling is applied as a post-processing step to modify the reranker's logits, aiming to calibrate confidence without changing model parameters or retriever recall. Understanding how such calibration shifts reranker decision boundaries between candidates critically influences downstream accuracy and factuality.",
+        "question": "How does applying temperature scaling to the reranker logits alter the relative ranking of candidate passages near the decision boundary for top-5 selection, and what effect does this have on the precision and answer accuracy for long-tail queries given a fixed retriever recall?",
+        "reference_answer": "Temperature scaling increases the entropy of the reranker score distribution by widening the logits, which reduces overconfidence and softens sharp score gaps between candidates near the top-5 cutoff. This adjustment allows lower-confidence but correct (gold) passages, often suppressed by the original overconfident reranker, to surface into the top-5 set. Since the retriever recall remains high (>0.85), calibrating the reranker’s confidence directly improves the precision of top-5 passage selection on long-tail queries (from 0.42 to 0.61) and consequently raises downstream exact match answer accuracy by about 5.3 points, without retraining or additional inference cost.",
+        "rubric": [
+          {
+            "criterion": "Identifies that temperature scaling widens the reranker’s score distribution, increasing entropy",
+            "weight": 10,
+            "category": "positive"
+          },
+          {
+            "criterion": "Explains how softened score differences near the top-5 boundary improve candidate diversity",
+            "weight": 9,
+            "category": "positive"
+          },
+          {
+            "criterion": "Connects calibration effect to surfacing correct passages previously suppressed due to overconfidence",
+            "weight": 9,
+            "category": "positive"
+          },
+          {
+            "criterion": "Relates improvements in passage ranking precision to downstream answer accuracy gains",
+            "weight": 8,
+            "category": "positive"
+          },
+          {
+            "criterion": "Acknowledges fixed retriever recall ensuring the gold passage is present before reranking",
+            "weight": 7,
+            "category": "positive"
+          },
+          {
+            "criterion": "Notes that temperature scaling acts as a simple post-processing step without retraining",
+            "weight": 7,
+            "category": "positive"
+          },
+          {
+            "criterion": "Mentions the zero additional inference cost due to scalar multiplication of logits",
+            "weight": 6,
+            "category": "positive"
+          },
+          {
+            "criterion": "Avoids conflating retriever recall improvement with reranker calibration effects",
+            "weight": -8,
+            "category": "negative"
+          },
+          {
+            "criterion": "Does not falsely claim changes to the reranker or retriever model parameters",
+            "weight": -7,
+            "category": "negative"
+          },
+          {
+            "criterion": "Does not oversimplify impact by ignoring score distribution shape and entropy changes",
+            "weight": -6,
+            "category": "negative"
+          },
+          {
+            "criterion": "Avoids attributing downstream answer accuracy gains solely to reranker ranking accuracy",
+            "weight": -5,
+            "category": "negative"
+          },
+          {
+            "criterion": "Does not misinterpret temperature scaling as a retriever improvement technique",
+            "weight": -9,
+            "category": "negative"
+          }
+        ],
+        "question_type": "calibration impact on reranker decision boundaries",
+        "reasoning_tags": [
+          "statistical_reasoning",
+          "score_distribution_analysis",
+          "performance_tradeoff"
+        ]
+      },
+      "weak_scores": [
+        0.19642857142857142,
+        0.26785714285714285,
+        0.14285714285714285
+      ],
+      "strong_scores": [
+        0.14285714285714285,
+        0.14285714285714285,
+        0.0
+      ],
+      "gap": null,
+      "feedback": "strong_avg 0.095 < 0.6"
+    },
+    {
+      "round": 6,
+      "status": "FAILED_STRONG",
+      "qa": {
+        "context": "In retrieval-augmented generation pipelines for open-domain QA, rerankers assign confidence scores to candidate passages retrieved from a large corpus. These confidence scores affect which passages are selected to condition the answer generator. On long-tail queries with low-frequency source passages, rerankers tend to be overconfident, producing sharply peaked score distributions that suppress potentially correct but lower-scored passages. Addressing this calibration issue can influence the balance between retrieval precision, diversity of passage sources, and downstream QA accuracy.",
+        "question": "How does the entropy of the reranker's score distribution relate to its calibration on long-tail queries, and what trade-offs arise when applying temperature scaling to increase this entropy in terms of passage diversity, top-5 precision, and overall answer accuracy?",
+        "reference_answer": "The reranker's score distribution on long-tail queries exhibits low entropy (1.2 nats), indicating overconfidence that leads to suppressing minority-source passages and reducing top-5 precision to 0.42. Temperature scaling (with optimal T ≈ 1.85) increases the entropy by widening the logits distribution, thereby allowing lower-confidence but correct passages to surface. This recalibration improves passage diversity in the top-5 set, recovering top-5 precision from 0.42 to 0.61 and increasing downstream answer accuracy by 5.3 absolute points (from 38.1 to 43.4 EM). The trade-off is that while the reranker becomes less certain, this uncertainty encourages inclusion of evidence from minority sources, improving factual answer generation without retraining or additional inference cost.",
+        "rubric": [
+          {
+            "criterion": "Identifies low entropy as indicative of overconfident score distributions",
+            "weight": 8,
+            "category": "positive"
+          },
+          {
+            "criterion": "Explains how low entropy affects the suppression of minority-source passages",
+            "weight": 7,
+            "category": "positive"
+          },
+          {
+            "criterion": "Describes the role of temperature scaling in increasing entropy of the reranker logits",
+            "weight": 8,
+            "category": "positive"
+          },
+          {
+            "criterion": "Connects increased entropy to improved retrieval diversity in the top-5 passages",
+            "weight": 9,
+            "category": "positive"
+          },
+          {
+            "criterion": "Relates improved passage diversity to recovery in top-5 precision for long-tail queries",
+            "weight": 9,
+            "category": "positive"
+          },
+          {
+            "criterion": "Links changes in reranker distribution to downstream answer accuracy gains",
+            "weight": 8,
+            "category": "positive"
+          },
+          {
+            "criterion": "Acknowledges the absence of retraining and the zero inference cost of the method",
+            "weight": 7,
+            "category": "positive"
+          },
+          {
+            "criterion": "Discusses trade-offs between reduced confidence and inclusion of diverse passages",
+            "weight": 7,
+            "category": "positive"
+          },
+          {
+            "criterion": "Does not confuse retriever recall with reranker calibration effects",
+            "weight": -8,
+            "category": "negative"
+          },
+          {
+            "criterion": "Avoids attributing benefits to generator-based reranking instead of cross-encoder reranking",
+            "weight": -6,
+            "category": "negative"
+          },
+          {
+            "criterion": "Does not mistake increasing entropy for improving retriever recall",
+            "weight": -7,
+            "category": "negative"
+          },
+          {
+            "criterion": "Avoids simplistic recall of numeric improvements without contextual reasoning",
+            "weight": -5,
+            "category": "negative"
+          },
+          {
+            "criterion": "Does not claim temperature scaling modifies retriever or reranker model parameters",
+            "weight": -7,
+            "category": "negative"
+          }
+        ],
+        "question_type": "reranker calibration impact analysis",
+        "reasoning_tags": [
+          "statistical_reasoning",
+          "system_design",
+          "performance_tradeoff"
+        ]
+      },
+      "weak_scores": [
+        0.0,
+        0.25396825396825395,
+        0.1111111111111111
+      ],
+      "strong_scores": [
+        0.2222222222222222,
+        0.1111111111111111,
+        0.1111111111111111
+      ],
+      "gap": null,
+      "feedback": "strong_avg 0.148 < 0.6"
+    },
+    {
+      "round": 7,
+      "status": "FAILED_STRONG",
+      "qa": {
+        "context": "In retrieval-augmented generation systems for open-domain QA, candidate passages are first retrieved and then reranked. While the retriever maintains high recall of gold passages even for rare long-tail queries, the reranker often exhibits overconfidence that skews the top-ranked passages towards incorrect but confidently scored candidates. Temperature scaling is introduced as a post-hoc calibration to address this imbalance without retraining.",
+        "question": "How does temperature scaling affect the score distribution entropy of the reranker on long-tail queries, and why does this change in entropy enable improved top-5 precision and downstream answer accuracy despite the underlying retriever recall remaining constant?",
+        "reference_answer": "Temperature scaling increases the entropy of the reranker's score distribution by softening its logits, which counteracts its overconfidence on long-tail queries. This widening of scores allows lower-confidence but correct passages to rise in rank, correcting the prior bias against minority or rare-source passages. As a result, the top-5 precision improves significantly (from 0.42 to 0.61), which directly contributes to a downstream answer accuracy gain of 5.3 EM points. Importantly, these improvements occur without changing the retriever or reranker parameters, indicating that calibration of score confidence alone can better surface gold passages that were previously suppressed due to overconfident but incorrect reranker rankings.",
+        "rubric": [
+          {
+            "criterion": "Identifies that temperature scaling softens reranker logits",
+            "weight": 8,
+            "category": "positive"
+          },
+          {
+            "criterion": "Explains how increasing entropy mitigates reranker overconfidence",
+            "weight": 9,
+            "category": "positive"
+          },
+          {
+            "criterion": "Connects entropy increase to improved diversity in top-5 passages",
+            "weight": 7,
+            "category": "positive"
+          },
+          {
+            "criterion": "Relates improved top-5 precision to downstream answer accuracy gains",
+            "weight": 8,
+            "category": "positive"
+          },
+          {
+            "criterion": "Recognizes that retriever recall remains high and unchanged",
+            "weight": 6,
+            "category": "positive"
+          },
+          {
+            "criterion": "Explains why no retraining or inference cost is needed",
+            "weight": 5,
+            "category": "positive"
+          },
+          {
+            "criterion": "Highlights that calibration corrects ranking bias without altering candidate set",
+            "weight": 7,
+            "category": "positive"
+          },
+          {
+            "criterion": "Shows understanding of reranker score distribution differences between head and tail queries",
+            "weight": 6,
+            "category": "positive"
+          },
+          {
+            "criterion": "Avoids simplistic cause-effect without reference to entropy or score distribution",
+            "weight": -6,
+            "category": "negative"
+          },
+          {
+            "criterion": "Does not confuse retriever recall effects with reranker calibration effects",
+            "weight": -8,
+            "category": "negative"
+          },
+          {
+            "criterion": "Does not assert that temperature scaling retrains or modifies underlying model parameters",
+            "weight": -7,
+            "category": "negative"
+          },
+          {
+            "criterion": "Avoids conflating improved factuality judge measures with mere reranker confidence increases",
+            "weight": -5,
+            "category": "negative"
+          },
+          {
+            "criterion": "Does not overstate benefits beyond the measured 5.3 EM accuracy improvement",
+            "weight": -4,
+            "category": "negative"
+          },
+          {
+            "criterion": "Explains connection between entropy and ranking decisions rather than superficial calibration benefits",
+            "weight": 7,
+            "category": "positive"
+          }
+        ],
+        "question_type": "score distribution calibration impact",
+        "reasoning_tags": [
+          "statistical_reasoning",
+          "tradeoff_analysis",
+          "pipeline_interaction"
+        ]
+      },
+      "weak_scores": [
+        0.20634920634920634,
+        0.3492063492063492,
+        0.3492063492063492
+      ],
+      "strong_scores": [
+        0.4444444444444444,
+        0.5238095238095238,
+        0.5238095238095238
+      ],
+      "gap": null,
+      "feedback": "strong_avg 0.497 < 0.6"
+    },
+    {
+      "round": 8,
+      "status": "TOO_EASY",
+      "qa": {
+        "context": "The paper explores temperature scaling of reranker logits to improve answer retrieval and generation accuracy in an open-domain QA pipeline. The calibration factor T is learned from a held-out set of queries and then applied at inference to widen score distributions, enhancing passage diversity and answer faithfulness. However, the study also highlights that T is fit on data from similar domains; it remains unknown how well a calibration learned in one domain transfers to other, more distant domains with potentially different data distributions and retrieval challenges.",
+        "question": "Given the calibration-dependent improvements reported in the paper, what challenges and potential impacts could arise if the temperature scaling parameter T, fit on Natural Questions and TriviaQA, were applied without adjustment to a significantly different domain such as legal QA? How might differences in domain distribution and retriever recall affect calibration effectiveness and downstream answer accuracy?",
+        "reference_answer": "The paper discusses that while the temperature scaling parameter T calibrated on Natural Questions generalizes well to TriviaQA due to domain similarity, it is unlikely to transfer effectively to significantly different domains like legal QA. This is because calibration depends on the underlying distribution of passage scores and retrieval characteristics, which can vary greatly between domains. Differences in domain-specific language, passage relevance patterns, and retriever recall rates would likely reduce the calibration’s effectiveness, potentially causing under- or overconfidence in reranker scores. As a result, temperature scaling based on a mismatched domain calibration set might fail to recover missing gold passages or could suppress relevant passages, degrading top-5 precision and downstream answer accuracy. Hence, domain-specific calibration sets are needed to maintain reranker calibration and retrieval diversity in new domains.",
+        "rubric": [
+          {
+            "criterion": "Identifies the role of domain similarity in calibration transferability",
+            "weight": 8,
+            "category": "positive"
+          },
+          {
+            "criterion": "Explains how differences in domain language and passage distributions impact reranker score distributions",
+            "weight": 7,
+            "category": "positive"
+          },
+          {
+            "criterion": "Describes the effect of mismatched calibration on reranker confidence (over- or underconfidence)",
+            "weight": 7,
+            "category": "positive"
+          },
+          {
+            "criterion": "Connects poor calibration transfer to potential degradation in top-5 passage precision",
+            "weight": 6,
+            "category": "positive"
+          },
+          {
+            "criterion": "Relates changes in retriever recall and distribution to calibration effectiveness",
+            "weight": 6,
+            "category": "positive"
+          },
+          {
+            "criterion": "Understands that domain-specific calibration sets improve reranker calibration and downstream accuracy",
+            "weight": 7,
+            "category": "positive"
+          },
+          {
+            "criterion": "Considers practical implications for maintaining retrieval diversity across domains",
+            "weight": 5,
+            "category": "positive"
+          },
+          {
+            "criterion": "Mentions potential need for recalibration or retraining in new domains",
+            "weight": 6,
+            "category": "positive"
+          },
+          {
+            "criterion": "Fails to consider domain distribution mismatch as a key challenge",
+            "weight": -8,
+            "category": "negative"
+          },
+          {
+            "criterion": "Incorrectly assumes calibration parameter T is universally applicable without domain adaptation",
+            "weight": -9,
+            "category": "negative"
+          },
+          {
+            "criterion": "Neglects the interaction between retriever recall variability and calibration success",
+            "weight": -7,
+            "category": "negative"
+          },
+          {
+            "criterion": "Confuses retriever and reranker calibration dynamics",
+            "weight": -6,
+            "category": "negative"
+          },
+          {
+            "criterion": "Overlooks impact on downstream answer accuracy when calibration fails",
+            "weight": -8,
+            "category": "negative"
+          }
+        ],
+        "question_type": "calibration transferability analysis",
+        "reasoning_tags": [
+          "calibration_effects",
+          "domain_adaptation",
+          "statistical_inference"
+        ]
+      },
+      "weak_scores": [
+        0.6346153846153846,
+        0.8846153846153846,
+        0.8653846153846154
+      ],
+      "strong_scores": [],
+      "gap": null,
+      "feedback": "weak_avg 0.795 > 0.65"
+    },
+    {
+      "round": 9,
+      "status": "TOO_EASY",
+      "qa": {
+        "context": "The paper demonstrates that temperature scaling improves calibration of a reranker in an open-domain QA pipeline, leading to better retrieval diversity and downstream answer accuracy. However, the calibration parameter T is learned on a calibration set drawn from domains similar to the evaluation data (Natural Questions and TriviaQA). The authors note that applying this same temperature to distant domains, such as legal QA, may not be effective due to domain distribution differences.",
+        "question": "Given that the temperature scaling parameter T is fit on a calibration set from Natural Questions and TriviaQA, both relatively similar domains, what are the statistical and practical challenges that might arise when applying this fixed T to a more distant domain like legal QA? How could differences in the distribution of retrieved passages, reranker confidence profiles, and retriever recall interact to affect the calibration effectiveness and downstream QA performance in such a scenario?",
+        "reference_answer": "Applying a fixed temperature scaling parameter T from Natural Questions and TriviaQA to a distant domain like legal QA may fail because the domain shift can cause the reranker's confidence scores to have different calibration biases and distributional properties. Legal QA documents might differ in language style, passage structure, and retrieval difficulty, leading to different score distributions and overconfidence patterns. Moreover, the retriever recall in legal QA might be lower or differently distributed, limiting the availability of gold passages in the candidate set. If the retriever recall is weak (<0.75 at top-100), temperature scaling helps less as there may be few or no gold passages to resurface. Therefore, the fixed T may either under- or over-correct the reranker's scores, resulting in suboptimal ranking, reduced retrieval diversity, and lower downstream answer accuracy. A separate calibration set from the target domain would likely be necessary to fit a more appropriate temperature scalar that accounts for these domain-specific characteristics.",
+        "rubric": [
+          {
+            "criterion": "Identifies the domain shift as a source of changed score distribution and calibration bias",
+            "weight": 8,
+            "category": "positive"
+          },
+          {
+            "criterion": "Explains how differences in language style and document structure could affect reranker confidence and calibration",
+            "weight": 7,
+            "category": "positive"
+          },
+          {
+            "criterion": "Recognizes the role of retriever recall variations in limiting calibration benefits",
+            "weight": 7,
+            "category": "positive"
+          },
+          {
+            "criterion": "Connects how poorly calibrated T can cause under- or over-correction of reranker scores",
+            "weight": 8,
+            "category": "positive"
+          },
+          {
+            "criterion": "Discusses the implication that a domain-specific calibration set is needed for reliable temperature scaling",
+            "weight": 9,
+            "category": "positive"
+          },
+          {
+            "criterion": "Considers the impact of reranker overconfidence or underconfidence on retrieval diversity and top-k precision",
+            "weight": 6,
+            "category": "positive"
+          },
+          {
+            "criterion": "Addresses how calibration interacts with downstream answer accuracy through passage ranking quality",
+            "weight": 7,
+            "category": "positive"
+          },
+          {
+            "criterion": "Avoids suggesting that temperature scaling alone can handle all domain shifts without adaptation",
+            "weight": 6,
+            "category": "positive"
+          },
+          {
+            "criterion": "Does not confuse retriever training/effectiveness with reranker calibration",
+            "weight": 5,
+            "category": "positive"
+          },
+          {
+            "criterion": "Avoids attributing improvements solely to richer data rather than calibration effects",
+            "weight": 5,
+            "category": "positive"
+          },
+          {
+            "criterion": "Does not claim zero inference cost improvements in the new domain without qualification",
+            "weight": 4,
+            "category": "positive"
+          },
+          {
+            "criterion": "Does not mistake the simple scalar parameter T as a complex retraining method",
+            "weight": 5,
+            "category": "positive"
+          },
+          {
+            "criterion": "Avoids conflating generator logit calibration with reranker calibration in domain shifts",
+            "weight": 5,
+            "category": "positive"
+          }
+        ],
+        "question_type": "calibration generalization and domain adaptation",
+        "reasoning_tags": [
+          "domain_adaptation",
+          "statistical_reasoning",
+          "impact_analysis"
+        ]
+      },
+      "weak_scores": [
+        0.8536585365853658,
+        0.8170731707317073,
+        1.0
+      ],
+      "strong_scores": [],
+      "gap": null,
+      "feedback": "weak_avg 0.890 > 0.65"
+    },
+    {
+      "round": 10,
+      "status": "TOO_EASY",
+      "qa": {
+        "context": "In retrieval-augmented generation (RAG) pipelines for open-domain QA, rerankers assign confidence scores to candidate passages retrieved by a dense retriever. These confidence scores influence which passages are selected for answer generation. Overconfident rerankers produce sharply peaked score distributions that can suppress less confident but correct passages, especially for long-tail queries where the gold passages come from rare sources. A temperature-scaling calibration step adjusts these reranker scores to soften the distribution. Understanding how this statistical adjustment affects the reranker's score distribution properties and the downstream retrieval and answer accuracy is critical for improving the pipeline performance without retraining models.",
+        "question": "How does temperature scaling quantitatively alter the reranker's score distribution characteristics on long-tail queries, and why does this alteration lead to improved top-5 precision and answer accuracy despite no changes to the retriever or reranker model parameters themselves?",
+        "reference_answer": "Temperature scaling multiplies the reranker logits by a scalar T > 1 (approximately 1.85), which widens the reranker score distribution by increasing entropy (from 1.2 nats to a value closer to head queries at 2.4 nats). This softening reduces the reranker's overconfidence, allowing lower-confidence but correct passages from minority or rare sources to be ranked higher into the top-5 set. Since the retriever's top-100 recall remains high (> 0.85), these correct passages are present among candidates but were previously suppressed by peaked, overconfident scores. The recalibrated distribution therefore surfaces more relevant passages without changing the retriever or reranker parameters, yielding a 0.42 to 0.61 increase in long-tail top-5 precision and a 5.3 absolute point gain in downstream exact match answer accuracy.",
+        "rubric": [
+          {
+            "criterion": "Identifies that temperature scaling multiplies reranker logits by a scalar >1 to soften scores",
+            "weight": 8,
+            "category": "positive"
+          },
+          {
+            "criterion": "Explains increase in entropy of reranker score distribution after scaling",
+            "weight": 7,
+            "category": "positive"
+          },
+          {
+            "criterion": "Connects softened score distribution to reduced reranker overconfidence",
+            "weight": 7,
+            "category": "positive"
+          },
+          {
+            "criterion": "Describes how reduction in overconfidence allows lower-ranked correct passages to surface",
+            "weight": 8,
+            "category": "positive"
+          },
+          {
+            "criterion": "Notes that retriever recall remains high and thus correct passages are in candidate set",
+            "weight": 6,
+            "category": "positive"
+          },
+          {
+            "criterion": "Links improved passage diversity in top-5 to gains in top-5 precision",
+            "weight": 7,
+            "category": "positive"
+          },
+          {
+            "criterion": "Relates improved top-5 precision to downstream answer accuracy improvements",
+            "weight": 8,
+            "category": "positive"
+          },
+          {
+            "criterion": "Recognizes that no retraining or inference cost increase occurs due to the simple scalar multiplication",
+            "weight": 6,
+            "category": "positive"
+          },
+          {
+            "criterion": "Avoids conflating retriever changes with reranker calibration effects",
+            "weight": 9,
+            "category": "positive"
+          },
+          {
+            "criterion": "Does not claim that temperature scaling improves retriever recall",
+            "weight": 9,
+            "category": "positive"
+          },
+          {
+            "criterion": "Avoids attributing accuracy gains to changes in generator or model architecture",
+            "weight": 8,
+            "category": "positive"
+          },
+          {
+            "criterion": "Does not confuse entropy increase with degraded ranking quality",
+            "weight": 7,
+            "category": "positive"
+          },
+          {
+            "criterion": "Does not incorrectly state that temperature scaling retrains or modifies reranker weights",
+            "weight": 8,
+            "category": "positive"
+          }
+        ],
+        "question_type": "calibration impact on reranker score distribution",
+        "reasoning_tags": [
+          "statistical_reasoning",
+          "model_calibration",
+          "performance_analysis"
+        ]
+      },
+      "weak_scores": [
+        0.8673469387755102,
+        0.7244897959183674,
+        0.8061224489795918
+      ],
+      "strong_scores": [],
+      "gap": null,
+      "feedback": "weak_avg 0.799 > 0.65"
+    },
+    {
+      "round": 11,
+      "status": "FAILED_STRONG",
+      "qa": {
+        "context": "In retrieval-augmented generation systems for open-domain QA, the reranker’s confidence calibration affects which passages are selected from a large retrieved candidate set. Overconfident rerankers tend to suppress minority-source passages despite their correctness, altering passage diversity and affecting downstream answer quality. Calibration via temperature scaling modifies the reranker’s score distribution, which influences the entropy and ranking order of passages.",
+        "question": "How does increasing the reranker’s temperature parameter influence the entropy of score distributions, and what are the consequent effects on the diversity of top-ranked passages and long-tail query answer accuracy, considering the fixed retriever recall and the presence of minority-source gold passages?",
+        "reference_answer": "Increasing the reranker’s temperature parameter scales down the logits, effectively softening the confidence scores and thereby increasing the entropy of the score distribution from about 1.2 nats to a higher value. This wider, less peaked distribution allows lower-confidence but correct passages—often from minority sources on long-tail queries—to surface into the top-5 ranked set. Because the retriever recall remains high (~0.85), these gold passages exist within the candidate set but were previously suppressed by overconfident scoring. The increased diversity in top-ranked passages improves retrieval precision from 0.42 to 0.61 and results in a downstream answer accuracy gain of over 5 percentage points. Hence, temperature scaling enables better utilization of the existing candidate set by balancing confidence spread and supporting evidence diversity without retraining or increasing inference cost.",
+        "rubric": [
+          {
+            "criterion": "Explains how temperature scaling modifies reranker logits and increases score entropy",
+            "weight": 8,
+            "category": "positive"
+          },
+          {
+            "criterion": "Connects increased entropy to improved passage diversity in top-k retrieval",
+            "weight": 7,
+            "category": "positive"
+          },
+          {
+            "criterion": "Addresses the presence of gold passages in the retrieval set despite low original top-5 precision",
+            "weight": 6,
+            "category": "positive"
+          },
+          {
+            "criterion": "Links passage diversity improvements to gains in long-tail query answer accuracy",
+            "weight": 7,
+            "category": "positive"
+          },
+          {
+            "criterion": "Notes that retriever recall remains fixed and high, enabling reranker calibration to be effective",
+            "weight": 5,
+            "category": "positive"
+          },
+          {
+            "criterion": "Mentions that temperature scaling requires no retraining and incurs zero inference cost",
+            "weight": 5,
+            "category": "positive"
+          },
+          {
+            "criterion": "Reflects understanding that minority-source passages are suppressed by overconfident reranker scores before calibration",
+            "weight": 6,
+            "category": "positive"
+          },
+          {
+            "criterion": "Avoids attributing improvements to retriever changes or generator reranking dynamics",
+            "weight": 3,
+            "category": "positive"
+          },
+          {
+            "criterion": "Does not confuse entropy increase with retriever recall improvement",
+            "weight": -5,
+            "category": "negative"
+          },
+          {
+            "criterion": "Does not claim temperature scaling changes the underlying reranker model parameters",
+            "weight": -4,
+            "category": "negative"
+          },
+          {
+            "criterion": "Avoids stating that generator-time reranking benefits from temperature scaling",
+            "weight": -3,
+            "category": "negative"
+          },
+          {
+            "criterion": "Does not overstate the magnitude of accuracy improvements beyond reported results",
+            "weight": -2,
+            "category": "negative"
+          }
+        ],
+        "question_type": "reranker calibration impact analysis",
+        "reasoning_tags": [
+          "statistical_reasoning",
+          "performance_tradeoff",
+          "distributional_analysis"
+        ]
+      },
+      "weak_scores": [
+        0.46808510638297873,
+        0.46808510638297873,
+        0.46808510638297873
+      ],
+      "strong_scores": [
+        0.5957446808510638,
+        0.5957446808510638,
+        0.5957446808510638
+      ],
+      "gap": null,
+      "feedback": "strong_avg 0.596 < 0.6"
+    },
+    {
+      "round": 12,
+      "status": "FAILED_STRONG",
+      "qa": {
+        "context": "The paper shows that a reranker in a retrieval-augmented QA pipeline exhibits overconfident scoring on long-tail queries, leading to poor top-5 precision despite high retriever recall. A temperature scaling technique adjusts the reranker's logits to widen the score distribution, improving retrieval diversity and downstream accuracy. Understanding how such scaling impacts the reranker's implicit decision boundary among candidate passages is crucial.",
+        "question": "How does applying temperature scaling to the reranker's logits affect the relative positioning of candidate passages near the top-5 cutoff, and how does this change in ranking behavior influence the tradeoff between surface-level precision and the inclusion of minority-source gold passages in the final retrieved set for long-tail queries?",
+        "reference_answer": "Temperature scaling increases the reranker’s output temperature (T≈1.85), effectively softening and flattening the score distribution. This reduces overconfidence by decreasing the margin between high-scoring incorrect passages and lower-confidence correct passages (including minority-source gold passages). Near the top-5 cutoff, this causes previously suppressed correct passages to surface above some overconfident false positives. Consequently, the top-5 precision improves by recovering gold passages that were displaced before, increasing passage diversity and leading to a 5.3 absolute point gain in downstream exact match accuracy on long-tail queries. However, this adjustment slightly reduces the raw precision metric from its previous biased peaks by allowing a more balanced ranking, trading some confidence in dominant passages for better overall evidence coverage.",
+        "rubric": [
+          {
+            "criterion": "Correctly identifies that temperature scaling reduces overconfidence by softening the reranker’s logits",
+            "weight": 8,
+            "category": "positive"
+          },
+          {
+            "criterion": "Explains how score distribution widening affects passages near the top-5 cutoff",
+            "weight": 7,
+            "category": "positive"
+          },
+          {
+            "criterion": "Connects changes in ranking behavior to increased inclusion of minority-source gold passages",
+            "weight": 7,
+            "category": "positive"
+          },
+          {
+            "criterion": "Relates improved inclusion of correct passages to downstream answer accuracy gains",
+            "weight": 8,
+            "category": "positive"
+          },
+          {
+            "criterion": "Analyzes the tradeoff between precision and retrieval diversity due to calibration",
+            "weight": 6,
+            "category": "positive"
+          },
+          {
+            "criterion": "Distinguishes the effect on reranker logits from changes in retriever recall or model retraining",
+            "weight": 6,
+            "category": "positive"
+          },
+          {
+            "criterion": "Mentions that the calibration applies post hoc without additional inference cost",
+            "weight": 4,
+            "category": "positive"
+          },
+          {
+            "criterion": "Avoids conflating retriever recall changes with reranker calibration effects",
+            "weight": -7,
+            "category": "negative"
+          },
+          {
+            "criterion": "Does not incorrectly claim temperature scaling retrains or modifies underlying models",
+            "weight": -8,
+            "category": "negative"
+          },
+          {
+            "criterion": "Avoids vague or generic descriptions without reference to passage ranking near top-k boundary",
+            "weight": -6,
+            "category": "negative"
+          },
+          {
+            "criterion": "Does not confuse entropy increase with arbitrary randomness instead of calibrated softening",
+            "weight": -5,
+            "category": "negative"
+          },
+          {
+            "criterion": "Does not attribute downstream accuracy gains solely to retriever performance",
+            "weight": -7,
+            "category": "negative"
+          }
+        ],
+        "question_type": "calibration impact on reranker decision boundary",
+        "reasoning_tags": [
+          "probabilistic_reasoning",
+          "distributional_shift",
+          "tradeoff_analysis"
+        ]
+      },
+      "weak_scores": [
+        0.1956521739130435,
+        0.021739130434782608,
+        0.1956521739130435
+      ],
+      "strong_scores": [
+        0.021739130434782608,
+        0.021739130434782608,
+        0.1956521739130435
+      ],
+      "gap": null,
+      "feedback": "strong_avg 0.080 < 0.6"
+    }
+  ]
+}

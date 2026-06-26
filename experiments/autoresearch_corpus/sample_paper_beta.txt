@@ -1,0 +1,5 @@
+Title: Retrieval Granularity and Reranker Calibration in Legal QA (mock corpus item)
+Abstract: We examine how passage granularity affects cross-encoder reranker calibration in a
+multi-source legal retrieval setting. We find that title-prefixed candidate construction at
+training time must match inference-time formatting, and we quantify the discrimination loss
+when held-out leak checks are name-blind.

@@ -1,0 +1,59 @@
+Title: Demonstration Ordering Effects in In-Context Learning for Structured Extraction
+       (Tutorial mock paper for Agentic Self-Instruct corpus diversification)
+
+Abstract
+We study how the *order* of demonstrations in a few-shot prompt influences a
+chat-tuned language model's ability to extract structured fields (entities,
+relations, dates) from free-form clinical notes. We show that a curriculum-style
+ordering — easiest example first, hardest last — yields a 6-9 absolute F1 point
+gain over random ordering on a 1,200-note evaluation set, and that the gain is
+larger for smaller models (8B: +9.2 F1, 70B: +6.1 F1). The effect is driven
+mostly by the *last* two demonstrations: shuffling them away from the
+hardest-examples slot reduces the gain by half.
+
+1. Setup
+We extract eight structured fields (patient_age, admission_reason, medication_list,
+allergy_list, primary_diagnosis_icd10, secondary_diagnoses, discharge_disposition,
+follow_up_interval) from de-identified clinical notes. The prompt is a fixed
+schema description plus k=6 in-context demonstrations sampled from a pool of 500
+human-annotated notes. We compare three ordering policies:
+  - random: shuffle demonstrations uniformly per query.
+  - curriculum: sort demonstrations by an automatic difficulty score (ratio of
+    fields the smallest-tested model gets right when shown the demo alone).
+  - reverse-curriculum: sort by the same score but hardest first.
+
+2. The ordering gap
+Random ordering on a 70B chat model reaches 71.4 macro-F1 across the eight
+fields. Curriculum ordering reaches 77.5 macro-F1, a 6.1-point absolute gain.
+Reverse-curriculum drops to 68.9, suggesting the position of the *hardest*
+demonstration carries most of the signal.
+
+3. Where does the gain come from?
+We ablate by holding the first k-2 demonstrations fixed and only shuffling the
+last two slots. Curriculum-style placement of the two hardest examples in slots
+5-6 recovers 4.4 of the 6.1 absolute points — about 72% of the gain. Placing
+those same two examples in slots 1-2 (curriculum-front) recovers only 1.1
+points. The effect is consistent across the eight fields, with the largest
+swing on `medication_list` (the most templated field) and the smallest on
+`patient_age` (the most surface-form field).
+
+4. Scale interaction
+- 8B model: 9.2-point curriculum gain (62.1 -> 71.3 macro-F1).
+- 27B model: 7.4-point gain.
+- 70B model: 6.1-point gain.
+- 200B model: 3.2-point gain.
+Larger models extract more from any single demonstration, so the marginal
+benefit of placing the hardest example "near the answer" shrinks but does not
+vanish.
+
+5. A simple negative control
+Curriculum on the *generic* RACE multiple-choice benchmark shows no effect
+(within 0.3 points of random). The win is specific to structured-output tasks
+where the model has to maintain a schema across several distinct fields under
+output-length pressure.
+
+6. Limitations
+The difficulty score is derived from a smaller probe model; we do not test
+self-difficulty (using the target model to score its own demos). Domain
+transfer is also untested — the same ordering policy may not help on, e.g.,
+legal-document extraction, where field semantics differ substantially.

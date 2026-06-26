@@ -1,0 +1,1106 @@
+{
+  "paper_id": "sample_paper_beta",
+  "accepted": false,
+  "accepted_qa": null,
+  "n_rounds": 12,
+  "rounds": [
+    {
+      "round": 1,
+      "status": "TOO_EASY",
+      "qa": {
+        "context": "In legal question answering systems, retrieval rerankers must process multiple sources with differing text granularities, such as titles and passages. Ensuring consistency between training and inference formats is critical to maintain model calibration and retrieval effectiveness.",
+        "question": "How does the match between training and inference formatting of title-prefixed candidates influence cross-encoder reranker calibration and discrimination performance in multi-source legal retrieval, and what underlying factors might explain this effect?",
+        "reference_answer": "The paper finds that cross-encoder reranker calibration is significantly affected when the formatting of title-prefixed candidates at training time does not match that at inference time. Specifically, misalignment leads to decreased discrimination ability, as the model struggles to effectively differentiate relevant from irrelevant passages when the input structure differs. This effect likely arises because the model learns contextual cues tied to the specific formatting during training, so deviations at inference disrupt these learned associations, reducing confidence calibration and overall retrieval quality.",
+        "rubric": [
+          {
+            "criterion": "Identifies the importance of matching input formatting between training and inference phases",
+            "weight": 10,
+            "category": "positive"
+          },
+          {
+            "criterion": "Links formatting mismatch to decreased reranker discrimination ability",
+            "weight": 8,
+            "category": "positive"
+          },
+          {
+            "criterion": "Explains the role of learned contextual cues tied to input structure",
+            "weight": 7,
+            "category": "positive"
+          },
+          {
+            "criterion": "Relates cross-encoder calibration to retrieval effectiveness in a multi-source setting",
+            "weight": 6,
+            "category": "positive"
+          },
+          {
+            "criterion": "Demonstrates understanding of why title prefix consistency matters",
+            "weight": 6,
+            "category": "positive"
+          },
+          {
+            "criterion": "Includes reasoning on why inference-stage differences cause performance degradation",
+            "weight": 5,
+            "category": "positive"
+          },
+          {
+            "criterion": "Mentions the paper’s empirical quantification of discrimination loss",
+            "weight": 5,
+            "category": "positive"
+          },
+          {
+            "criterion": "Avoids merely restating findings without causal interpretation",
+            "weight": 8,
+            "category": "positive"
+          },
+          {
+            "criterion": "Does not confuse the effect of name-blind held-out leak checks with formatting mismatch",
+            "weight": 7,
+            "category": "positive"
+          },
+          {
+            "criterion": "Does not oversimplify calibration effects as only related to data size or quality",
+            "weight": 5,
+            "category": "positive"
+          },
+          {
+            "criterion": "Does not ignore the multi-source nature of the retrieval setting",
+            "weight": 4,
+            "category": "positive"
+          },
+          {
+            "criterion": "Avoids attributing effects solely to model architecture without evidence",
+            "weight": 3,
+            "category": "positive"
+          }
+        ],
+        "question_type": "reranker calibration impact",
+        "reasoning_tags": [
+          "experimental_design",
+          "statistical_inference",
+          "cross-modal_consistency"
+        ]
+      },
+      "weak_scores": [
+        0.9324324324324325,
+        0.9324324324324325,
+        0.9324324324324325
+      ],
+      "strong_scores": [],
+      "gap": null,
+      "feedback": "weak_avg 0.932 > 0.65"
+    },
+    {
+      "round": 2,
+      "status": "FAILED_STRONG",
+      "qa": {
+        "context": "In multi-source legal question answering systems, passage granularity and the formatting of candidate passages can significantly impact the performance of cross-encoder rerankers. The study investigates how alignment or mismatch between candidate formatting during training and inference influences reranker calibration and discrimination, particularly focusing on the role of title prefixes and name-leak checks within the context of legal document retrieval.",
+        "question": "How does mismatching the presence of title prefixes between training and inference candidate passages affect the calibration and discrimination of cross-encoder rerankers in legal QA, and what implications does this have for designing robust retrieval pipelines in terms of handling data leakage and granularity?",
+        "reference_answer": "The paper finds that the calibration and discrimination performance of cross-encoder rerankers degrade significantly when the title-prefixed candidate formatting used during training does not match the inference-time formatting. This mismatch leads to a loss in discrimination ability, indicating that the model relies on consistent input structure to properly calibrate scores. Additionally, the study reveals that name-leak checks, when held out in a name-blind manner, also result in discrimination loss, highlighting the importance of carefully managing potential data leakage. These findings imply that retrieval pipeline design must ensure consistent candidate passage formatting and carefully consider granularity and leakage controls to maintain reranker reliability.",
+        "rubric": [
+          {
+            "criterion": "Correctly identifies the relationship between formatting mismatch and reranker calibration degradation",
+            "weight": 9,
+            "category": "positive"
+          },
+          {
+            "criterion": "Links title prefix consistency to discrimination ability in reranking",
+            "weight": 8,
+            "category": "positive"
+          },
+          {
+            "criterion": "Explains the role of candidate passage granularity in calibration effects",
+            "weight": 7,
+            "category": "positive"
+          },
+          {
+            "criterion": "Discusses the impact of name-leak checks on discrimination performance",
+            "weight": 6,
+            "category": "positive"
+          },
+          {
+            "criterion": "Articulates the broader implications for robust retrieval pipeline design",
+            "weight": 7,
+            "category": "positive"
+          },
+          {
+            "criterion": "Integrates knowledge of data leakage challenges in legal QA contexts",
+            "weight": 6,
+            "category": "positive"
+          },
+          {
+            "criterion": "Demonstrates understanding of multi-source legal retrieval challenges",
+            "weight": 6,
+            "category": "positive"
+          },
+          {
+            "criterion": "Avoids conflating recall of details with reasoning about their impact",
+            "weight": -6,
+            "category": "negative"
+          },
+          {
+            "criterion": "Does not ignore the role of training-inference consistency",
+            "weight": -7,
+            "category": "negative"
+          },
+          {
+            "criterion": "Avoids attributing observed performance solely to model architecture rather than data formatting",
+            "weight": -5,
+            "category": "negative"
+          },
+          {
+            "criterion": "Does not neglect the interaction between granularity and calibration",
+            "weight": -6,
+            "category": "negative"
+          }
+        ],
+        "question_type": "reranker calibration impact analysis",
+        "reasoning_tags": [
+          "experimental_design",
+          "model_evaluation",
+          "data_formatting"
+        ]
+      },
+      "weak_scores": [
+        0.5102040816326531,
+        0.5102040816326531,
+        0.5102040816326531
+      ],
+      "strong_scores": [
+        0.5102040816326531,
+        0.5102040816326531,
+        0.5102040816326531
+      ],
+      "gap": null,
+      "feedback": "strong_avg 0.510 < 0.6"
+    },
+    {
+      "round": 3,
+      "status": "TOO_EASY",
+      "qa": {
+        "context": "Legal question answering systems often involve reranking retrieved passages from multiple sources. The calibration of rerankers—how reliably their scores reflect true relevance—can be influenced by how candidate passages are constructed and formatted. Additionally, the presence of data leakage through named entities in training or evaluation sets can distort performance metrics, complicating the analysis of reranker effectiveness across different retrieval granularities.",
+        "question": "Given a multi-source legal retrieval scenario where held-out test sets intentionally obscure named entity information to prevent leakage, how does this name-blind setting impact the discriminatory power and calibration of cross-encoder rerankers compared to name-aware settings, and what does this reveal about the reliance of reranker models on surface-level cues versus deeper semantic understanding?",
+        "reference_answer": "The paper finds that when held-out leak checks are name-blind—that is, named entities normally providing shortcuts for relevance matching are obscured—the discrimination performance of cross-encoder rerankers notably decreases. This indicates that the rerankers rely substantially on named entity cues to differentiate relevant from irrelevant passages. Calibration is also affected, as the models' confidence scores become less aligned with true relevance probabilities without these cues. Thus, this suggests reranker models tend to exploit surface-level features (such as presence of specific names) rather than robust semantic understanding, highlighting challenges in designing models that generalize beyond superficial textual hints.",
+        "rubric": [
+          {
+            "criterion": "Identifies the role of named entities in reranker discrimination",
+            "weight": 8,
+            "category": "positive"
+          },
+          {
+            "criterion": "Explains how name obfuscation affects calibration scores",
+            "weight": 7,
+            "category": "positive"
+          },
+          {
+            "criterion": "Connects decreased discrimination to model reliance on surface cues",
+            "weight": 8,
+            "category": "positive"
+          },
+          {
+            "criterion": "Differentiates between name-aware and name-blind evaluation settings",
+            "weight": 6,
+            "category": "positive"
+          },
+          {
+            "criterion": "Discusses implications for model generalization in legal QA",
+            "weight": 7,
+            "category": "positive"
+          },
+          {
+            "criterion": "Incorporates understanding of multi-source retrieval complexities",
+            "weight": 5,
+            "category": "positive"
+          },
+          {
+            "criterion": "Avoids simply restating findings without causal reasoning",
+            "weight": 8,
+            "category": "positive"
+          },
+          {
+            "criterion": "Considers calibration and discrimination as distinct but related metrics",
+            "weight": 6,
+            "category": "positive"
+          },
+          {
+            "criterion": "Incorrectly assumes reranker performance is unaffected by name obfuscation",
+            "weight": -10,
+            "category": "negative"
+          },
+          {
+            "criterion": "Conflates calibration with discrimination without distinction",
+            "weight": -7,
+            "category": "negative"
+          },
+          {
+            "criterion": "Overlooks the effect of surface-level cues on model behavior",
+            "weight": -8,
+            "category": "negative"
+          },
+          {
+            "criterion": "Fails to link experimental setup with implications for robust retrieval design",
+            "weight": -6,
+            "category": "negative"
+          }
+        ],
+        "question_type": "calibration robustness under data leakage",
+        "reasoning_tags": [
+          "statistical_reasoning",
+          "experimental_design",
+          "model_generalization"
+        ]
+      },
+      "weak_scores": [
+        1.0,
+        1.0,
+        0.9090909090909091
+      ],
+      "strong_scores": [],
+      "gap": null,
+      "feedback": "weak_avg 0.970 > 0.65"
+    },
+    {
+      "round": 4,
+      "status": "FAILED_STRONG",
+      "qa": {
+        "context": "In multi-source legal question answering, cross-encoder rerankers rely on candidate passages constructed with specific formatting conventions such as title prefixes. Variations in how candidates are formatted during training versus inference can influence model calibration and ranking discrimination, which are critical for downstream legal retrieval accuracy.",
+        "question": "Considering the role of candidate passage formatting in multi-source legal QA, how does the alignment or misalignment of title-prefixed candidate construction between training and inference phases quantitatively affect the cross-encoder reranker's calibration and discrimination, and what underlying aspects of the model’s representation learning might account for these changes?",
+        "reference_answer": "The paper finds that when training and inference candidate passages both include matching title prefixes, the cross-encoder reranker exhibits better calibration and higher discrimination performance. Misalignment—such as training on title-prefixed passages but inferring on unprefixed ones—results in significant degradation in these metrics. This suggests that the model partially relies on consistent data representation cues, like title prefixes, for learning meaningful features. The discrepancy disrupts learned patterns, lowering confidence reliability (calibration) and ranking quality (discrimination).",
+        "rubric": [
+          {
+            "criterion": "Identifies effect of matching formatting on calibration improvement",
+            "weight": 8,
+            "category": "positive"
+          },
+          {
+            "criterion": "Describes discrimination metric degradation due to formatting mismatch",
+            "weight": 8,
+            "category": "positive"
+          },
+          {
+            "criterion": "Connects formatting consistency to model’s ability to learn reliable features",
+            "weight": 7,
+            "category": "positive"
+          },
+          {
+            "criterion": "Mentions quantitative impact on calibration reliability",
+            "weight": 6,
+            "category": "positive"
+          },
+          {
+            "criterion": "Includes explanation of cross-encoder reliance on title prefixes as data cues",
+            "weight": 7,
+            "category": "positive"
+          },
+          {
+            "criterion": "Acknowledges training-inference distribution shift implications",
+            "weight": 6,
+            "category": "positive"
+          },
+          {
+            "criterion": "Avoids vague or purely descriptive answers lacking mechanistic insight",
+            "weight": 5,
+            "category": "positive"
+          },
+          {
+            "criterion": "Avoids conflating calibration with discrimination",
+            "weight": -5,
+            "category": "negative"
+          },
+          {
+            "criterion": "Does not merely restate paper’s abstract without reasoning",
+            "weight": -7,
+            "category": "negative"
+          },
+          {
+            "criterion": "Avoids discussing unrelated factors like corpus size or retrieval speed",
+            "weight": -3,
+            "category": "negative"
+          },
+          {
+            "criterion": "Does not treat formatting effects as superficial without linking to model learning",
+            "weight": -6,
+            "category": "negative"
+          }
+        ],
+        "question_type": "training-inference format alignment impact",
+        "reasoning_tags": [
+          "experimental_design",
+          "data_representation",
+          "model_calibration"
+        ]
+      },
+      "weak_scores": [
+        0.5531914893617021,
+        0.5531914893617021,
+        0.5531914893617021
+      ],
+      "strong_scores": [
+        0.5531914893617021,
+        0.5531914893617021,
+        0.5531914893617021
+      ],
+      "gap": null,
+      "feedback": "strong_avg 0.553 < 0.6"
+    },
+    {
+      "round": 5,
+      "status": "FAILED_STRONG",
+      "qa": {
+        "context": "Cross-encoder rerankers in legal question answering rely on candidate passage formatting for making relevance judgments. Training and inference conditions may differ in how candidate passages include or omit document titles, impacting calibration and discrimination. Understanding how such formatting induces distribution shifts and affects the model's ranking confidence is critical when deploying retrieval systems robust to real-world variability.",
+        "question": "In the presence of distributional shifts caused by inconsistent use of title-prefixed candidate passages between training and inference in multi-source legal retrieval, how does this discrepancy specifically alter the calibration and discrimination capabilities of cross-encoder rerankers, and what does this imply about the model’s sensitivity to surface-level formatting cues versus semantic content?",
+        "reference_answer": "The paper shows that when candidate passages are formatted with title prefixes during training but the inference candidates omit these prefixes (or vice versa), the cross-encoder reranker experiences a notable drop in discrimination performance and calibration quality. This occurs because the model has learned to rely on surface-level formatting cues such as title presence for ranking signals, and inconsistent formatting introduces a distributional shift that degrades its confidence estimates and ranking accuracy. This demonstrates the reranker's sensitivity to formatting patterns rather than purely semantic content, highlighting the need for consistent candidate formatting or model retraining to ensure robust performance.",
+        "rubric": [
+          {
+            "criterion": "Correctly identifies distribution shift caused by title prefix inconsistency",
+            "weight": 8,
+            "category": "positive"
+          },
+          {
+            "criterion": "Explains impact on calibration (confidence alignment) of the reranker",
+            "weight": 7,
+            "category": "positive"
+          },
+          {
+            "criterion": "Discusses effect on discrimination (ranking accuracy) metrics",
+            "weight": 7,
+            "category": "positive"
+          },
+          {
+            "criterion": "Links observed model behavior to reliance on surface-level formatting cues",
+            "weight": 6,
+            "category": "positive"
+          },
+          {
+            "criterion": "Recognizes that semantic understanding alone is insufficient under formatting mismatch",
+            "weight": 6,
+            "category": "positive"
+          },
+          {
+            "criterion": "Draws implications for training/inference formatting consistency",
+            "weight": 5,
+            "category": "positive"
+          },
+          {
+            "criterion": "Mentions necessity to handle distribution shifts for deployment robustness",
+            "weight": 4,
+            "category": "positive"
+          },
+          {
+            "criterion": "Includes evidence or reasoning grounded in the paper’s experiments or results",
+            "weight": 7,
+            "category": "positive"
+          },
+          {
+            "criterion": "Avoids superficial recall of paper's conclusion without reasoning",
+            "weight": 5,
+            "category": "positive"
+          },
+          {
+            "criterion": "Does not confuse discrimination with calibration or treat them interchangeably",
+            "weight": -6,
+            "category": "negative"
+          },
+          {
+            "criterion": "Does not ignore the significance of formatting cues in model performance",
+            "weight": -5,
+            "category": "negative"
+          },
+          {
+            "criterion": "Avoids attributing errors to generic model failures without formatting context",
+            "weight": -4,
+            "category": "negative"
+          },
+          {
+            "criterion": "Does not suggest the model’s semantic representations are unaffected by formatting changes",
+            "weight": -7,
+            "category": "negative"
+          }
+        ],
+        "question_type": "model generalization and robustness",
+        "reasoning_tags": [
+          "distribution_shift",
+          "model_calibration",
+          "effect_of_formatting"
+        ]
+      },
+      "weak_scores": [
+        0.6,
+        0.6,
+        0.6
+      ],
+      "strong_scores": [
+        0.6,
+        0.6,
+        0.6
+      ],
+      "gap": 0.0,
+      "feedback": "gap 0.000 < 0.2"
+    },
+    {
+      "round": 6,
+      "status": "TOO_EASY",
+      "qa": {
+        "context": "In multi-source legal retrieval, input passages can be formatted with or without title prefixes. Cross-encoder rerankers are trained under certain formatting conventions but tested under potentially inconsistent ones. This inconsistency introduces distributional shifts that impact reranker calibration and discrimination. Understanding how these shifts affect the model's trustworthiness and ranking ability is crucial for designing reliable legal QA systems, especially when dealing with heterogeneous sources and preventing data leakage.",
+        "question": "How does the presence of title prefix mismatch between training and inference candidate passages influence the cross-encoder reranker’s calibration reliability and ranking discrimination, and what does this reveal about the model's vulnerability to distributional shifts in multi-source legal retrieval scenarios?",
+        "reference_answer": "The paper demonstrates that when the title-prefixed candidate construction at training does not match the inference-time formatting, the cross-encoder reranker experiences a significant loss in discrimination performance accompanied by poorer calibration. This effect indicates that the model heavily depends on consistent formatting cues learned during training, making it vulnerable to distributional shifts caused by mismatched passage granularity. Consequently, the reranker’s ability to produce well-calibrated confidence scores and correctly rank relevant documents deteriorates, emphasizing the need for strict alignment in candidate formatting to maintain robustness in multi-source legal retrieval.",
+        "rubric": [
+          {
+            "criterion": "Identifies impact of title prefix mismatch on calibration accuracy",
+            "weight": 8,
+            "category": "positive"
+          },
+          {
+            "criterion": "Explains how mismatch reduces ranking discrimination",
+            "weight": 7,
+            "category": "positive"
+          },
+          {
+            "criterion": "Connects formatting inconsistency to distributional shift vulnerability",
+            "weight": 9,
+            "category": "positive"
+          },
+          {
+            "criterion": "Recognizes importance of consistent training and inference formatting",
+            "weight": 6,
+            "category": "positive"
+          },
+          {
+            "criterion": "Discusses implications for robustness in multi-source retrieval",
+            "weight": 5,
+            "category": "positive"
+          },
+          {
+            "criterion": "Addresses the model's reliance on formatting cues rather than semantic content",
+            "weight": 6,
+            "category": "positive"
+          },
+          {
+            "criterion": "Includes calibration and discrimination as separate but related model performance aspects",
+            "weight": 7,
+            "category": "positive"
+          },
+          {
+            "criterion": "Avoids superficial restatement of findings",
+            "weight": 8,
+            "category": "positive"
+          },
+          {
+            "criterion": "Incorrectly attributes effects solely to semantic content rather than formatting",
+            "weight": -7,
+            "category": "negative"
+          },
+          {
+            "criterion": "Fails to relate formatting mismatch to distributional shift concept",
+            "weight": -8,
+            "category": "negative"
+          },
+          {
+            "criterion": "Overgeneralizes results to all QA settings without context",
+            "weight": -5,
+            "category": "negative"
+          },
+          {
+            "criterion": "Confuses calibration with discrimination or treats them synonymously",
+            "weight": -6,
+            "category": "negative"
+          },
+          {
+            "criterion": "Misrepresents the empirical relationship between formatting and model performance",
+            "weight": -9,
+            "category": "negative"
+          },
+          {
+            "criterion": "Neglects to mention multi-source setting impact",
+            "weight": -4,
+            "category": "negative"
+          }
+        ],
+        "question_type": "robustness to formatting shifts",
+        "reasoning_tags": [
+          "distributional_shift",
+          "model_calibration",
+          "multi_source_retrieval"
+        ]
+      },
+      "weak_scores": [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "strong_scores": [],
+      "gap": null,
+      "feedback": "weak_avg 1.000 > 0.65"
+    },
+    {
+      "round": 7,
+      "status": "FAILED_STRONG",
+      "qa": {
+        "context": "Cross-encoder rerankers used for legal question answering rely on the formatting of candidate passages during training and inference. In multi-source legal retrieval, input distribution shifts arising from changes in passage granularity or the presence of title prefixes can impact the model’s ability to correctly rank and calibrate candidate passages. Understanding how these formatting inconsistencies affect the interplay between learned semantic representations and surface-level cues is critical for building robust retrieval systems.",
+        "question": "How might inconsistencies in the granularity and formatting of candidate passages (such as title prefix presence or absence) between training and inference phases impact the interaction between semantic representation learning and surface cue reliance in cross-encoder rerankers, and what are the resulting effects on the model’s calibration and discrimination performance in multi-source legal retrieval?",
+        "reference_answer": "The paper finds that mismatches in title-prefixed formatting between training and inference cause degradation in both calibration and discrimination performance of cross-encoder rerankers, indicating the model partially relies on surface formatting cues alongside semantic representations. Such inconsistencies create a distributional shift that weakens the model’s confidence calibration and ranking accuracy, highlighting the importance of consistent candidate construction. This demonstrates that the model’s learned representations are entangled with surface cues, and when these cues change unexpectedly at inference, the reranker’s effectiveness diminishes.",
+        "rubric": [
+          {
+            "criterion": "Identifies the role of formatting inconsistencies as a distributional shift",
+            "weight": 8,
+            "category": "positive"
+          },
+          {
+            "criterion": "Explains how surface-level cues interact with semantic representations in the reranker",
+            "weight": 9,
+            "category": "positive"
+          },
+          {
+            "criterion": "Connects formatting mismatch to calibration degradation",
+            "weight": 7,
+            "category": "positive"
+          },
+          {
+            "criterion": "Relates formatting inconsistencies to discrimination performance loss",
+            "weight": 7,
+            "category": "positive"
+          },
+          {
+            "criterion": "Recognizes the importance of consistent candidate construction for robustness",
+            "weight": 6,
+            "category": "positive"
+          },
+          {
+            "criterion": "Discusses implications for representation learning entanglement with cues",
+            "weight": 8,
+            "category": "positive"
+          },
+          {
+            "criterion": "Considers the multi-source retrieval setting impact on these effects",
+            "weight": 6,
+            "category": "positive"
+          },
+          {
+            "criterion": "Avoids merely restating paper findings without connecting underlying causes",
+            "weight": 9,
+            "category": "positive"
+          },
+          {
+            "criterion": "Does not attribute performance loss solely to semantic misunderstanding",
+            "weight": -5,
+            "category": "negative"
+          },
+          {
+            "criterion": "Does not confuse calibration effects with discrimination or vice versa",
+            "weight": -6,
+            "category": "negative"
+          },
+          {
+            "criterion": "Does not ignore the importance of training/inference formatting match",
+            "weight": -7,
+            "category": "negative"
+          },
+          {
+            "criterion": "Avoids overgeneralizing results beyond the multi-source or legal QA setting",
+            "weight": -4,
+            "category": "negative"
+          },
+          {
+            "criterion": "Does not mistake name-blind leakage checks for formatting mismatch effects",
+            "weight": -5,
+            "category": "negative"
+          }
+        ],
+        "question_type": "model robustness to input distribution shifts",
+        "reasoning_tags": [
+          "distribution_shift",
+          "model_calibration",
+          "representation_learning"
+        ]
+      },
+      "weak_scores": [
+        0.4166666666666667,
+        0.31666666666666665,
+        0.55
+      ],
+      "strong_scores": [
+        0.55,
+        0.55,
+        0.55
+      ],
+      "gap": null,
+      "feedback": "strong_avg 0.550 < 0.6"
+    },
+    {
+      "round": 8,
+      "status": "TOO_EASY",
+      "qa": {
+        "context": "In multi-source legal retrieval systems, input candidate passages may vary in formatting granularity, such as the inclusion or exclusion of a title prefix. Cross-encoder rerankers trained on one formatting style may face distributional shifts when applied to differently formatted inference candidates. This situation complicates the reranker's ability to maintain well-calibrated confidence scores and discriminative ranking performance.",
+        "question": "How does the reranker's reliance on title-prefixed surface cues versus deeper semantic representations manifest under controlled perturbations where only the formatting granularity differs between training and inference, and what does this reveal about the fundamental trade-offs in calibration and discrimination across data sources with variable granularity?",
+        "reference_answer": "The paper shows that when training and inference candidate formats mismatch in title prefixes, cross-encoder rerankers suffer a notable loss in discrimination and calibration quality, indicating a strong reliance on surface-level formatting cues rather than robust semantic features. The results highlight that surface cue dependence causes performance degradation under distribution shifts in granularity, revealing a trade-off where models optimized on consistent formatting gain accuracy but lack generalization to varied granularities. This suggests that improving robustness requires addressing model sensitivity to such non-semantic input changes.",
+        "rubric": [
+          {
+            "criterion": "Identifies the impact of controlled formatting perturbations on reranker calibration",
+            "weight": 8,
+            "category": "positive"
+          },
+          {
+            "criterion": "Explains the role of surface cues vs semantic representations in reranker behavior",
+            "weight": 9,
+            "category": "positive"
+          },
+          {
+            "criterion": "Describes the performance trade-offs between calibration and discrimination under distribution shift",
+            "weight": 7,
+            "category": "positive"
+          },
+          {
+            "criterion": "Links findings to challenges in multi-source legal retrieval with variable granularity",
+            "weight": 6,
+            "category": "positive"
+          },
+          {
+            "criterion": "Discusses implications for designing more robust reranker models",
+            "weight": 5,
+            "category": "positive"
+          },
+          {
+            "criterion": "Integrates results about discrimination loss with calibration degradation",
+            "weight": 7,
+            "category": "positive"
+          },
+          {
+            "criterion": "Accounts for why title-prefixed candidate passage mismatch causes vulnerability",
+            "weight": 8,
+            "category": "positive"
+          },
+          {
+            "criterion": "Avoids superficial description without addressing distributional shift effects",
+            "weight": 6,
+            "category": "positive"
+          },
+          {
+            "criterion": "Mistakes correlation for causation between formatting and performance",
+            "weight": -5,
+            "category": "negative"
+          },
+          {
+            "criterion": "Fails to distinguish between calibration reliability and ranking discrimination",
+            "weight": -6,
+            "category": "negative"
+          },
+          {
+            "criterion": "Ignores multi-source data variability in explanation",
+            "weight": -4,
+            "category": "negative"
+          },
+          {
+            "criterion": "Overly relies on recall of empirical results without reasoning",
+            "weight": -3,
+            "category": "negative"
+          },
+          {
+            "criterion": "Confuses the role of held-out leak checks with formatting mismatch effects",
+            "weight": -5,
+            "category": "negative"
+          },
+          {
+            "criterion": "Neglects to discuss semantic robustness despite formatting changes",
+            "weight": -7,
+            "category": "negative"
+          }
+        ],
+        "question_type": "robustness to data perturbations",
+        "reasoning_tags": [
+          "distribution_shift_analysis",
+          "model_sensitivity",
+          "semantic_vs_surface_cues"
+        ]
+      },
+      "weak_scores": [
+        0.8928571428571429,
+        1.0,
+        1.0
+      ],
+      "strong_scores": [],
+      "gap": null,
+      "feedback": "weak_avg 0.964 > 0.65"
+    },
+    {
+      "round": 9,
+      "status": "FAILED_STRONG",
+      "qa": {
+        "context": "In multi-source legal question answering, candidate passages can vary in granularity and formatting, including the presence or absence of title prefixes. Cross-encoder rerankers are sensitive to such variations, which may cause distributional shifts between training and inference data. Understanding the model's robustness to these shifts is crucial for designing reliable retrieval systems that maintain calibration and discrimination performance.",
+        "question": "How does the variability in passage granularity and formatting, specifically the presence or absence of title prefixes, interact with the reranker's internal representation learning to affect its robustness against distributional shifts, and what mechanisms explain the observed changes in calibration and discrimination when the model encounters unseen formatting variants during inference?",
+        "reference_answer": "The paper shows that cross-encoder rerankers trained with a specific candidate formatting (i.e., title-prefixed passages) suffer a drop in calibration and discrimination performance when tested on passages without the expected title prefix, indicating sensitivity to formatting as a distributional shift. This reveals that the model partially relies on surface-level cues embedded in the prefix to structure its representations. When encountering unseen formatting variants, the reranker’s semantic representation learning is undermined, leading to degraded calibration and discrimination. The findings suggest that matching candidate formatting between training and inference is essential to maintain robustness, as the model’s learned representations are entangled with these formatting cues.",
+        "rubric": [
+          {
+            "criterion": "Identifies interaction between passage formatting and representation learning",
+            "weight": 8,
+            "category": "positive"
+          },
+          {
+            "criterion": "Explains how distributional shifts arise from granularity changes",
+            "weight": 7,
+            "category": "positive"
+          },
+          {
+            "criterion": "Connects formatting variability to calibration degradation",
+            "weight": 9,
+            "category": "positive"
+          },
+          {
+            "criterion": "Describes impact of unseen formatting variants during inference",
+            "weight": 9,
+            "category": "positive"
+          },
+          {
+            "criterion": "Discusses why matching training and inference formatting is crucial",
+            "weight": 8,
+            "category": "positive"
+          },
+          {
+            "criterion": "Explores reranker’s reliance on surface-level cues vs deeper semantics",
+            "weight": 7,
+            "category": "positive"
+          },
+          {
+            "criterion": "Incorporates multi-source legal retrieval setting in reasoning",
+            "weight": 6,
+            "category": "positive"
+          },
+          {
+            "criterion": "Avoids simplistic recall of paper findings",
+            "weight": 10,
+            "category": "positive"
+          },
+          {
+            "criterion": "Does not conflate passage text content changes with formatting effects",
+            "weight": -8,
+            "category": "negative"
+          },
+          {
+            "criterion": "Does not ignore the role of distributional shift in model degradation",
+            "weight": -9,
+            "category": "negative"
+          },
+          {
+            "criterion": "Avoids attributing calibration loss solely to model capacity",
+            "weight": -7,
+            "category": "negative"
+          },
+          {
+            "criterion": "Does not confuse name-blind leakage controls with formatting shifts",
+            "weight": -6,
+            "category": "negative"
+          }
+        ],
+        "question_type": "model robustness to granularity shifts",
+        "reasoning_tags": [
+          "distributional_shift",
+          "model_sensitivity",
+          "representation_learning"
+        ]
+      },
+      "weak_scores": [
+        0.3125,
+        0.3125,
+        0.3125
+      ],
+      "strong_scores": [
+        0.4375,
+        0.4375,
+        0.4375
+      ],
+      "gap": null,
+      "feedback": "strong_avg 0.438 < 0.6"
+    },
+    {
+      "round": 10,
+      "status": "FAILED_STRONG",
+      "qa": {
+        "context": "Cross-encoder rerankers in legal question answering are trained on candidate passages constructed with specific formatting conventions, such as title prefixes. When inference input deviates from these conventions, the reranker's internal calibration and discrimination capabilities may suffer. Understanding how distributional shifts caused by formatting inconsistencies affect the reranker’s reliance on different types of learned signals is critical for improving robustness in multi-source legal retrieval systems.",
+        "question": "How does a mismatch in title prefix formatting between training and inference phases affect the balance between the reranker’s reliance on surface-level cues and semantic content in its internal representations, and what are the implications of this shift for the model’s calibration and discrimination performance in multi-source legal QA?",
+        "reference_answer": "The paper finds that when title prefixes are inconsistently applied between training and inference, rerankers suffer notable degradation in both calibration and discrimination. This is because the model relies heavily on surface-level formatting cues learned during training, which are disrupted by the mismatch. Consequently, the reranker’s internal representations shift away from robust semantic encoding toward fragile pattern matching on formatting. This shift undermines the model's ability to generalize calibration across data sources of varying granularity, leading to lower confidence reliability and poorer ranking discrimination in legal QA tasks.",
+        "rubric": [
+          {
+            "criterion": "Identifies the role of title prefix formatting as a surface-level signal",
+            "weight": 8,
+            "category": "positive"
+          },
+          {
+            "criterion": "Explains how formatting mismatch induces a distributional shift affecting model inputs",
+            "weight": 7,
+            "category": "positive"
+          },
+          {
+            "criterion": "Analyzes the impact of this shift on the reranker’s internal representation balance",
+            "weight": 9,
+            "category": "positive"
+          },
+          {
+            "criterion": "Connects changes in representation to observed calibration performance degradation",
+            "weight": 8,
+            "category": "positive"
+          },
+          {
+            "criterion": "Links degradation in discrimination ability to loss of stable semantic cues",
+            "weight": 7,
+            "category": "positive"
+          },
+          {
+            "criterion": "Discusses implications for robustness of multi-source legal retrieval systems",
+            "weight": 6,
+            "category": "positive"
+          },
+          {
+            "criterion": "References the paper’s quantification of discrimination loss under formatting mismatch",
+            "weight": 6,
+            "category": "positive"
+          },
+          {
+            "criterion": "Mentions the dependency of rerankers on training-time formatting conventions",
+            "weight": 7,
+            "category": "positive"
+          },
+          {
+            "criterion": "Avoids conflating surface cue reliance with semantic understanding",
+            "weight": -6,
+            "category": "negative"
+          },
+          {
+            "criterion": "Does not treat calibration and discrimination as identical phenomena",
+            "weight": -5,
+            "category": "negative"
+          },
+          {
+            "criterion": "Avoids simply restating that mismatch harms performance without explaining mechanisms",
+            "weight": -7,
+            "category": "negative"
+          },
+          {
+            "criterion": "Does not confuse the role of name-blind held-out leak checks with title prefix issues",
+            "weight": -4,
+            "category": "negative"
+          },
+          {
+            "criterion": "Avoids focusing solely on quantitative metrics without qualitative reasoning",
+            "weight": -6,
+            "category": "negative"
+          }
+        ],
+        "question_type": "distributional shift impact analysis",
+        "reasoning_tags": [
+          "distributional_shift",
+          "model_calibration",
+          "representation_learning"
+        ]
+      },
+      "weak_scores": [
+        0.41379310344827586,
+        0.41379310344827586,
+        0.41379310344827586
+      ],
+      "strong_scores": [
+        0.41379310344827586,
+        0.41379310344827586,
+        0.41379310344827586
+      ],
+      "gap": null,
+      "feedback": "strong_avg 0.414 < 0.6"
+    },
+    {
+      "round": 11,
+      "status": "TOO_EASY",
+      "qa": {
+        "context": "In multi-source legal question answering, models rerank candidate passages that vary in how granularly they present information, including formatting differences such as title prefixes. Additionally, some test sets obscure named entities to prevent leakage, which can influence how rerankers rely on surface cues versus deeper semantics. Understanding how these factors jointly affect cross-encoder reranker calibration and discrimination is crucial for building robust retrieval pipelines.",
+        "question": "How do combined disruptions—specifically, mismatches in passage title-prefix formatting between training and inference, together with held-out leak checks that anonymize named entities—interact to affect the calibration and discrimination performance of cross-encoder rerankers in multi-source legal QA, and what does this interaction reveal about the rerankers’ differing dependencies on surface formatting cues versus semantic content?",
+        "reference_answer": "The paper finds that when both title-prefix formatting mismatches and name-blind leak checks are present, calibration and discrimination degrade more substantially than when these factors are considered independently. This indicates that cross-encoder rerankers rely substantially on consistent surface-level cues such as title prefixes and named entities for robust ranking and confidence calibration. The anonymization of named entities reduces reliance on superficial cues, which, when coupled with inconsistent formatting, exacerbates the model's difficulty in generalizing, highlighting a compounded vulnerability to distributional shifts and underscoring the importance of harmonizing training and inference conditions to maintain model robustness.",
+        "rubric": [
+          {
+            "criterion": "Identifies the combined effect of title-prefix mismatches and name-blind leak checks on calibration",
+            "weight": 9,
+            "category": "positive"
+          },
+          {
+            "criterion": "Explains how the interaction leads to greater degradation than each factor alone",
+            "weight": 8,
+            "category": "positive"
+          },
+          {
+            "criterion": "Clarifies the reranker's reliance on surface-level formatting cues like title prefixes",
+            "weight": 7,
+            "category": "positive"
+          },
+          {
+            "criterion": "Discusses the role of named entity anonymization in reducing surface cue availability",
+            "weight": 7,
+            "category": "positive"
+          },
+          {
+            "criterion": "Analyzes implications for distributional shift sensitivity in cross-encoder rerankers",
+            "weight": 8,
+            "category": "positive"
+          },
+          {
+            "criterion": "Connects findings to design considerations for robust legal retrieval pipelines",
+            "weight": 6,
+            "category": "positive"
+          },
+          {
+            "criterion": "Differentiates between semantic content reliance and surface cue reliance in model behavior",
+            "weight": 8,
+            "category": "positive"
+          },
+          {
+            "criterion": "Avoids simple recall of the paper's findings without connecting them to model behavior",
+            "weight": 5,
+            "category": "positive"
+          },
+          {
+            "criterion": "Does not conflate calibration performance with discrimination without nuance",
+            "weight": 6,
+            "category": "positive"
+          },
+          {
+            "criterion": "Misinterprets the independent effects of formatting and leak checks as additive rather than interactive",
+            "weight": -8,
+            "category": "negative"
+          },
+          {
+            "criterion": "Overlooks the role of anonymized entities in shifting model reliance away from surface cues",
+            "weight": -7,
+            "category": "negative"
+          },
+          {
+            "criterion": "Claims the model is unaffected by distributional shifts introduced by formatting differences",
+            "weight": -9,
+            "category": "negative"
+          },
+          {
+            "criterion": "Fails to address the implications for training-inference consistency",
+            "weight": -6,
+            "category": "negative"
+          },
+          {
+            "criterion": "Suggests that semantic content dependence fully compensates for formatting discrepancies",
+            "weight": -8,
+            "category": "negative"
+          },
+          {
+            "criterion": "Incorrectly assumes leak checks enhance rather than impair discrimination",
+            "weight": -7,
+            "category": "negative"
+          }
+        ],
+        "question_type": "impact of granularity and leak checks on calibration",
+        "reasoning_tags": [
+          "distributional_shift",
+          "model_robustness",
+          "semantic_vs_surface_cues"
+        ]
+      },
+      "weak_scores": [
+        0.875,
+        1.0,
+        0.875
+      ],
+      "strong_scores": [],
+      "gap": null,
+      "feedback": "weak_avg 0.917 > 0.65"
+    },
+    {
+      "round": 12,
+      "status": "FAILED_STRONG",
+      "qa": {
+        "context": "In multi-source legal question answering, candidate passages vary in their granularity and formatting, such as the presence or absence of title prefixes. Cross-encoder rerankers depend on both semantic content and surface-level cues, but distributional shifts arising from inconsistent formatting between training and inference challenge model calibration and ranking discrimination. Understanding how these shifts specifically influence internal representation and model robustness is critical for reliable retrieval performance in legal QA systems.",
+        "question": "How does the presence of unseen formatting variants, such as novel combinations of title prefix inclusion or exclusion at inference time, affect the internal representation learning dynamics of cross-encoder rerankers, and what mechanisms underlie the resulting shifts in calibration and discrimination performance under these distributional shifts?",
+        "reference_answer": "The paper finds that when the formatting of candidate passages at inference differs from training—particularly regarding title prefixes that were either present or absent—cross-encoder rerankers suffer a measurable degradation in discrimination and calibration. This is because the model partially encodes surface-level formatting cues into its internal representations, so unseen formatting variants disrupt these learned patterns and create distributional shifts. The reranker’s reliance on these surface cues, rather than purely semantic features, explains the sensitivity. Hence, unseen formatting changes at inference cause the model to miscalibrate its confidence and reduce ranking accuracy, highlighting the importance of consistent formatting for stable representation learning and robustness.",
+        "rubric": [
+          {
+            "criterion": "Explains the role of unseen formatting variants as a form of distributional shift",
+            "weight": 8,
+            "category": "positive"
+          },
+          {
+            "criterion": "Analyzes how internal representations incorporate both semantic and surface-level features",
+            "weight": 9,
+            "category": "positive"
+          },
+          {
+            "criterion": "Connects formatting mismatch to calibration degradation quantitatively or qualitatively",
+            "weight": 7,
+            "category": "positive"
+          },
+          {
+            "criterion": "Describes impact on ranking discrimination and relates to internal model mechanisms",
+            "weight": 7,
+            "category": "positive"
+          },
+          {
+            "criterion": "Identifies reliance on surface cues as a key vulnerability to formatting shifts",
+            "weight": 8,
+            "category": "positive"
+          },
+          {
+            "criterion": "Discusses implications for robustness and design of retrieval pipelines",
+            "weight": 6,
+            "category": "positive"
+          },
+          {
+            "criterion": "Includes reasoning about model’s learned distribution and representation shift",
+            "weight": 8,
+            "category": "positive"
+          },
+          {
+            "criterion": "Does not merely recall paper findings but explains underlying causes",
+            "weight": 7,
+            "category": "positive"
+          },
+          {
+            "criterion": "Avoids simplistic restatement of formatting mismatch effects without deeper insight",
+            "weight": 6,
+            "category": "positive"
+          },
+          {
+            "criterion": "Does not conflate name-blind leak checks effects with unseen formatting impact",
+            "weight": -5,
+            "category": "negative"
+          },
+          {
+            "criterion": "Avoids attributing all degradation solely to semantic representation failure",
+            "weight": -6,
+            "category": "negative"
+          },
+          {
+            "criterion": "Does not overlook the interaction between surface cues and semantic encoding",
+            "weight": -7,
+            "category": "negative"
+          },
+          {
+            "criterion": "Does not misidentify model calibration and discrimination as unrelated",
+            "weight": -5,
+            "category": "negative"
+          },
+          {
+            "criterion": "Avoids vague or general answers lacking connection to representation learning",
+            "weight": -6,
+            "category": "negative"
+          }
+        ],
+        "question_type": "reranker robustness to distributional shifts",
+        "reasoning_tags": [
+          "distribution_shift_analysis",
+          "model_behavior_interpretation",
+          "semantic_vs_surface_cues"
+        ]
+      },
+      "weak_scores": [
+        0.5606060606060606,
+        0.4696969696969697,
+        0.4696969696969697
+      ],
+      "strong_scores": [
+        0.5606060606060606,
+        0.5606060606060606,
+        0.5606060606060606
+      ],
+      "gap": null,
+      "feedback": "strong_avg 0.561 < 0.6"
+    }
+  ]
+}

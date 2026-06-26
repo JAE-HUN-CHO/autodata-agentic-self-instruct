@@ -1,0 +1,1154 @@
+{
+  "paper_id": "icl_paper",
+  "accepted": false,
+  "accepted_qa": null,
+  "n_rounds": 12,
+  "rounds": [
+    {
+      "round": 1,
+      "status": "FAILED_STRONG",
+      "qa": {
+        "context": "The paper investigates how the sequence of demonstrations in few-shot prompting affects the performance of large language models on structured extraction from clinical notes. It compares curriculum-based ordering (easy to hard), random, and reverse-curriculum (hard to easy) and measures their impact on extraction accuracy across several model scales and fields. The study also explores which demonstration positions drive the gain and whether this effect generalizes to other tasks.",
+        "question": "How does the placement of the hardest demonstrations in the prompt sequence influence structured extraction performance across different model scales, and why might this effect be specific to structured extraction rather than generic multiple-choice tasks?",
+        "reference_answer": "Placing the hardest demonstrations last (slots 5-6) in a curriculum-style sequence yields the largest accuracy gains, recovering about 72% of the total improvement over random order. This benefit decreases as model scale grows, with smaller models (8B) gaining more (+9.2 F1) compared to the largest evaluated (200B, +3.2 F1). Larger models extract more from any single demonstration, reducing the marginal effect of ordering. The effect is specific to structured extraction because such tasks require maintaining a consistent output schema across fields under length pressure, making demonstration ordering impactful. In contrast, generic multiple-choice tasks like RACE do not benefit from curriculum ordering, showing negligible score differences, likely because they do not demand structured, multi-field output consistency.",
+        "rubric": [
+          {
+            "criterion": "Identifies the role of hardest demonstrations placement in achieving performance gains",
+            "weight": 10,
+            "category": "positive"
+          },
+          {
+            "criterion": "Explains how the last two demonstration slots contribute disproportionately to gains",
+            "weight": 9,
+            "category": "positive"
+          },
+          {
+            "criterion": "Recognizes the diminishing ordering effect with increasing model scale",
+            "weight": 8,
+            "category": "positive"
+          },
+          {
+            "criterion": "Links smaller models’ greater sensitivity to demonstration order to their lower single-demo extraction ability",
+            "weight": 7,
+            "category": "positive"
+          },
+          {
+            "criterion": "Describes the task-specific nature of the effect linked to structured extraction challenges",
+            "weight": 9,
+            "category": "positive"
+          },
+          {
+            "criterion": "Distinguishes structured extraction from multiple-choice tasks regarding output schema demands",
+            "weight": 8,
+            "category": "positive"
+          },
+          {
+            "criterion": "Cites quantitative improvements (F1 gains) substantively supporting claims",
+            "weight": 7,
+            "category": "positive"
+          },
+          {
+            "criterion": "Mentions the negative control on RACE and its implications",
+            "weight": 6,
+            "category": "positive"
+          },
+          {
+            "criterion": "Correctly attributes reduced gains in larger models to their robustness in single-demo extraction",
+            "weight": 5,
+            "category": "positive"
+          },
+          {
+            "criterion": "Avoids conflating demonstration difficulty with random performance variance",
+            "weight": -7,
+            "category": "negative"
+          },
+          {
+            "criterion": "Does not incorrectly claim the effect generalizes to unrelated tasks without evidence",
+            "weight": -8,
+            "category": "negative"
+          },
+          {
+            "criterion": "Avoids misrepresenting the scale interaction trend (e.g., saying gains increase with scale)",
+            "weight": -9,
+            "category": "negative"
+          },
+          {
+            "criterion": "Does not overlook the role of output length pressure in structured extraction tasks",
+            "weight": -6,
+            "category": "negative"
+          },
+          {
+            "criterion": "Avoids superficial answers that only restate observed improvements without reasoning",
+            "weight": -5,
+            "category": "negative"
+          }
+        ],
+        "question_type": "demonstration ordering impact analysis",
+        "reasoning_tags": [
+          "experimental_design",
+          "scale_effects",
+          "task_specificity"
+        ]
+      },
+      "weak_scores": [
+        0.028985507246376812,
+        0.10144927536231885,
+        0.0
+      ],
+      "strong_scores": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "gap": null,
+      "feedback": "strong_avg 0.000 < 0.6"
+    },
+    {
+      "round": 2,
+      "status": "FAILED_STRONG",
+      "qa": {
+        "context": "In few-shot learning with large language models, the ordering of demonstration examples can influence performance. While curriculum learning—ordering examples from easiest to hardest—has shown benefits in some structured extraction tasks, it is unclear how these ordering effects depend on model size and task characteristics. The interaction between demonstration difficulty placement, model scale, and the nature of the output schema creates a complex setting where the observed gains may vary substantially.",
+        "question": "How does the marginal benefit of curriculum-style demonstration ordering change with increasing model size in structured extraction tasks, and what underlying factors related to task output structure might explain why such ordering confers gains in structured extraction but not in generic multiple-choice tasks?",
+        "reference_answer": "The marginal benefit of curriculum-style ordering decreases as model size increases, with the smallest (8B) model gaining around 9.2 F1 points and the largest (200B) model gaining only about 3.2 points. Larger models extract more information from single demonstrations, reducing the relative impact of demonstration ordering. The gains are specific to structured extraction tasks due to the need to maintain a consistent schema across multiple fields and manage output-length constraints, which are less prominent in multiple-choice tasks like RACE. This structural complexity likely makes demonstration order more critical for guiding model output in structured extraction.",
+        "rubric": [
+          {
+            "criterion": "Identifies that curriculum ordering gains decrease with model size",
+            "weight": 8,
+            "category": "positive"
+          },
+          {
+            "criterion": "Explains larger models' ability to extract more from individual demonstrations",
+            "weight": 7,
+            "category": "positive"
+          },
+          {
+            "criterion": "Connects output schema complexity and length constraints to ordering benefits",
+            "weight": 8,
+            "category": "positive"
+          },
+          {
+            "criterion": "Distinguishes structured extraction tasks from generic multiple-choice tasks regarding ordering effects",
+            "weight": 7,
+            "category": "positive"
+          },
+          {
+            "criterion": "References empirical findings on relative gains across scales (8B to 200B)",
+            "weight": 6,
+            "category": "positive"
+          },
+          {
+            "criterion": "Mentions task-specific pressure on maintaining schema across multiple fields as key reason for gain",
+            "weight": 6,
+            "category": "positive"
+          },
+          {
+            "criterion": "Recognizes that marginal benefit does not vanish completely for large models",
+            "weight": 5,
+            "category": "positive"
+          },
+          {
+            "criterion": "Incorrectly asserts that gains disappear for large models",
+            "weight": -8,
+            "category": "negative"
+          },
+          {
+            "criterion": "Fails to account for differences between structured extraction and multiple-choice tasks",
+            "weight": -7,
+            "category": "negative"
+          },
+          {
+            "criterion": "Confuses the source of difficulty score or its application in ordering",
+            "weight": -5,
+            "category": "negative"
+          },
+          {
+            "criterion": "Claims ordering effect is uniform across all model sizes without variation",
+            "weight": -6,
+            "category": "negative"
+          },
+          {
+            "criterion": "Omits consideration of output-length and schema maintenance constraints",
+            "weight": -6,
+            "category": "negative"
+          }
+        ],
+        "question_type": "curriculum learning impact analysis",
+        "reasoning_tags": [
+          "experimental_design",
+          "scaling_behavior",
+          "task_specificity"
+        ]
+      },
+      "weak_scores": [
+        0.0,
+        0.3404255319148936,
+        0.0
+      ],
+      "strong_scores": [
+        0.44680851063829785,
+        0.574468085106383,
+        0.574468085106383
+      ],
+      "gap": null,
+      "feedback": "strong_avg 0.532 < 0.6"
+    },
+    {
+      "round": 3,
+      "status": "FAILED_STRONG",
+      "qa": {
+        "context": "Few-shot in-context learning relies on selecting and ordering example demonstrations to guide a language model's predictions. While curriculum ordering (easiest to hardest) has shown overall performance gains in structured extraction tasks, it is less clear how this ordering affects the distribution and types of errors across different structured fields, model scales, and demonstration positions. Understanding error pattern shifts can provide deeper insight beyond aggregate metrics.",
+        "question": "How does curriculum-style demonstration ordering affect the model's error distribution across different structured fields and model scales, particularly in comparison to random or reverse orderings, and what does this imply about the role of the hardest examples' placement in guiding model behavior for complex field extraction?",
+        "reference_answer": "The paper shows that curriculum ordering (easiest to hardest) yields the largest performance gains overall, with the most pronounced effect on fields like medication_list, which are templated and complex, and the least on surface-form fields like patient_age. The benefit is stronger for smaller models (8B: +9.2 F1) and diminishes with scale (200B: +3.2 F1). Ablations reveal that placing the hardest examples at the end (slots 5-6) recovers about 72% of the gain, indicating these hardest examples help the model adjust its predictions on difficult fields more effectively. In contrast, placing hardest examples early recovers much less. This implies that the hardest examples at the end serve as a critical final anchor influencing error corrections across complex fields, especially for smaller, less capable models.",
+        "rubric": [
+          {
+            "criterion": "Identifies differential impact of demonstration order on error rates across structured fields",
+            "weight": 8,
+            "category": "positive"
+          },
+          {
+            "criterion": "Explains variation in ordering effect magnitude by model scale",
+            "weight": 7,
+            "category": "positive"
+          },
+          {
+            "criterion": "Links placement of hardest examples at the end with effective error correction",
+            "weight": 9,
+            "category": "positive"
+          },
+          {
+            "criterion": "Distinguishes effects between templated complex fields and surface-form fields",
+            "weight": 6,
+            "category": "positive"
+          },
+          {
+            "criterion": "Considers how the interaction between demonstration order and model capacity influences behavior",
+            "weight": 7,
+            "category": "positive"
+          },
+          {
+            "criterion": "Avoids conflating overall accuracy gains with uniform error reduction across all fields",
+            "weight": 6,
+            "category": "positive"
+          },
+          {
+            "criterion": "Uses evidence from ablation experiments on last two demonstration slots to support argument",
+            "weight": 8,
+            "category": "positive"
+          },
+          {
+            "criterion": "Incorrectly states that hardest examples placed early produce equal or larger gains than at the end",
+            "weight": -8,
+            "category": "negative"
+          },
+          {
+            "criterion": "Fails to differentiate effects by field complexity or model size",
+            "weight": -7,
+            "category": "negative"
+          },
+          {
+            "criterion": "Overgeneralizes findings to tasks outside structured extraction without justification",
+            "weight": -5,
+            "category": "negative"
+          },
+          {
+            "criterion": "Misattributes gains solely to demonstration content rather than order or placement",
+            "weight": -6,
+            "category": "negative"
+          },
+          {
+            "criterion": "Neglects to consider the role of last demonstrations in anchoring model predictions",
+            "weight": -7,
+            "category": "negative"
+          }
+        ],
+        "question_type": "impact of demonstration order on error patterns",
+        "reasoning_tags": [
+          "empirical_analysis",
+          "model_comparison",
+          "task_specificity"
+        ]
+      },
+      "weak_scores": [
+        0.45098039215686275,
+        0.45098039215686275,
+        0.47058823529411764
+      ],
+      "strong_scores": [
+        0.7254901960784313,
+        0.5882352941176471,
+        0.5882352941176471
+      ],
+      "gap": 0.1764705882352941,
+      "feedback": "gap 0.176 < 0.2"
+    },
+    {
+      "round": 4,
+      "status": "FAILED_STRONG",
+      "qa": {
+        "context": "In-context learning for structured field extraction from clinical notes involves selecting and ordering example demonstrations in a prompt to guide a language model's output. The ordering of these demonstrations can significantly impact model performance, especially in tasks requiring multi-field structured outputs. This effect interacts with model scale and the nature of the downstream task.",
+        "question": "Given that placing the hardest demonstrations last yields the greatest performance improvement in structured extraction tasks but not in generic multiple-choice tasks, how might the structured output requirements and demonstration ordering interact to produce diminishing curriculum gains as model size increases?",
+        "reference_answer": "The structured output tasks require the model to maintain a schema across multiple fields under output-length constraints, making demonstration ordering crucial. Placing the hardest examples last provides a curriculum that progressively builds model understanding, especially beneficial for smaller models that learn less from single examples. Larger models already extract more information per demonstration, so the marginal benefit of ordering decreases. In contrast, generic multiple-choice tasks lack the multi-field output structure and accompanying schema constraints, reducing the impact of demonstration order.",
+        "rubric": [
+          {
+            "criterion": "Identifies the role of output schema complexity in ordering effects",
+            "weight": 8,
+            "category": "positive"
+          },
+          {
+            "criterion": "Explains why structured extraction tasks benefit more from hardest-last ordering than generic tasks",
+            "weight": 9,
+            "category": "positive"
+          },
+          {
+            "criterion": "Analyzes how model scale modulates the benefit of curriculum ordering",
+            "weight": 8,
+            "category": "positive"
+          },
+          {
+            "criterion": "Connects output-length pressure to demonstration ordering impact",
+            "weight": 7,
+            "category": "positive"
+          },
+          {
+            "criterion": "Recognizes diminishing returns of demonstration ordering at larger model scales",
+            "weight": 7,
+            "category": "positive"
+          },
+          {
+            "criterion": "Distinguishes between multi-field extraction and single-label classification impacts",
+            "weight": 6,
+            "category": "positive"
+          },
+          {
+            "criterion": "Incorporates insights from the ablation on last two demonstrations",
+            "weight": 7,
+            "category": "positive"
+          },
+          {
+            "criterion": "Avoids conflating difficulty ordering effects with overall demonstration quality",
+            "weight": -7,
+            "category": "negative"
+          },
+          {
+            "criterion": "Does not rely on trivial recall of numerical results without explanation",
+            "weight": -6,
+            "category": "negative"
+          },
+          {
+            "criterion": "Avoids assuming curriculum gains are uniform across all fields without evidence",
+            "weight": -5,
+            "category": "negative"
+          },
+          {
+            "criterion": "Does not incorrectly generalize findings to unrelated tasks like legal document extraction",
+            "weight": -6,
+            "category": "negative"
+          },
+          {
+            "criterion": "Avoids mistaking the absence of effect on RACE as model failure",
+            "weight": -4,
+            "category": "negative"
+          }
+        ],
+        "question_type": "prompt ordering optimization",
+        "reasoning_tags": [
+          "quantitative_analysis",
+          "cross_scale_comparison",
+          "task_specificity"
+        ]
+      },
+      "weak_scores": [
+        0.19230769230769232,
+        0.19230769230769232,
+        0.19230769230769232
+      ],
+      "strong_scores": [
+        0.19230769230769232,
+        0.19230769230769232,
+        0.19230769230769232
+      ],
+      "gap": null,
+      "feedback": "strong_avg 0.192 < 0.6"
+    },
+    {
+      "round": 5,
+      "status": "FAILED_STRONG",
+      "qa": {
+        "context": "In-context learning with large language models for structured extraction involves providing a prompt with several example demonstrations. Demonstration ordering—whether examples are arranged from easiest to hardest, randomly, or hardest to easiest—can affect model performance. This effect varies across model scales and task types, particularly in tasks requiring structured outputs with many fields.",
+        "question": "How does the position of the hardest demonstrations within a prompt influence the relative gains from curriculum ordering for models of varying sizes, and what does this suggest about the interaction between model capacity and demonstration ordering effects in structured extraction?",
+        "reference_answer": "The hardest demonstrations placed at the last two slots yield the majority (about 72%) of the curriculum ordering gains, with placement at the front yielding a substantially smaller improvement. Smaller models (e.g., 8B parameters) benefit more from curriculum ordering (+9.2 F1) than larger models (e.g., 70B: +6.1 F1, 200B: +3.2 F1). This suggests that smaller models rely more heavily on demonstration ordering to guide structured extraction, while larger models can extract information more effectively even from randomly ordered examples, possibly due to higher capacity in capturing complex patterns and maintaining schema representations.",
+        "rubric": [
+          {
+            "criterion": "Identifies the critical role of the hardest demos' position in the prompt sequence",
+            "weight": 10,
+            "category": "positive"
+          },
+          {
+            "criterion": "Explains the quantitative gain mostly comes from placing hardest examples last",
+            "weight": 8,
+            "category": "positive"
+          },
+          {
+            "criterion": "Relates model size to magnitude of curriculum gains with supporting data",
+            "weight": 7,
+            "category": "positive"
+          },
+          {
+            "criterion": "Discusses how smaller models depend more on ordered demonstrations",
+            "weight": 7,
+            "category": "positive"
+          },
+          {
+            "criterion": "Connects higher model capacity to reduced marginal benefits from ordering",
+            "weight": 6,
+            "category": "positive"
+          },
+          {
+            "criterion": "Notes that curriculum gains diminish but do not vanish for larger models",
+            "weight": 5,
+            "category": "positive"
+          },
+          {
+            "criterion": "Mentions the structured output nature of task as a necessary context",
+            "weight": 5,
+            "category": "positive"
+          },
+          {
+            "criterion": "Avoids conflation with generic multiple-choice task results",
+            "weight": 6,
+            "category": "positive"
+          },
+          {
+            "criterion": "Does not simply restate results without analysis",
+            "weight": 7,
+            "category": "positive"
+          },
+          {
+            "criterion": "Omits discussion of unrelated task domains (e.g., legal extraction)",
+            "weight": 3,
+            "category": "positive"
+          },
+          {
+            "criterion": "Fails to explain why hardest demonstration positioning matters",
+            "weight": -8,
+            "category": "negative"
+          },
+          {
+            "criterion": "Ignores differences in gains across model sizes",
+            "weight": -7,
+            "category": "negative"
+          },
+          {
+            "criterion": "Confuses curriculum effect with general prompt length or number of examples",
+            "weight": -6,
+            "category": "negative"
+          },
+          {
+            "criterion": "Assumes gains translate directly to generic tasks without evidence",
+            "weight": -7,
+            "category": "negative"
+          },
+          {
+            "criterion": "Misrepresents the contribution of last two demonstrations",
+            "weight": -8,
+            "category": "negative"
+          }
+        ],
+        "question_type": "curriculum learning impact analysis",
+        "reasoning_tags": [
+          "empirical_analysis",
+          "ablation_study",
+          "model_capacity"
+        ]
+      },
+      "weak_scores": [
+        0.0,
+        0.25,
+        0.125
+      ],
+      "strong_scores": [
+        0.6875,
+        0.375,
+        0.6875
+      ],
+      "gap": null,
+      "feedback": "strong_avg 0.583 < 0.6"
+    },
+    {
+      "round": 6,
+      "status": "TOO_EASY",
+      "qa": {
+        "context": "In-context learning with large language models involves showing multiple labeled examples (demonstrations) to guide the model’s output. Demonstration order can significantly impact performance, particularly in tasks requiring the extraction of multiple structured fields from complex inputs like clinical notes. However, this effect varies by model size and task type, raising questions about how exactly the position of demonstrations, especially the hardest ones, drives performance changes and why such ordering effects might be task-dependent.",
+        "question": "How does selectively shuffling only the last two demonstrations in a curriculum-ordered prompt affect structured extraction performance, and what does this imply about the relative importance of demonstration positions for models of different sizes and the nature of the task?",
+        "reference_answer": "The paper’s ablation study shows that holding the first k-2 demonstrations fixed and only shuffling the last two (the hardest examples in curriculum order) recovers about 72% of the total curriculum gain—a 4.4-point gain out of 6.1 on the 70B model. Placing the hardest examples at the end rather than the front yields substantially better performance. This indicates that the positions of the hardest demonstrations near the answer are critical, largely driving the improvement. Moreover, as model size increases, the overall curriculum gain diminishes, but the positional effect of the hardest examples remains significant. The effect is also task-specific, as no ordering benefit appears on generic multiple-choice tasks, suggesting that structured extraction—requiring maintenance of a complex schema over multiple fields—relies more heavily on the strategic placement of demonstrations.",
+        "rubric": [
+          {
+            "criterion": "Recognizes the ablation design focusing on the last two demonstrations",
+            "weight": 8,
+            "category": "positive"
+          },
+          {
+            "criterion": "Quantifies the proportion of curriculum gain attributable to last two demos",
+            "weight": 9,
+            "category": "positive"
+          },
+          {
+            "criterion": "Explains why placing hardest examples last is more effective than first",
+            "weight": 7,
+            "category": "positive"
+          },
+          {
+            "criterion": "Connects demonstration position effects to model size scaling",
+            "weight": 8,
+            "category": "positive"
+          },
+          {
+            "criterion": "Highlights task specificity of ordering effects",
+            "weight": 7,
+            "category": "positive"
+          },
+          {
+            "criterion": "Incorporates insight about structured extraction demands vs. multiple-choice",
+            "weight": 7,
+            "category": "positive"
+          },
+          {
+            "criterion": "Understands that curriculum gains shrink but positional sensitivity remains as models grow",
+            "weight": 6,
+            "category": "positive"
+          },
+          {
+            "criterion": "Avoids attributing gains solely to first demonstrations",
+            "weight": -6,
+            "category": "negative"
+          },
+          {
+            "criterion": "Does not generalize ordering benefits to unrelated tasks without evidence",
+            "weight": -7,
+            "category": "negative"
+          },
+          {
+            "criterion": "Refrains from invoking untested methods (e.g., self-difficulty scoring)",
+            "weight": -5,
+            "category": "negative"
+          },
+          {
+            "criterion": "Avoids conflating model capacity with task difficulty without supporting data",
+            "weight": -6,
+            "category": "negative"
+          },
+          {
+            "criterion": "Does not ignore the interaction between schema complexity and demonstration placement",
+            "weight": -8,
+            "category": "negative"
+          },
+          {
+            "criterion": "Avoids superficial recall and requires quantitative interpretation",
+            "weight": 8,
+            "category": "positive"
+          }
+        ],
+        "question_type": "demonstration position sensitivity",
+        "reasoning_tags": [
+          "experimental_design",
+          "quantitative_analysis",
+          "task_specificity"
+        ]
+      },
+      "weak_scores": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "strong_scores": [],
+      "gap": null,
+      "feedback": "degenerate all-zero weak rollouts"
+    },
+    {
+      "round": 7,
+      "status": "TOO_EASY",
+      "qa": {
+        "context": "In-context learning for structured extraction tasks involves presenting language models with example demonstrations to guide extraction of multiple structured fields from clinical texts. The ordering of these demonstrations influences performance, but the interactions between example difficulty, position in the prompt, and model scale on the model's ability to maintain consistent output schemas are complex and task-specific.",
+        "question": "How might the placement of the most challenging demonstrations toward the end of an in-context prompt specifically enhance a language model's ability to maintain schema consistency across multiple fields in structured extraction tasks, and why does this effect diminish with increasing model size despite larger models generally extracting more from individual demonstrations?",
+        "reference_answer": "Placing the hardest demonstrations at the end of the prompt aligns with a curriculum approach that builds from easiest to hardest examples, which helps the model better consolidate and apply learned extraction patterns just before generating the output. This positioning effectively cues the model to attend to difficult cases last, improving schema adherence and field coverage, as evidenced by a 6.1-point absolute F1 gain for a 70B model and even larger gains for smaller models. Larger models inherently extract more from single examples, reducing the marginal benefit of ordering, so while the curriculum gain diminishes with size, it does not vanish entirely. The effect is specific to structured tasks requiring maintenance of output schemas and is minimal in generic tasks like multiple-choice QA.",
+        "rubric": [
+          {
+            "criterion": "Correctly identifies the role of hardest examples' position in guiding schema adherence",
+            "weight": 8,
+            "category": "positive"
+          },
+          {
+            "criterion": "Explains why placing hardest examples last benefits consolidation of task patterns",
+            "weight": 7,
+            "category": "positive"
+          },
+          {
+            "criterion": "Links the curriculum gain magnitude to model size and extraction capacity",
+            "weight": 7,
+            "category": "positive"
+          },
+          {
+            "criterion": "Distinguishes structured extraction from generic tasks regarding ordering effects",
+            "weight": 6,
+            "category": "positive"
+          },
+          {
+            "criterion": "References empirical findings on F1 gains and their distribution across fields",
+            "weight": 5,
+            "category": "positive"
+          },
+          {
+            "criterion": "Discusses diminished but non-vanishing gains in larger models",
+            "weight": 5,
+            "category": "positive"
+          },
+          {
+            "criterion": "Acknowledges the model's need to maintain multi-field schema as a key complexity",
+            "weight": 6,
+            "category": "positive"
+          },
+          {
+            "criterion": "Does not conflate random and reverse ordering effects with curriculum ordering",
+            "weight": 4,
+            "category": "positive"
+          },
+          {
+            "criterion": "Avoids attributing gains solely to demonstration difficulty without positional consideration",
+            "weight": 4,
+            "category": "positive"
+          },
+          {
+            "criterion": "Does not assume identical effects across unrelated task formats",
+            "weight": 5,
+            "category": "positive"
+          },
+          {
+            "criterion": "Fails to explain diminishing returns in larger models",
+            "weight": -6,
+            "category": "negative"
+          },
+          {
+            "criterion": "Ignores the model's capacity difference impacting marginal ordering benefit",
+            "weight": -5,
+            "category": "negative"
+          },
+          {
+            "criterion": "Conflates curriculum with reverse or random ordering effects",
+            "weight": -7,
+            "category": "negative"
+          },
+          {
+            "criterion": "Overgeneralizes findings from structured extraction to generic QA tasks",
+            "weight": -5,
+            "category": "negative"
+          },
+          {
+            "criterion": "Neglects the importance of schema maintenance across multiple fields",
+            "weight": -6,
+            "category": "negative"
+          }
+        ],
+        "question_type": "demonstration position impact on schema adherence",
+        "reasoning_tags": [
+          "comparative_analysis",
+          "model_behavior",
+          "task_specificity"
+        ]
+      },
+      "weak_scores": [
+        0.7192982456140351,
+        0.631578947368421,
+        0.7192982456140351
+      ],
+      "strong_scores": [],
+      "gap": null,
+      "feedback": "weak_avg 0.690 > 0.65"
+    },
+    {
+      "round": 8,
+      "status": "FAILED_STRONG",
+      "qa": {
+        "context": "In few-shot prompting for structured field extraction from clinical text, the relative difficulty of in-context demonstrations is automatically scored based on a smaller model's performance on individual examples. This difficulty ranking guides the ordering of demonstrations, which significantly influences the large model's extraction accuracy. Understanding how this difficulty ranking—derived externally rather than from the target model itself—affects performance across multiple model scales and fields is crucial for designing robust prompts in structured extraction tasks.",
+        "question": "How might the use of a difficulty score derived from a smaller probe model, rather than the target large model itself, influence the effectiveness and generalizability of curriculum-style demonstration ordering in structured extraction, and what implications does this have for scaling and task specificity as reported in the paper?",
+        "reference_answer": "The difficulty score is computed by measuring a smaller model's accuracy on each demonstration alone, not the target model's own difficulty assessment. Because smaller models and larger models differ in capabilities, this proxy difficulty may imperfectly reflect the target model's perception of difficulty, potentially limiting the optimality of the curriculum ordering at larger scales. The paper notes that curriculum gains decrease as model size grows (9.2 points for 8B down to 3.2 points for 200B), indicating that marginal benefits of the proxy difficulty-based ordering shrink but do not vanish. Furthermore, the paper highlights that this ordering effect is specific to structured extraction tasks demanding schema maintenance, not generic multiple-choice tasks, suggesting task specificity interacts with the proxy difficulty's usefulness. Finally, the authors acknowledge that self-difficulty scoring (using the target model) and domain transfer remain untested, implying that reliance on a smaller probe model's difficulty score may limit generalization.",
+        "rubric": [
+          {
+            "criterion": "Identifies that difficulty is scored using a smaller probe model, not the target model itself",
+            "weight": 10,
+            "category": "positive"
+          },
+          {
+            "criterion": "Recognizes that this proxy difficulty may mismatch the target model's true perception of difficulty",
+            "weight": 8,
+            "category": "positive"
+          },
+          {
+            "criterion": "Explains how this mismatch could reduce curriculum ordering effectiveness especially for larger models",
+            "weight": 8,
+            "category": "positive"
+          },
+          {
+            "criterion": "Connects observed diminishing returns in curriculum gains with model scale to the difficulty proxy limitation",
+            "weight": 7,
+            "category": "positive"
+          },
+          {
+            "criterion": "Links the curriculum ordering impact specifically to structured extraction tasks requiring schema maintenance",
+            "weight": 7,
+            "category": "positive"
+          },
+          {
+            "criterion": "Notes that no effect is found on generic multiple-choice benchmarks, highlighting task specificity",
+            "weight": 6,
+            "category": "positive"
+          },
+          {
+            "criterion": "Acknowledges that self-difficulty scoring and domain transfer remain untested, limiting conclusions",
+            "weight": 6,
+            "category": "positive"
+          },
+          {
+            "criterion": "Considers implications for designing effective demonstration orderings across different model scales",
+            "weight": 5,
+            "category": "positive"
+          },
+          {
+            "criterion": "Fails to mention the role of curriculum ordering in improving extraction of templated vs. surface-form fields",
+            "weight": -3,
+            "category": "negative"
+          },
+          {
+            "criterion": "Incorrectly assumes that difficulty scoring is derived from the target model rather than a smaller model",
+            "weight": -7,
+            "category": "negative"
+          },
+          {
+            "criterion": "Overlooks the scaling effect and assumes uniform curriculum gain across model sizes",
+            "weight": -6,
+            "category": "negative"
+          },
+          {
+            "criterion": "Does not distinguish between structured extraction and generic multiple-choice task results",
+            "weight": -5,
+            "category": "negative"
+          },
+          {
+            "criterion": "Ignores the acknowledged limitations section regarding difficulty scoring and domain transfer",
+            "weight": -4,
+            "category": "negative"
+          },
+          {
+            "criterion": "Focuses solely on model size or task without connecting to the difficulty score derivation",
+            "weight": -4,
+            "category": "negative"
+          }
+        ],
+        "question_type": "demonstration difficulty ranking impact",
+        "reasoning_tags": [
+          "experimental_design",
+          "scaling_effects",
+          "task_specificity"
+        ]
+      },
+      "weak_scores": [
+        0.6666666666666666,
+        0.6666666666666666,
+        0.543859649122807
+      ],
+      "strong_scores": [
+        0.543859649122807,
+        0.6666666666666666,
+        0.7894736842105263
+      ],
+      "gap": 0.040935672514619825,
+      "feedback": "gap 0.041 < 0.2"
+    },
+    {
+      "round": 9,
+      "status": "FAILED_STRONG",
+      "qa": {
+        "context": "In-context learning for structured extraction involves selecting and ordering examples to prompt a large language model to extract multiple structured fields from complex clinical text. The effect of demonstration order depends on both the difficulty of examples and the model size, revealing complex interactions between model capacity, demonstration complexity, and output structure.",
+        "question": "How does the interplay between model size and the automatic difficulty-based ordering of demonstrations affect the diminishing gains from curriculum ordering in structured extraction, and why might larger models exhibit a smaller relative performance increase despite inherently extracting more information from individual demonstrations?",
+        "reference_answer": "The paper finds that curriculum ordering yields the largest gains for smaller models (e.g., an 8B parameter model gains +9.2 macro-F1) and the gains progressively diminish as model size increases (down to +3.2 points for a 200B model). Larger models extract more from each individual demonstration, reducing the marginal benefit of optimal ordering. Thus, the diminishing gains arise because bigger models are less reliant on demonstration ordering to effectively process complex prompts, while smaller models benefit more from placing the hardest examples last to scaffold understanding and maintain schema consistency. This interaction highlights that curriculum effects are tied to model capacity and the need to manage structured output, making them less impactful as model size grows.",
+        "rubric": [
+          {
+            "criterion": "Identifies that smaller models benefit more from curriculum ordering than larger models",
+            "weight": 10,
+            "category": "positive"
+          },
+          {
+            "criterion": "Explains that larger models extract more from individual demonstrations, reducing marginal gains from ordering",
+            "weight": 9,
+            "category": "positive"
+          },
+          {
+            "criterion": "Describes the role of demonstration difficulty ordering in scaffolding model understanding for structured extraction",
+            "weight": 8,
+            "category": "positive"
+          },
+          {
+            "criterion": "Connects diminishing gains to the interaction between model capacity and prompt complexity",
+            "weight": 8,
+            "category": "positive"
+          },
+          {
+            "criterion": "Recognizes that the structured output task demands maintaining schema across fields, influencing curriculum effectiveness",
+            "weight": 7,
+            "category": "positive"
+          },
+          {
+            "criterion": "Mentions that curriculum ordering does not generalize to generic multiple-choice tasks, indicating task specificity",
+            "weight": 6,
+            "category": "positive"
+          },
+          {
+            "criterion": "Explains the importance of positioning the hardest examples last in the demonstration sequence",
+            "weight": 7,
+            "category": "positive"
+          },
+          {
+            "criterion": "Clarifies that difficulty scores are based on a smaller probe model, which may impact scoring but does not invalidate the scaling trend",
+            "weight": 5,
+            "category": "positive"
+          },
+          {
+            "criterion": "Fails to relate performance gains to model size and instead attributes improvements solely to ordering",
+            "weight": -8,
+            "category": "negative"
+          },
+          {
+            "criterion": "Overlooks the role of structured output constraints in modulating curriculum gain",
+            "weight": -7,
+            "category": "negative"
+          },
+          {
+            "criterion": "Assumes that curriculum benefits increase with model size rather than diminish",
+            "weight": -9,
+            "category": "negative"
+          },
+          {
+            "criterion": "Confuses task specificity by ignoring differences between structured extraction and multiple-choice benchmarks",
+            "weight": -6,
+            "category": "negative"
+          },
+          {
+            "criterion": "Ignores the significance of demonstration difficulty ordering in the last two prompt examples",
+            "weight": -7,
+            "category": "negative"
+          }
+        ],
+        "question_type": "model scaling and demonstration difficulty interaction",
+        "reasoning_tags": [
+          "quantitative_reasoning",
+          "model_capacity",
+          "task_specificity"
+        ]
+      },
+      "weak_scores": [
+        0.5833333333333334,
+        0.5833333333333334,
+        0.5833333333333334
+      ],
+      "strong_scores": [
+        0.5833333333333334,
+        0.5833333333333334,
+        0.5833333333333334
+      ],
+      "gap": null,
+      "feedback": "strong_avg 0.583 < 0.6"
+    },
+    {
+      "round": 10,
+      "status": "TOO_EASY",
+      "qa": {
+        "context": "The paper investigates how ordering of in-context learning demonstrations impacts structured field extraction from clinical notes, showing that curriculum ordering improves performance particularly when hardest examples appear last. However, the difficulty ranking is based on a smaller probe model, and the effect is evaluated only within the clinical extraction domain, leaving open questions about generalization and the role of the difficulty metric relative to target model size.",
+        "question": "How might the reliance on a difficulty score derived from a smaller probe model limit the applicability of curriculum-style demonstration ordering to larger models or different structured extraction domains, and what experimental approaches could help clarify whether self-difficulty scoring or cross-domain adaptation would alter the observed ordering effects?",
+        "reference_answer": "The difficulty score, being based on a smaller probe model, may not accurately reflect the target model's notion of difficulty, potentially limiting curriculum ordering gains especially for larger models that process demonstrations differently. Given that the paper notes diminishing returns with larger models and untested domain transfer, using self-difficulty scoring (where the target model ranks demonstration difficulty) or evaluating curriculum ordering on tasks with different field semantics (e.g., legal documents) could reveal if the observed gains hold or change. These approaches could help determine whether difficulty assessment needs to be model- and domain-specific for curriculum ordering to be effective.",
+        "rubric": [
+          {
+            "criterion": "Identifies limitation of using a smaller probe model's difficulty score for larger or different domain models",
+            "weight": 8,
+            "category": "positive"
+          },
+          {
+            "criterion": "Explains how the difficulty metric's mismatch could diminish curriculum ordering gains for larger models",
+            "weight": 7,
+            "category": "positive"
+          },
+          {
+            "criterion": "Recognizes that domain differences in field semantics may affect curriculum ordering effectiveness",
+            "weight": 6,
+            "category": "positive"
+          },
+          {
+            "criterion": "Proposes experimental methods such as self-difficulty scoring to improve difficulty estimation",
+            "weight": 7,
+            "category": "positive"
+          },
+          {
+            "criterion": "Suggests cross-domain testing to evaluate generalizability of ordering effects",
+            "weight": 6,
+            "category": "positive"
+          },
+          {
+            "criterion": "Connects experimental design suggestions to clarifying the interaction between model scale and ordering effects",
+            "weight": 5,
+            "category": "positive"
+          },
+          {
+            "criterion": "Discusses implications for scaling curriculum ordering strategies and task specificity",
+            "weight": 6,
+            "category": "positive"
+          },
+          {
+            "criterion": "Misattributes the difficulty score as target model derived",
+            "weight": -8,
+            "category": "negative"
+          },
+          {
+            "criterion": "Fails to consider domain transfer or only discusses clinical notes domain",
+            "weight": -7,
+            "category": "negative"
+          },
+          {
+            "criterion": "Overlooks the diminishing gain trend with increasing model size",
+            "weight": -6,
+            "category": "negative"
+          },
+          {
+            "criterion": "Confuses curriculum ordering effect with general in-context learning improvements",
+            "weight": -7,
+            "category": "negative"
+          },
+          {
+            "criterion": "Neglects to propose concrete experimental approaches or controls",
+            "weight": -5,
+            "category": "negative"
+          }
+        ],
+        "question_type": "curriculum ordering generalization",
+        "reasoning_tags": [
+          "experimental_design",
+          "task_specificity",
+          "scaling_behavior"
+        ]
+      },
+      "weak_scores": [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "strong_scores": [],
+      "gap": null,
+      "feedback": "weak_avg 1.000 > 0.65"
+    },
+    {
+      "round": 11,
+      "status": "FAILED_STRONG",
+      "qa": {
+        "context": "Few-shot prompting with chat-tuned language models leverages in-context demonstrations to extract structured information from clinical notes. The way these demonstrations are ordered impacts model performance, with hardest examples placed last generally providing gains. However, this effect varies across model sizes and is absent in generic multiple-choice tasks, suggesting complex interactions between model capacity, demonstration order, and task structure.",
+        "question": "How does the interaction between model size and the positional ordering of the hardest demonstrations reveal underlying differences in how models exploit in-context examples for maintaining schema consistency in structured extraction, and why might these dynamics not translate to performance gains in generic multiple-choice tasks?",
+        "reference_answer": "The paper finds that placing the hardest demonstrations at the end yields the largest gains in structured extraction tasks, particularly enhancing schema maintenance across multiple fields. Smaller models exhibit larger gains (e.g., 8B: +9.2 F1) because they benefit more from curriculum ordering, while larger models (e.g., 70B, 200B) show diminishing returns due to their inherent ability to extract more from any demonstration independently. This positional effect is largely driven by the last two demonstrations, emphasizing their role in guiding model output. The absence of gains on generic multiple-choice benchmarks like RACE suggests these effects depend on the need to maintain complex output structures and schemas, which are not required in multiple-choice tasks.",
+        "rubric": [
+          {
+            "criterion": "Identifies the role of hardest demonstration placement on schema consistency",
+            "weight": 8,
+            "category": "positive"
+          },
+          {
+            "criterion": "Explains how smaller models benefit more due to limited single-example extraction",
+            "weight": 7,
+            "category": "positive"
+          },
+          {
+            "criterion": "Describes diminishing curriculum gains with increasing model size",
+            "weight": 7,
+            "category": "positive"
+          },
+          {
+            "criterion": "Links the gain primarily to the last two demonstration positions",
+            "weight": 6,
+            "category": "positive"
+          },
+          {
+            "criterion": "Differentiates structured extraction tasks from generic multiple-choice tasks in terms of schema demands",
+            "weight": 8,
+            "category": "positive"
+          },
+          {
+            "criterion": "Addresses why maintaining schema complexity affects ordering sensitivity",
+            "weight": 7,
+            "category": "positive"
+          },
+          {
+            "criterion": "Includes evidence of quantitative gains from the paper’s experiments",
+            "weight": 6,
+            "category": "positive"
+          },
+          {
+            "criterion": "Avoids attributing gains solely to model scale without ordering considerations",
+            "weight": 7,
+            "category": "positive"
+          },
+          {
+            "criterion": "Does not conflate the role of difficulty score derivation with demonstration ordering effect",
+            "weight": 5,
+            "category": "positive"
+          },
+          {
+            "criterion": "Does not generalize findings outside structured extraction without evidence",
+            "weight": 6,
+            "category": "positive"
+          },
+          {
+            "criterion": "Fails to explain why multiple-choice benchmarks show no ordering effect",
+            "weight": -6,
+            "category": "negative"
+          },
+          {
+            "criterion": "Misattributes gains to random ordering instead of curriculum",
+            "weight": -7,
+            "category": "negative"
+          },
+          {
+            "criterion": "Ignores the importance of the last two demonstration slots",
+            "weight": -8,
+            "category": "negative"
+          },
+          {
+            "criterion": "Overlooks the reported quantitative scale interactions",
+            "weight": -7,
+            "category": "negative"
+          },
+          {
+            "criterion": "Confuses schema maintenance with surface-form extraction benefits",
+            "weight": -6,
+            "category": "negative"
+          }
+        ],
+        "question_type": "demonstration position influence",
+        "reasoning_tags": [
+          "empirical_analysis",
+          "model_scaling",
+          "task_specificity"
+        ]
+      },
+      "weak_scores": [
+        0.29850746268656714,
+        0.29850746268656714,
+        0.29850746268656714
+      ],
+      "strong_scores": [
+        0.29850746268656714,
+        0.29850746268656714,
+        0.7164179104477612
+      ],
+      "gap": null,
+      "feedback": "strong_avg 0.438 < 0.6"
+    },
+    {
+      "round": 12,
+      "status": "FAILED_STRONG",
+      "qa": {
+        "context": "In-context learning with large language models can be influenced by the order of demonstrations. This affects how well models extract structured information from clinical text, where multiple fields must be simultaneously predicted. Ordering demonstrations by difficulty has been shown to yield gains, but these gains vary with model size and task type. Understanding how demonstration order affects error patterns across different fields and models remains complex.",
+        "question": "How does curriculum-style demonstration ordering alter the distribution of errors across different structured fields compared to random or reverse orderings, and what does this reveal about the role of placing the hardest examples last for modulating model behavior in structured extraction tasks of varying complexity?",
+        "reference_answer": "Curriculum ordering improves macro-F1 by 6.1 points over random on a 70B model, with most gains (about 72%) coming from placing the hardest examples in the last two demonstration slots. The improvement is consistent across all eight structured fields but varies in magnitude: fields with templated outputs like medication_list show the largest gain, while simpler surface-form fields like patient_age show the smallest. This suggests that positioning hardest examples last helps the model better handle complex fields requiring schema consistency, by likely setting a stronger context before prediction. Reverse ordering hurts performance, indicating that putting hard examples early does not provide the same benefit. The effect is stronger on smaller models, highlighting how ordering helps compensate for limited capacity to integrate difficult examples.",
+        "rubric": [
+          {
+            "criterion": "Identifies that curriculum ordering shifts error distribution favorably across fields",
+            "weight": 8,
+            "category": "positive"
+          },
+          {
+            "criterion": "Recognizes that the effect is not uniform across fields, with templated fields benefiting most",
+            "weight": 7,
+            "category": "positive"
+          },
+          {
+            "criterion": "Understands placing hardest examples last yields the greatest gain",
+            "weight": 8,
+            "category": "positive"
+          },
+          {
+            "criterion": "Explains that reverse ordering lowers performance compared to curriculum and random",
+            "weight": 6,
+            "category": "positive"
+          },
+          {
+            "criterion": "Connects error distribution changes to the model’s ability to maintain schema consistency",
+            "weight": 7,
+            "category": "positive"
+          },
+          {
+            "criterion": "Notes that smaller models gain more from correct ordering due to capacity constraints",
+            "weight": 7,
+            "category": "positive"
+          },
+          {
+            "criterion": "Considers how complexity of fields impacts sensitivity to demonstration ordering",
+            "weight": 6,
+            "category": "positive"
+          },
+          {
+            "criterion": "Does not confuse impact of demonstration ordering on structured extraction with effects on generic multiple-choice",
+            "weight": 8,
+            "category": "positive"
+          },
+          {
+            "criterion": "Avoids attributing gains solely to model size without considering ordering effects",
+            "weight": 7,
+            "category": "positive"
+          },
+          {
+            "criterion": "Does not claim that self-difficulty scoring was tested or necessary",
+            "weight": -5,
+            "category": "negative"
+          },
+          {
+            "criterion": "Avoids asserting uniform gains across all models and fields",
+            "weight": -6,
+            "category": "negative"
+          },
+          {
+            "criterion": "Does not ignore the positional importance of the last two demonstrations",
+            "weight": -7,
+            "category": "negative"
+          },
+          {
+            "criterion": "Does not generalize structured extraction gains to generic benchmarks like RACE",
+            "weight": -8,
+            "category": "negative"
+          },
+          {
+            "criterion": "Avoids simplistic recall answers without reasoning about error distributions",
+            "weight": -6,
+            "category": "negative"
+          },
+          {
+            "criterion": "Does not mix results from different model sizes without clarifying interaction with ordering",
+            "weight": -7,
+            "category": "negative"
+          }
+        ],
+        "question_type": "impact of demonstration ordering on error patterns",
+        "reasoning_tags": [
+          "comparative_analysis",
+          "model_behavior",
+          "task_specificity"
+        ]
+      },
+      "weak_scores": [
+        0.078125,
+        0.078125,
+        0.078125
+      ],
+      "strong_scores": [
+        0.28125,
+        0.28125,
+        0.28125
+      ],
+      "gap": null,
+      "feedback": "strong_avg 0.281 < 0.6"
+    }
+  ]
+}
