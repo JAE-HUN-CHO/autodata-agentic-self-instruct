@@ -2,7 +2,8 @@
 
 A runnable implementation of the **CS-research-paper instantiation** of *Autodata: An agentic
 data scientist to create high quality synthetic data* (FAIR at Meta, arXiv `2606.25996v1`,
-Sec 3.1 / App C.1).
+Sec 3.1 / App C.1). The source paper is included verbatim at
+[`paper/Autodata_Agentic_Self_Instruct_arxiv_2606.25996v1.pdf`](paper/Autodata_Agentic_Self_Instruct_arxiv_2606.25996v1.pdf).
 
 An orchestrator agent directs a **challenger**, a **weak solver**, a **strong solver**, a
 **quality verifier**, and a **rubric judge** in a loop that produces synthetic
@@ -128,6 +129,7 @@ examples/            two tiny demo "papers"
 tests/test_orchestrator.py     loop + acceptance-criteria tests
 tests/test_providers.py        OpenAI/NIM provider tests (offline, fake requests)
 ai-docs/             paper2code intermediate artifacts (phases 1-3)
+paper/               source paper PDF (arXiv 2606.25996v1, verbatim)
 ```
 
 ## Scope & faithfulness notes
