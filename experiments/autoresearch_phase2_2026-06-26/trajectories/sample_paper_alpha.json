@@ -1,0 +1,1117 @@
+{
+  "paper_id": "sample_paper_alpha",
+  "accepted": false,
+  "accepted_qa": null,
+  "n_rounds": 12,
+  "rounds": [
+    {
+      "round": 1,
+      "status": "TOO_EASY",
+      "qa": {
+        "context": "Training deep neural networks in low-precision formats like fp8 introduces instability due to quantization noise and gradient variance. Clipping gradients helps maintain training stability, but fixed thresholds can cause loss spikes. Adaptive gradient clipping methods that tie thresholds to activation statistics offer a promising solution, yet their failure modes in certain network architectures remain understudied.",
+        "question": "How does coupling the gradient clipping threshold to the running variance of activations mitigate loss spikes during fp8 training, and under what architectural conditions does this strategy fail according to the paper's analysis?",
+        "reference_answer": "Coupling the gradient clipping threshold to the running variance of activations adapts the clipping level dynamically to the scale of layer outputs, preventing overly aggressive or insufficient clipping that fixed thresholds cause, thus avoiding loss spikes during fp8 training. This approach maintains stability by reflecting the actual activation statistics rather than applying a static threshold. However, the paper identifies that in very deep network stacks, the adaptive clipping mechanism fails due to accumulating variance estimation errors and signal degradation, which lead to inappropriate threshold settings and ultimately destabilize training.",
+        "rubric": [
+          {
+            "criterion": "Describes dynamic adjustment of clipping thresholds based on activation variance",
+            "weight": 8,
+            "category": "positive"
+          },
+          {
+            "criterion": "Explains why fixed-threshold clipping can cause loss spikes",
+            "weight": 7,
+            "category": "positive"
+          },
+          {
+            "criterion": "Connects variance coupling to improved training stability in low-precision fp8 setting",
+            "weight": 8,
+            "category": "positive"
+          },
+          {
+            "criterion": "Identifies the failure mode in very deep network stacks",
+            "weight": 9,
+            "category": "positive"
+          },
+          {
+            "criterion": "Includes understanding of accumulation of variance estimation errors",
+            "weight": 7,
+            "category": "positive"
+          },
+          {
+            "criterion": "States how signal degradation affects clipping threshold estimation",
+            "weight": 6,
+            "category": "positive"
+          },
+          {
+            "criterion": "Integrates the relationship between activation statistics and gradient clipping",
+            "weight": 7,
+            "category": "positive"
+          },
+          {
+            "criterion": "Avoids conflating stable training effects with mere precision improvements",
+            "weight": 5,
+            "category": "positive"
+          },
+          {
+            "criterion": "Does not incorrectly claim fixed threshold clipping outperforms adaptive clipping",
+            "weight": -6,
+            "category": "negative"
+          },
+          {
+            "criterion": "Does not omit conditions under which adaptive clipping fails",
+            "weight": -8,
+            "category": "negative"
+          },
+          {
+            "criterion": "Avoids attributing failure solely to fp8 quantization rather than variance estimation",
+            "weight": -7,
+            "category": "negative"
+          },
+          {
+            "criterion": "Does not confuse activation variance with gradient variance in threshold computation",
+            "weight": -5,
+            "category": "negative"
+          },
+          {
+            "criterion": "Avoids superficial answers that do not engage with failure analysis",
+            "weight": -6,
+            "category": "negative"
+          }
+        ],
+        "question_type": "adaptive clipping threshold analysis",
+        "reasoning_tags": [
+          "statistical_reasoning",
+          "algorithmic_stability",
+          "failure_mode_analysis"
+        ]
+      },
+      "weak_scores": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "strong_scores": [],
+      "gap": null,
+      "feedback": "degenerate all-zero weak rollouts"
+    },
+    {
+      "round": 2,
+      "status": "FAILED_STRONG",
+      "qa": {
+        "context": "Training deep neural networks with low-precision formats like fp8 is challenging due to instability caused by gradient explosion or vanishing. Gradient clipping is a common technique to prevent these issues, but choosing an appropriate clipping threshold is difficult because fixed thresholds may not adapt to varying activation statistics across layers and training iterations. Adaptive approaches that leverage per-layer activation variance have been proposed to stabilize fp8 training, but understanding when and why these adaptive methods fail remains crucial for effective low-precision model training.",
+        "question": "Considering the interaction between per-layer adaptive gradient clipping and fp8 training dynamics, how do the authors derive the relationship between the clipping threshold and the running variance of activations to prevent loss spikes, and what underlying factors contribute to the failure of this approach in very deep networks as identified in their failure analysis?",
+        "reference_answer": "The authors derive the adaptive clipping threshold by linking it to the running variance of activations, using the observation that activation variance reflects the scale of gradients relevant for effective clipping. This coupling ensures clipping adapts dynamically to layer-specific and temporal changes in activation statistics, preventing abrupt loss spikes that occur with fixed thresholds. However, in very deep networks, the failure analysis reveals that the compounded effect of running variance estimates can become unstable due to accumulated noise and gradient attenuation, causing the adaptive thresholds to either clip too aggressively or too loosely. This breakdown is exacerbated by the interaction of low-precision rounding errors and the depth-induced shift in activation distributions, which undermine the assumptions behind variance-based thresholding.",
+        "rubric": [
+          {
+            "criterion": "Correctly explains the derivation of adaptive clipping threshold using running activation variance",
+            "weight": 9,
+            "category": "positive"
+          },
+          {
+            "criterion": "Describes how dynamic thresholding mitigates loss spikes during fp8 training",
+            "weight": 8,
+            "category": "positive"
+          },
+          {
+            "criterion": "Identifies the role of running variance as an indicator of gradient scale for clipping",
+            "weight": 7,
+            "category": "positive"
+          },
+          {
+            "criterion": "Explains the interplay between low-precision numerical errors and clipping stability",
+            "weight": 7,
+            "category": "positive"
+          },
+          {
+            "criterion": "Details failure factors in very deep networks, such as noise accumulation and gradient attenuation",
+            "weight": 9,
+            "category": "positive"
+          },
+          {
+            "criterion": "Links failure to the breakdown of variance-based assumptions in deep stacks",
+            "weight": 8,
+            "category": "positive"
+          },
+          {
+            "criterion": "Includes consideration of how depth affects activation distribution shifts",
+            "weight": 6,
+            "category": "positive"
+          },
+          {
+            "criterion": "Mentions how aggressive or insufficient clipping arises from flawed variance estimates",
+            "weight": 7,
+            "category": "positive"
+          },
+          {
+            "criterion": "Avoids vague or overly general statements about adaptive clipping benefits",
+            "weight": 5,
+            "category": "positive"
+          },
+          {
+            "criterion": "Does not confuse fixed-threshold clipping mechanisms with adaptive thresholding",
+            "weight": -6,
+            "category": "negative"
+          },
+          {
+            "criterion": "Does not attribute failure solely to fp8 precision without discussing variance estimation",
+            "weight": -5,
+            "category": "negative"
+          },
+          {
+            "criterion": "Avoids conflating running activation variance with gradient variance",
+            "weight": -5,
+            "category": "negative"
+          },
+          {
+            "criterion": "Does not omit the connection between activation statistics and clipping threshold derivation",
+            "weight": -7,
+            "category": "negative"
+          },
+          {
+            "criterion": "Avoids overgeneralizing failure causes without linking to deep network structure and dynamics",
+            "weight": -6,
+            "category": "negative"
+          }
+        ],
+        "question_type": "training stability optimization",
+        "reasoning_tags": [
+          "dynamic_thresholding",
+          "numerical_precision",
+          "failure_analysis"
+        ]
+      },
+      "weak_scores": [
+        0.10606060606060606,
+        0.42424242424242425,
+        0.45454545454545453
+      ],
+      "strong_scores": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "gap": null,
+      "feedback": "strong_avg 0.000 < 0.6"
+    },
+    {
+      "round": 3,
+      "status": "FAILED_STRONG",
+      "qa": {
+        "context": "In low-precision training with fp8 arithmetic, maintaining numerical stability is challenging due to quantization effects and dynamic range limitations. Gradient clipping thresholds that adapt per layer using activation statistics have been proposed to stabilize training. However, understanding when and why such adaptive thresholds fail is crucial for designing robust training protocols, especially in very deep networks where signal propagation and variance dynamics are complex.",
+        "question": "How do the interactions between activation variance estimation and fp8 quantization noise influence the stability of per-layer adaptive gradient clipping, and what specific characteristics of very deep network architectures exacerbate failures in this adaptive clipping approach as found in the paper?",
+        "reference_answer": "The paper demonstrates that the fp8 quantization noise introduces variance estimation errors that affect the accuracy of the running variance used for threshold adaptation. This interaction can destabilize the gradient clipping when the variance estimates are noisy or lagging, causing inappropriate clipping thresholds. Very deep networks amplify this effect because deep stacks cause signal variance to attenuate or explode nonuniformly across layers, leading to miscalibrated clipping thresholds that do not prevent loss spikes. The failure modes arise primarily from the compounded variance estimation errors and the increased sensitivity of deep layers to clipping misadjustments.",
+        "rubric": [
+          {
+            "criterion": "Identifies the role of fp8 quantization noise in variance estimation errors",
+            "weight": 8,
+            "category": "positive"
+          },
+          {
+            "criterion": "Explains how inaccurate variance estimates affect adaptive threshold stability",
+            "weight": 9,
+            "category": "positive"
+          },
+          {
+            "criterion": "Connects deep network architecture characteristics to variance propagation challenges",
+            "weight": 7,
+            "category": "positive"
+          },
+          {
+            "criterion": "Describes the compounding effect of depth on adaptive gradient clipping failures",
+            "weight": 8,
+            "category": "positive"
+          },
+          {
+            "criterion": "Includes reasoning about signal attenuation or explosion in very deep models",
+            "weight": 6,
+            "category": "positive"
+          },
+          {
+            "criterion": "Discusses the dynamics of running variance lag impacting threshold adaptation",
+            "weight": 7,
+            "category": "positive"
+          },
+          {
+            "criterion": "Distinguishes between fixed-threshold and adaptive threshold clipping failures",
+            "weight": 5,
+            "category": "positive"
+          },
+          {
+            "criterion": "Explains why failure is specific to per-layer adaptive clipping rather than global clipping",
+            "weight": 6,
+            "category": "positive"
+          },
+          {
+            "criterion": "Avoids conflating variance estimation with loss spikes without causality",
+            "weight": -5,
+            "category": "negative"
+          },
+          {
+            "criterion": "Does not attribute failure solely to depth without discussing variance dynamics",
+            "weight": -6,
+            "category": "negative"
+          },
+          {
+            "criterion": "Does not ignore the role of fp8 precision constraints in threshold failures",
+            "weight": -7,
+            "category": "negative"
+          },
+          {
+            "criterion": "Avoids simplistic explanations such as 'network too deep' without mechanism",
+            "weight": -6,
+            "category": "negative"
+          },
+          {
+            "criterion": "Does not misinterpret adaptive clipping as a static threshold method",
+            "weight": -8,
+            "category": "negative"
+          }
+        ],
+        "question_type": "robustness of adaptive clipping",
+        "reasoning_tags": [
+          "statistical_analysis",
+          "numerical_stability",
+          "model_dynamics"
+        ]
+      },
+      "weak_scores": [
+        0.10714285714285714,
+        0.10714285714285714,
+        0.10714285714285714
+      ],
+      "strong_scores": [
+        0.23214285714285715,
+        0.23214285714285715,
+        0.23214285714285715
+      ],
+      "gap": null,
+      "feedback": "strong_avg 0.232 < 0.6"
+    },
+    {
+      "round": 4,
+      "status": "FAILED_STRONG",
+      "qa": {
+        "context": "Low-precision training, specifically with 8-bit floating point (fp8), introduces quantization noise that interacts with gradient clipping strategies. Adaptive gradient clipping adjusts thresholds based on activation statistics, but the complex interplay between quantization noise and activation variance can affect training stability, especially in networks with varying depths and layer characteristics.",
+        "question": "How does quantization noise introduced by fp8 precision interact with the statistical estimation of activation variance used for per-layer adaptive gradient clipping, and why does this interaction lead to diminished stability in very deep neural network architectures according to the findings in the paper?",
+        "reference_answer": "The paper finds that quantization noise from fp8 alters the activation distribution statistics, which biases or increases the variance estimate used for setting clipping thresholds. This interaction destabilizes the adaptive clipping mechanism, causing inaccurate thresholds that either under- or over-clip gradients. In very deep networks, accumulated quantization noise and reduced signal-to-noise ratio exacerbate this effect, leading to failure in preventing loss spikes, as the variance estimate becomes increasingly unreliable layer-to-layer.",
+        "rubric": [
+          {
+            "criterion": "Identifies the role of fp8 quantization noise in perturbing activation statistics",
+            "weight": 8,
+            "category": "positive"
+          },
+          {
+            "criterion": "Explains how quantization noise biases or increases variance estimates used for clipping thresholds",
+            "weight": 9,
+            "category": "positive"
+          },
+          {
+            "criterion": "Connects altered variance estimation to inaccurate adaptive gradient clipping thresholds",
+            "weight": 7,
+            "category": "positive"
+          },
+          {
+            "criterion": "Describes how these inaccuracies affect training stability via loss spikes",
+            "weight": 8,
+            "category": "positive"
+          },
+          {
+            "criterion": "Highlights the cumulative effect of quantization noise across many layers in very deep architectures",
+            "weight": 7,
+            "category": "positive"
+          },
+          {
+            "criterion": "Details why deep network architectures lead to degradation of variance estimation reliability",
+            "weight": 8,
+            "category": "positive"
+          },
+          {
+            "criterion": "Shows understanding of the link between numerical instability and architectural depth",
+            "weight": 7,
+            "category": "positive"
+          },
+          {
+            "criterion": "Avoids superficial restatement of the adaptive clipping method without relating to quantization noise",
+            "weight": -6,
+            "category": "negative"
+          },
+          {
+            "criterion": "Does not confuse activation variance estimation with gradient magnitude statistics",
+            "weight": -5,
+            "category": "negative"
+          },
+          {
+            "criterion": "Avoids attributing failure solely to fixed clipping thresholds rather than estimation noise",
+            "weight": -4,
+            "category": "negative"
+          },
+          {
+            "criterion": "Does not ignore architectural factors contributing to failure, such as depth and signal degradation",
+            "weight": -7,
+            "category": "negative"
+          }
+        ],
+        "question_type": "quantization noise impact analysis",
+        "reasoning_tags": [
+          "statistical_reasoning",
+          "numerical_stability",
+          "architectural_impact"
+        ]
+      },
+      "weak_scores": [
+        0.4444444444444444,
+        0.5740740740740741,
+        0.5925925925925926
+      ],
+      "strong_scores": [
+        0.5925925925925926,
+        0.5925925925925926,
+        0.5925925925925926
+      ],
+      "gap": null,
+      "feedback": "strong_avg 0.593 < 0.6"
+    },
+    {
+      "round": 5,
+      "status": "FAILED_STRONG",
+      "qa": {
+        "context": "Low-precision training such as fp8 introduces quantization noise that impacts gradient statistics. Adaptive gradient clipping relies on accurate per-layer activation variance estimates to set clipping thresholds, but the interplay between quantization noise and variance estimation can destabilize training, especially in deep architectures.",
+        "question": "In what ways does the quantization noise from fp8 precision affect the reliability of activation variance estimates used in per-layer adaptive gradient clipping, and how does this degradation in variance estimation propagate to cause instability specifically in very deep neural network architectures as discussed in the paper?",
+        "reference_answer": "The paper finds that fp8 quantization noise corrupts the running estimates of activation variance by adding noise that inflates or distorts these statistics. This makes the adaptive clipping thresholds less accurate and sometimes too permissive or too restrictive. In very deep networks, the compounded error in variance estimates across many layers causes cascading instability, leading to loss spikes and training failure, as the variance coupling no longer effectively controls gradients.",
+        "rubric": [
+          {
+            "criterion": "Identifies the source of noise introduced by fp8 precision and its impact on variance estimation",
+            "weight": 8,
+            "category": "positive"
+          },
+          {
+            "criterion": "Explains how corrupted variance estimates affect adaptive clipping thresholds",
+            "weight": 8,
+            "category": "positive"
+          },
+          {
+            "criterion": "Connects quantization noise to instability observed in deep neural network training",
+            "weight": 9,
+            "category": "positive"
+          },
+          {
+            "criterion": "Recognizes the compounding effect of error in very deep architectures",
+            "weight": 7,
+            "category": "positive"
+          },
+          {
+            "criterion": "Demonstrates understanding of adaptive gradient clipping dependency on variance statistics",
+            "weight": 7,
+            "category": "positive"
+          },
+          {
+            "criterion": "Links the failure mode specifically to variance-coupled thresholding mechanism under noise",
+            "weight": 6,
+            "category": "positive"
+          },
+          {
+            "criterion": "Addresses interaction between quantization noise and statistical estimation noise",
+            "weight": 6,
+            "category": "positive"
+          },
+          {
+            "criterion": "Avoids conflating general fp8 noise effects with variance estimation noise",
+            "weight": -6,
+            "category": "negative"
+          },
+          {
+            "criterion": "Does not mistakenly attribute failure to fixed threshold clipping rather than adaptive variance coupling",
+            "weight": -7,
+            "category": "negative"
+          },
+          {
+            "criterion": "Avoids superficial answers that do not detail the propagation effect in deep layers",
+            "weight": -8,
+            "category": "negative"
+          },
+          {
+            "criterion": "Does not simply restate the problem without connecting quantization noise to instability",
+            "weight": -5,
+            "category": "negative"
+          }
+        ],
+        "question_type": "quantization-noise and variance estimation interaction",
+        "reasoning_tags": [
+          "statistical_analysis",
+          "quantization_effects",
+          "failure_mode_identification"
+        ]
+      },
+      "weak_scores": [
+        0.37254901960784315,
+        0.37254901960784315,
+        0.37254901960784315
+      ],
+      "strong_scores": [
+        0.49019607843137253,
+        0.37254901960784315,
+        0.49019607843137253
+      ],
+      "gap": null,
+      "feedback": "strong_avg 0.451 < 0.6"
+    },
+    {
+      "round": 6,
+      "status": "FAILED_STRONG",
+      "qa": {
+        "context": "Adaptive gradient clipping methods that adjust thresholds based on activation statistics aim to stabilize training under low-precision (fp8) arithmetic, which introduces noise. However, estimating activation variance accurately in this noisy environment can be challenging, especially as network depth increases. The training dynamics and stability depend on how these statistical estimates interact with quantization noise and layerwise properties.",
+        "question": "How do the challenges in estimating activation variance under fp8 quantization noise impact the choice of adaptive gradient clipping thresholds across layers, and why might certain architectural features in very deep networks amplify these challenges, ultimately leading to stability failures?",
+        "reference_answer": "The paper finds that fp8 quantization noise contaminates the estimates of activation variance, which adaptive gradient clipping relies on to set per-layer thresholds. Inaccurate variance estimates cause inappropriate clipping levels, either too loose or too tight, leading to loss spikes or training divergence. Very deep architectures exacerbate these issues due to cumulative quantization noise, layerwise variance heterogeneity, and potential attenuation or amplification of signals, making variance estimation less reliable in deeper layers. This layered degradation results in clipping thresholds that fail to stabilize gradients effectively, causing failures in training stability.",
+        "rubric": [
+          {
+            "criterion": "Identifies the role of quantization noise in corrupting activation variance estimation",
+            "weight": 8,
+            "category": "positive"
+          },
+          {
+            "criterion": "Explains why inaccurate variance estimates affect gradient clipping threshold selection",
+            "weight": 8,
+            "category": "positive"
+          },
+          {
+            "criterion": "Recognizes how cumulative effects in very deep networks amplify estimation errors",
+            "weight": 7,
+            "category": "positive"
+          },
+          {
+            "criterion": "Connects architectural depth and layerwise variance heterogeneity to variance estimation difficulty",
+            "weight": 7,
+            "category": "positive"
+          },
+          {
+            "criterion": "Describes the impact of inappropriate clipping thresholds on training stability",
+            "weight": 7,
+            "category": "positive"
+          },
+          {
+            "criterion": "Uses reasoning about statistical estimation under noise to explain failure modes",
+            "weight": 6,
+            "category": "positive"
+          },
+          {
+            "criterion": "Differentiates between per-layer effects rather than treating the network as homogeneous",
+            "weight": 6,
+            "category": "positive"
+          },
+          {
+            "criterion": "Acknowledges limitations in variance estimation specific to the fp8 precision regime",
+            "weight": 5,
+            "category": "positive"
+          },
+          {
+            "criterion": "Avoids conflating variance estimation problems with unrelated hyperparameter tuning",
+            "weight": -5,
+            "category": "negative"
+          },
+          {
+            "criterion": "Does not attribute failure solely to architectural depth without reasoning about noise impacts",
+            "weight": -6,
+            "category": "negative"
+          },
+          {
+            "criterion": "Does not overlook the statistical nature of variance estimation and its noise susceptibility",
+            "weight": -7,
+            "category": "negative"
+          },
+          {
+            "criterion": "Avoids vague or generic descriptions lacking connection to quantization noise and variance estimation",
+            "weight": -6,
+            "category": "negative"
+          },
+          {
+            "criterion": "Does not confuse gradient clipping thresholds as fixed rather than adaptive per variance estimates",
+            "weight": -5,
+            "category": "negative"
+          }
+        ],
+        "question_type": "gradient clipping stability tradeoffs",
+        "reasoning_tags": [
+          "statistical_reasoning",
+          "numerical_precision",
+          "architectural_analysis"
+        ]
+      },
+      "weak_scores": [
+        0.46296296296296297,
+        0.46296296296296297,
+        0.46296296296296297
+      ],
+      "strong_scores": [
+        0.46296296296296297,
+        0.46296296296296297,
+        0.0
+      ],
+      "gap": null,
+      "feedback": "strong_avg 0.309 < 0.6"
+    },
+    {
+      "round": 7,
+      "status": "FAILED_STRONG",
+      "qa": {
+        "context": "Adaptive gradient clipping uses activation variance estimates to set per-layer clipping thresholds dynamically during low-precision (fp8) training. However, estimating activation variance reliably in the presence of quantization noise is challenging and may vary across different network depths and structures.",
+        "question": "How does the nature of fp8 quantization noise affect the statistical properties of activation variance estimates used for adaptive gradient clipping, and why do these effects lead to distinct stability challenges in very deep networks compared to shallower ones, based on the paper's analysis?",
+        "reference_answer": "The paper finds that fp8 quantization noise introduces bias and increased variance in activation variance estimates, which disrupts the adaptive clipping threshold's accuracy. In very deep networks, accumulation of such estimation errors across layers increasingly destabilizes training, as variance estimates become less reliable and clipping thresholds inappropriate, causing loss spikes. Shallower networks, with fewer layers, experience less error propagation and thus maintain more stable training under the same adaptive clipping scheme.",
+        "rubric": [
+          {
+            "criterion": "Identifies that fp8 quantization noise affects activation variance estimation accuracy",
+            "weight": 8,
+            "category": "positive"
+          },
+          {
+            "criterion": "Explains statistical consequences of quantization noise on variance estimates (e.g., bias, increased variance)",
+            "weight": 9,
+            "category": "positive"
+          },
+          {
+            "criterion": "Describes how accumulation of estimation errors across layers compounds instability",
+            "weight": 8,
+            "category": "positive"
+          },
+          {
+            "criterion": "Differentiates impact on deep vs. shallow networks in terms of error propagation",
+            "weight": 9,
+            "category": "positive"
+          },
+          {
+            "criterion": "Connects degradation in variance estimation to resulting loss spikes and training instability",
+            "weight": 7,
+            "category": "positive"
+          },
+          {
+            "criterion": "Recognizes that adaptive clipping thresholds rely heavily on accurate variance estimates",
+            "weight": 6,
+            "category": "positive"
+          },
+          {
+            "criterion": "Includes insight on why fixed-threshold clipping fails to address these issues",
+            "weight": 5,
+            "category": "positive"
+          },
+          {
+            "criterion": "Mentions the paper's failure analysis and empirical observations supporting the explanation",
+            "weight": 7,
+            "category": "positive"
+          },
+          {
+            "criterion": "Avoids conflating quantization noise effects with other noise sources or training artifacts",
+            "weight": -7,
+            "category": "negative"
+          },
+          {
+            "criterion": "Does not incorrectly claim that variance estimation is unaffected by quantization noise",
+            "weight": -10,
+            "category": "negative"
+          },
+          {
+            "criterion": "Avoids attributing stability issues solely to network depth without linking quantization noise",
+            "weight": -8,
+            "category": "negative"
+          },
+          {
+            "criterion": "Does not confuse the role of adaptive clipping threshold coupling with unrelated mechanisms",
+            "weight": -7,
+            "category": "negative"
+          },
+          {
+            "criterion": "Does not describe the method using vague or general statements lacking technical depth",
+            "weight": -5,
+            "category": "negative"
+          }
+        ],
+        "question_type": "variance estimation robustness under quantization",
+        "reasoning_tags": [
+          "statistical_reasoning",
+          "noise_analysis",
+          "architectural_impact"
+        ]
+      },
+      "weak_scores": [
+        0.05084745762711865,
+        0.1694915254237288,
+        0.05084745762711865
+      ],
+      "strong_scores": [
+        0.0,
+        0.1694915254237288,
+        0.0
+      ],
+      "gap": null,
+      "feedback": "strong_avg 0.056 < 0.6"
+    },
+    {
+      "round": 8,
+      "status": "FAILED_STRONG",
+      "qa": {
+        "context": "Adaptive gradient clipping methods dynamically adjust per-layer thresholds based on activation statistics to stabilize training under low-precision quantization. The relationship between activation variance estimates and quantization noise is complex, especially as network depth increases, presenting challenges for maintaining stable updates.",
+        "question": "How does the interplay between activation variance estimation errors caused by fp8 quantization noise and the network's depth influence the robustness of adaptive gradient clipping thresholds, and what mechanisms explain why deeper architectures are more prone to clipping instability in this context?",
+        "reference_answer": "The paper shows that fp8 quantization noise introduces bias and increased variance into the activation statistics used to set clipping thresholds adaptively. As network depth grows, small errors in variance estimation compound across layers, reducing threshold reliability. This feedback leads to miscalibrated clipping, which causes loss spikes and instability. The deeper the network, the more pronounced the accumulation and amplification of these estimation errors, explaining why deeper architectures suffer more from adaptive clipping failures under low-precision training.",
+        "rubric": [
+          {
+            "criterion": "Identifies the impact of fp8 quantization noise on activation variance estimation",
+            "weight": 8,
+            "category": "positive"
+          },
+          {
+            "criterion": "Explains how estimation errors accumulate or amplify with increasing network depth",
+            "weight": 9,
+            "category": "positive"
+          },
+          {
+            "criterion": "Connects variance estimation errors to miscalibration of gradient clipping thresholds",
+            "weight": 7,
+            "category": "positive"
+          },
+          {
+            "criterion": "Describes the causal pathway from miscalibrated clipping to training instability and loss spikes",
+            "weight": 8,
+            "category": "positive"
+          },
+          {
+            "criterion": "Distinguishes effects specific to deeper networks versus shallower ones",
+            "weight": 7,
+            "category": "positive"
+          },
+          {
+            "criterion": "References the dynamic feedback loop between clipping thresholds and variance estimates",
+            "weight": 6,
+            "category": "positive"
+          },
+          {
+            "criterion": "Includes the role of layer-wise adaptive clipping versus fixed thresholds in mitigating instability",
+            "weight": 5,
+            "category": "positive"
+          },
+          {
+            "criterion": "Avoids attributing failures solely to variance estimation without considering quantization noise",
+            "weight": -6,
+            "category": "negative"
+          },
+          {
+            "criterion": "Does not confuse stability failures with general training convergence issues unrelated to clipping",
+            "weight": -7,
+            "category": "negative"
+          },
+          {
+            "criterion": "Avoids conflating architectural depth effects with unrelated hyperparameter tuning problems",
+            "weight": -5,
+            "category": "negative"
+          },
+          {
+            "criterion": "Does not rely solely on descriptive recall; provides mechanistic reasoning",
+            "weight": -8,
+            "category": "negative"
+          }
+        ],
+        "question_type": "robustness_of_variance_coupling",
+        "reasoning_tags": [
+          "statistical_inference",
+          "quantization_effects",
+          "architectural_analysis"
+        ]
+      },
+      "weak_scores": [
+        0.1,
+        0.22,
+        0.38
+      ],
+      "strong_scores": [
+        0.26,
+        0.26,
+        0.26
+      ],
+      "gap": null,
+      "feedback": "strong_avg 0.260 < 0.6"
+    },
+    {
+      "round": 9,
+      "status": "FAILED_STRONG",
+      "qa": {
+        "context": "Training deep neural networks using low-precision floating-point formats such as fp8 introduces quantization noise, which affects internal activation statistics. Adaptive gradient clipping methods that rely on per-layer activation variance estimates must contend with these noisy estimates. Understanding how architectural features of very deep networks exacerbate instability issues when using these variance-driven thresholds is crucial for designing robust training procedures.",
+        "question": "How do specific architectural properties of very deep networks amplify the adverse effects of fp8 quantization noise on the accuracy of activation variance estimates used for adaptive gradient clipping, and what are the consequences of these amplified errors on training stability as demonstrated in the paper?",
+        "reference_answer": "The paper identifies that in very deep architectures, repeated application of layers compounds quantization noise introduced by fp8 precision, leading to increased variance estimation errors. Characteristics such as long sequential dependencies and accumulation of small perturbations cause the running variance estimates to become less reliable per layer. These amplified estimation errors lead to inappropriate clipping thresholds, which either over-clip or under-clip gradients, resulting in loss spike instabilities and ultimately destabilizing the training process.",
+        "rubric": [
+          {
+            "criterion": "Identifies that architectural depth leads to accumulation of quantization noise across layers",
+            "weight": 8,
+            "category": "positive"
+          },
+          {
+            "criterion": "Explains how variance estimation errors increase with network depth",
+            "weight": 7,
+            "category": "positive"
+          },
+          {
+            "criterion": "Describes the role of sequential dependency in amplifying quantization effects",
+            "weight": 6,
+            "category": "positive"
+          },
+          {
+            "criterion": "Connects variance estimation inaccuracies to adaptive gradient clipping threshold miscalibration",
+            "weight": 8,
+            "category": "positive"
+          },
+          {
+            "criterion": "Details how inappropriate threshold setting causes instability in training loss",
+            "weight": 7,
+            "category": "positive"
+          },
+          {
+            "criterion": "Acknowledges the cumulative nature of error propagation in very deep networks",
+            "weight": 5,
+            "category": "positive"
+          },
+          {
+            "criterion": "Mentions that these failure modes are empirically observed and analyzed in the paper",
+            "weight": 6,
+            "category": "positive"
+          },
+          {
+            "criterion": "Avoids vague or superficial statements about quantization noise effects",
+            "weight": 5,
+            "category": "positive"
+          },
+          {
+            "criterion": "Does not confuse activation variance with gradient variance",
+            "weight": -5,
+            "category": "negative"
+          },
+          {
+            "criterion": "Does not attribute failure solely to clipping algorithm design ignoring quantization effects",
+            "weight": -6,
+            "category": "negative"
+          },
+          {
+            "criterion": "Does not ignore the interaction between quantization noise and architecture when discussing instability",
+            "weight": -6,
+            "category": "negative"
+          },
+          {
+            "criterion": "Avoids attributing instability solely to low precision without linking to variance estimation errors",
+            "weight": -4,
+            "category": "negative"
+          },
+          {
+            "criterion": "Does not generalize the failure to all network depths without distinguishing very deep networks",
+            "weight": -3,
+            "category": "negative"
+          }
+        ],
+        "question_type": "failure mode analysis in adaptive clipping",
+        "reasoning_tags": [
+          "statistical_inference",
+          "quantization_effects",
+          "architectural_analysis"
+        ]
+      },
+      "weak_scores": [
+        0.3076923076923077,
+        0.4230769230769231,
+        0.4230769230769231
+      ],
+      "strong_scores": [
+        0.5384615384615384,
+        0.5384615384615384,
+        0.5384615384615384
+      ],
+      "gap": null,
+      "feedback": "strong_avg 0.538 < 0.6"
+    },
+    {
+      "round": 10,
+      "status": "FAILED_STRONG",
+      "qa": {
+        "context": "Adaptive gradient clipping uses per-layer thresholds often set relative to statistics such as activation variance. The presence of low-precision fp8 quantization introduces complex noise that can corrupt these statistical estimates, particularly in deep neural networks. Understanding how threshold setting strategies can be optimized to maintain training stability involves analyzing the interplay between quantization noise, variance estimation reliability, and network depth.",
+        "question": "Given the challenges in estimating activation variance under fp8 quantization noise, how might altering the adaptive clipping threshold update rules or incorporating additional statistical safeguards improve stability in very deep networks, and what trade-offs would this introduce according to the paper's experimentation and failure analysis?",
+        "reference_answer": "The paper suggests that while coupling clipping thresholds to running activation variance stabilizes training by preventing loss spikes, this approach fails in very deep networks due to amplified quantization noise corrupting variance estimates. To improve stability, modifying threshold update rules to be more robust — such as smoothing variance estimates over longer windows or incorporating variance bounds — can help mitigate erratic threshold changes. However, these measures introduce trade-offs including slower adaptation to changing activation dynamics and potential clipping under flexible conditions, as experiments showed that excessive smoothing may delay recovery from loss spikes. Hence, the paper emphasizes a balance between responsiveness and robustness in threshold updates for deep architectures.",
+        "rubric": [
+          {
+            "criterion": "Identifies the source and impact of fp8 quantization noise on activation variance estimation",
+            "weight": 8,
+            "category": "positive"
+          },
+          {
+            "criterion": "Discusses how variance estimation errors specifically worsen in very deep networks",
+            "weight": 7,
+            "category": "positive"
+          },
+          {
+            "criterion": "Proposes plausible modifications to the adaptive clipping threshold update mechanism",
+            "weight": 9,
+            "category": "positive"
+          },
+          {
+            "criterion": "Explains how smoothing or bounding variance estimates can reduce instability",
+            "weight": 7,
+            "category": "positive"
+          },
+          {
+            "criterion": "Acknowledges trade-offs such as reduced responsiveness or delayed adaptation",
+            "weight": 6,
+            "category": "positive"
+          },
+          {
+            "criterion": "References experimental observations or failure analyses related to these modifications",
+            "weight": 8,
+            "category": "positive"
+          },
+          {
+            "criterion": "Integrates knowledge about statistical safeguards with fp8 training dynamics effectively",
+            "weight": 8,
+            "category": "positive"
+          },
+          {
+            "criterion": "Avoids superficial or purely descriptive answers without technical depth",
+            "weight": 5,
+            "category": "positive"
+          },
+          {
+            "criterion": "Does not incorrectly attribute failures to factors unrelated to quantization noise or variance",
+            "weight": -7,
+            "category": "negative"
+          },
+          {
+            "criterion": "Avoids suggesting threshold adjustments that contradict the paper's empirical findings",
+            "weight": -6,
+            "category": "negative"
+          },
+          {
+            "criterion": "Does not ignore the balance between stability and adaptability in threshold updates",
+            "weight": -5,
+            "category": "negative"
+          },
+          {
+            "criterion": "Avoids reasoning errors that conflate activation variance with other statistical metrics",
+            "weight": -4,
+            "category": "negative"
+          },
+          {
+            "criterion": "Does not oversimplify the effects of network depth on clipping stability",
+            "weight": -6,
+            "category": "negative"
+          }
+        ],
+        "question_type": "adaptive clipping threshold optimization",
+        "reasoning_tags": [
+          "statistical_analysis",
+          "quantization_effects",
+          "architecture_impact"
+        ]
+      },
+      "weak_scores": [
+        0.5172413793103449,
+        0.5172413793103449,
+        0.5172413793103449
+      ],
+      "strong_scores": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "gap": null,
+      "feedback": "strong_avg 0.000 < 0.6"
+    },
+    {
+      "round": 11,
+      "status": "FAILED_STRONG",
+      "qa": {
+        "context": "Adaptive gradient clipping methods that adjust thresholds based on activation statistics have been proposed to stabilize low-precision (fp8) training. However, the paper shows that coupling the clipping threshold to running activation variance can fail under certain network depth conditions. Understanding the alternative mechanisms or modifications to the adaptation process that can mitigate instability requires analyzing how variance estimation and clipping interact beyond straightforward coupling.",
+        "question": "Beyond directly coupling the adaptive clipping threshold to the running variance of activations, what alternative or supplementary statistical mechanisms do the authors investigate or suggest to improve stability during fp8 training, particularly for very deep networks, and how do these mechanisms address the shortcomings identified in their failure analysis?",
+        "reference_answer": "The authors conduct ablations over threshold update schedules and analyze modifications to the variance coupling mechanism, such as smoothing or incorporating additional safeguards to reduce sensitivity to noisy variance estimates under fp8 quantization. These alternative mechanisms can moderate abrupt threshold changes that cause instability in very deep networks. Their failure analysis indicates that carefully tuned update rules or variance estimation techniques can partially overcome the limitations of raw variance coupling, improving training stability in challenging architectural regimes.",
+        "rubric": [
+          {
+            "criterion": "Identifies that the paper explores modifications beyond direct variance coupling for threshold adaptation",
+            "weight": 8,
+            "category": "positive"
+          },
+          {
+            "criterion": "Explains how smoothing or statistical safeguards can reduce sensitivity to noisy activation variance estimates",
+            "weight": 7,
+            "category": "positive"
+          },
+          {
+            "criterion": "Connects these alternative mechanisms to improved stability in fp8 training, especially for very deep networks",
+            "weight": 8,
+            "category": "positive"
+          },
+          {
+            "criterion": "References the failure analysis to justify why raw variance coupling is insufficient in deep architectures",
+            "weight": 6,
+            "category": "positive"
+          },
+          {
+            "criterion": "Distinguishes between direct clipping threshold coupling and more complex adaptive update rules",
+            "weight": 5,
+            "category": "positive"
+          },
+          {
+            "criterion": "Describes how alternative threshold adaptations moderate abrupt changes that lead to loss spikes",
+            "weight": 6,
+            "category": "positive"
+          },
+          {
+            "criterion": "Acknowledges the role of fp8 quantization noise in motivating the need for these alternative mechanisms",
+            "weight": 5,
+            "category": "positive"
+          },
+          {
+            "criterion": "Avoids superficial recall; links mechanisms to underlying training dynamics and stability",
+            "weight": 7,
+            "category": "positive"
+          },
+          {
+            "criterion": "Does not confuse variance estimation improvements with unrelated architectural changes",
+            "weight": -6,
+            "category": "negative"
+          },
+          {
+            "criterion": "Does not claim that raw variance coupling works perfectly in all settings",
+            "weight": -7,
+            "category": "negative"
+          },
+          {
+            "criterion": "Does not merely restate that the method fails in deep networks without explaining mechanisms",
+            "weight": -8,
+            "category": "negative"
+          },
+          {
+            "criterion": "Does not omit the impact of fp8 quantization noise on variance estimation and threshold stability",
+            "weight": -5,
+            "category": "negative"
+          },
+          {
+            "criterion": "Avoids conflating failure causes with unrelated training instabilities",
+            "weight": -6,
+            "category": "negative"
+          }
+        ],
+        "question_type": "clipping threshold adaptation mechanisms",
+        "reasoning_tags": [
+          "statistical_modeling",
+          "failure_analysis",
+          "quantization_effects"
+        ]
+      },
+      "weak_scores": [
+        0.038461538461538464,
+        0.1346153846153846,
+        0.38461538461538464
+      ],
+      "strong_scores": [
+        0.38461538461538464,
+        0.38461538461538464,
+        0.38461538461538464
+      ],
+      "gap": null,
+      "feedback": "strong_avg 0.385 < 0.6"
+    },
+    {
+      "round": 12,
+      "status": "FAILED_STRONG",
+      "qa": {
+        "context": "Training deep neural networks using low-precision formats like fp8 presents unique challenges due to quantization noise that affects internal activation statistics. Adaptive gradient clipping strategies often rely on running estimates of activation variance to dynamically adjust clipping thresholds per layer, aiming to prevent instability such as loss spikes. However, the accuracy and reliability of these variance estimates under quantization noise, as well as how architectural features like network depth influence this process, are critical to the effectiveness of these methods.",
+        "question": "How do varying network depths influence the reliability of activation variance estimates used for adaptive gradient clipping under fp8 quantization, and why do these factors lead to different stability outcomes in shallow versus very deep networks according to the authors' analysis?",
+        "reference_answer": "The paper demonstrates that increasing network depth exacerbates the impact of quantization noise on activation variance estimates, causing these estimates to become less accurate and more noisy in very deep networks. This degradation leads to less effective adaptive clipping thresholds, resulting in instability such as loss spikes that are not fully prevented by the variance-coupled clipping mechanism. In contrast, shallower networks maintain more reliable variance estimates under fp8 quantization and consequently more stable training dynamics, as the smaller accumulation of quantization noise and simpler signal propagation reduce variance estimation errors.",
+        "rubric": [
+          {
+            "criterion": "Correctly identifies how network depth affects quantization noise accumulation",
+            "weight": 8,
+            "category": "positive"
+          },
+          {
+            "criterion": "Explains the relationship between quantization noise and variance estimation accuracy",
+            "weight": 9,
+            "category": "positive"
+          },
+          {
+            "criterion": "Distinguishes between shallow and very deep network behavior in terms of variance estimation reliability",
+            "weight": 7,
+            "category": "positive"
+          },
+          {
+            "criterion": "Connects variance estimation errors to the failure of adaptive gradient clipping thresholds",
+            "weight": 8,
+            "category": "positive"
+          },
+          {
+            "criterion": "Describes resulting training stability differences attributable to depth",
+            "weight": 7,
+            "category": "positive"
+          },
+          {
+            "criterion": "Incorporates reasoning about statistical inference under quantization noise",
+            "weight": 6,
+            "category": "positive"
+          },
+          {
+            "criterion": "Mentions the paper’s failure analysis findings to ground the explanation",
+            "weight": 6,
+            "category": "positive"
+          },
+          {
+            "criterion": "Avoids superficial or vague statements about network depth or quantization",
+            "weight": 5,
+            "category": "positive"
+          },
+          {
+            "criterion": "Does not confuse the directionality of noise effects (i.e., noise increasing vs reducing variance estimation quality)",
+            "weight": -7,
+            "category": "negative"
+          },
+          {
+            "criterion": "Does not claim stability issues occur in shallow networks contradicting the paper",
+            "weight": -6,
+            "category": "negative"
+          },
+          {
+            "criterion": "Avoids attributing instability solely to the clipping method without considering variance estimation issues",
+            "weight": -8,
+            "category": "negative"
+          },
+          {
+            "criterion": "Does not incorrectly suggest that adaptive clipping always fails regardless of depth",
+            "weight": -6,
+            "category": "negative"
+          },
+          {
+            "criterion": "Avoids mixing up the role of activations versus gradients in variance estimation",
+            "weight": -5,
+            "category": "negative"
+          },
+          {
+            "criterion": "Does not omit the role of fp8 quantization noise in causing variance estimation degradation",
+            "weight": -7,
+            "category": "negative"
+          },
+          {
+            "criterion": "Maintains focus on variance estimate reliability rather than fixed clipping threshold effects",
+            "weight": 6,
+            "category": "positive"
+          }
+        ],
+        "question_type": "stability mechanism evaluation",
+        "reasoning_tags": [
+          "statistical_inference",
+          "quantization_effects",
+          "architectural_analysis"
+        ]
+      },
+      "weak_scores": [
+        0.3709677419354839,
+        0.3709677419354839,
+        0.3709677419354839
+      ],
+      "strong_scores": [
+        0.3709677419354839,
+        0.3709677419354839,
+        0.3709677419354839
+      ],
+      "gap": null,
+      "feedback": "strong_avg 0.371 < 0.6"
+    }
+  ]
+}

@@ -1,0 +1,727 @@
+{
+  "paper_id": "sample_paper_beta",
+  "accepted": true,
+  "accepted_qa": {
+    "context": "In legal QA systems, multi-source retrieval involves passages from heterogeneous sources with varying metadata and formatting conventions, such as title prefixes. Models trained on one formatting style may encounter different formats at inference, challenging their calibration and discrimination capabilities.",
+    "question": "How might a cross-encoder reranker's calibration and discrimination performance be affected when deployed on legal document sources with unseen passage granularity and novel metadata formats, and what strategies derived from the paper could mitigate degradation caused by such domain shifts?",
+    "reference_answer": "The paper demonstrates that mismatches in passage construction between training and inference, particularly regarding title prefix formatting, degrade both calibration and discrimination. This indicates that the reranker heavily relies on consistent metadata cues and passage granularity to function well. To mitigate such degradation when facing unseen formats, the paper suggests aligning training and inference passage formatting (e.g., consistent use of title prefixes) and highlights that name-blind leak checks expose the reranker's susceptibility to overfitting on surface cues rather than robust semantic features. Thus, training that incorporates diverse or generalized formatting and evaluation under name-blind conditions can improve robustness to domain shifts.",
+    "rubric": [
+      {
+        "criterion": "Identifies impact of unseen passage granularity on calibration",
+        "weight": 7,
+        "category": "positive"
+      },
+      {
+        "criterion": "Explains how inconsistent metadata formats cause discrimination loss",
+        "weight": 8,
+        "category": "positive"
+      },
+      {
+        "criterion": "Recognizes the reranker's dependence on surface-level cues like title prefixes",
+        "weight": 7,
+        "category": "positive"
+      },
+      {
+        "criterion": "Includes strategies for mitigating domain shift effects based on training/inference alignment",
+        "weight": 9,
+        "category": "positive"
+      },
+      {
+        "criterion": "Discusses implications of name-blind leak checks for evaluating robustness",
+        "weight": 6,
+        "category": "positive"
+      },
+      {
+        "criterion": "Articulates the difference between semantic generalization and overfitting to metadata",
+        "weight": 8,
+        "category": "positive"
+      },
+      {
+        "criterion": "Connects domain adaptation challenges to multi-source legal retrieval complexity",
+        "weight": 7,
+        "category": "positive"
+      },
+      {
+        "criterion": "Explains why calibration quality is sensitive to passage formatting consistency",
+        "weight": 7,
+        "category": "positive"
+      },
+      {
+        "criterion": "Fails to distinguish between calibration and discrimination concepts",
+        "weight": -6,
+        "category": "negative"
+      },
+      {
+        "criterion": "Overemphasizes recall of paper details without reasoning on domain shift effects",
+        "weight": -5,
+        "category": "negative"
+      },
+      {
+        "criterion": "Neglects the role of metadata formatting in performance degradation",
+        "weight": -7,
+        "category": "negative"
+      },
+      {
+        "criterion": "Mistakes name-blind leak checks as merely a data filtering mechanism rather than evaluation of model robustness",
+        "weight": -6,
+        "category": "negative"
+      },
+      {
+        "criterion": "Ignores the multi-source nature and treats retrieval sources as homogeneous",
+        "weight": -5,
+        "category": "negative"
+      }
+    ],
+    "question_type": "domain adaptation robustness",
+    "reasoning_tags": [
+      "generalization",
+      "feature_dependence",
+      "calibration"
+    ]
+  },
+  "n_rounds": 7,
+  "rounds": [
+    {
+      "round": 1,
+      "status": "TOO_EASY",
+      "qa": {
+        "context": "In multi-source legal question answering systems, rerankers utilize cross-encoder architectures that rely heavily on input formatting consistency between training and inference. Discrepancies in how candidate passages are constructed, such as the presence or absence of title prefixes, can impact the calibration and discrimination ability of these models. Understanding the interaction between passage granularity and reranker calibration is crucial for optimizing legal QA performance across diverse datasets.",
+        "question": "How does a mismatch between title-prefixed candidate construction during training and inference affect the calibration and discrimination performance of cross-encoder rerankers in a multi-source legal retrieval scenario? Illustrate the underlying mechanisms that lead to these effects.",
+        "reference_answer": "The paper finds that cross-encoder rerankers require consistent title-prefixed candidate formatting during training and inference to maintain proper calibration. When training is done with title prefixes but inference uses candidates without them (or vice versa), the reranker experiences a drop in discrimination ability because it cannot reliably align learned attention patterns or scoring distributions. This mismatch leads to poorer confidence estimates and ranking errors, demonstrating that formatting consistency directly supports calibration quality and effective discrimination in multi-source legal retrieval settings.",
+        "rubric": [
+          {
+            "criterion": "Identifies the importance of matching candidate formatting between training and inference",
+            "weight": 8,
+            "category": "positive"
+          },
+          {
+            "criterion": "Explains how title prefixes impact the input representation for the reranker",
+            "weight": 7,
+            "category": "positive"
+          },
+          {
+            "criterion": "Connects formatting mismatch to decreased reranker calibration",
+            "weight": 9,
+            "category": "positive"
+          },
+          {
+            "criterion": "Describes the resulting loss in discrimination performance quantitatively or qualitatively",
+            "weight": 7,
+            "category": "positive"
+          },
+          {
+            "criterion": "Demonstrates understanding of multi-source challenges in legal retrieval scenarios",
+            "weight": 6,
+            "category": "positive"
+          },
+          {
+            "criterion": "Articulates the mechanism by which training-inference format divergence affects model confidence",
+            "weight": 8,
+            "category": "positive"
+          },
+          {
+            "criterion": "Includes implications for reranker design or dataset preparation",
+            "weight": 5,
+            "category": "positive"
+          },
+          {
+            "criterion": "Fails to mention the necessity of consistent formatting during both training and inference",
+            "weight": -10,
+            "category": "negative"
+          },
+          {
+            "criterion": "Conflates calibration with mere ranking accuracy without discussing confidence",
+            "weight": -7,
+            "category": "negative"
+          },
+          {
+            "criterion": "Overlooks the role of title prefixes in altering passage granularity",
+            "weight": -6,
+            "category": "negative"
+          },
+          {
+            "criterion": "Answers without addressing the multi-source legal retrieval context",
+            "weight": -5,
+            "category": "negative"
+          },
+          {
+            "criterion": "Confuses discrimination loss due to formatting mismatch with other error sources",
+            "weight": -8,
+            "category": "negative"
+          }
+        ],
+        "question_type": "reranker calibration under format mismatch",
+        "reasoning_tags": [
+          "experimental_design",
+          "model_calibration",
+          "data_formatting"
+        ]
+      },
+      "weak_scores": [
+        0.9,
+        0.9,
+        0.9
+      ],
+      "strong_scores": [],
+      "gap": null,
+      "feedback": "weak_avg 0.900 > 0.65"
+    },
+    {
+      "round": 2,
+      "status": "FAILED_STRONG",
+      "qa": {
+        "context": "In legal information retrieval systems combining multiple document sources, the granularity of text passages and the presence of metadata such as titles influence downstream reranker models. Calibration of rerankers ensures reliable confidence estimates, which is critical for practical deployment. However, data format changes between training and inference can degrade calibration, and certain held-out validation checks may inadvertently reveal sensitive information, impacting fairness and robustness.",
+        "question": "Considering the interplay between passage granularity and metadata formatting, how does enforcing or relaxing title-prefix consistency during reranker training and inference affect the model's ability to discriminate between relevant and irrelevant legal passages, especially under held-out leak checks that conceal named entities? Discuss the potential trade-offs revealed by this setup in terms of calibration quality and discrimination loss.",
+        "reference_answer": "The paper demonstrates that maintaining consistent title-prefixed candidate formatting between training and inference is crucial for preserving cross-encoder reranker calibration and discrimination performance. When training and inference formats match, the reranker can effectively learn signal associations linked to the title metadata, improving discrimination between relevant and irrelevant passages. Conversely, when formats mismatch, calibration degrades, and discrimination suffers significantly. Additionally, introducing held-out leak checks that mask named entities (making them name-blind) further exacerbates discrimination loss, highlighting the reliance of rerankers on identifiable metadata. These findings reveal a trade-off where strict format consistency improves calibration and discrimination but may reduce robustness to metadata obfuscation scenarios.",
+        "rubric": [
+          {
+            "criterion": "Identifies the role of title-prefix consistency in training and inference",
+            "weight": 8,
+            "category": "positive"
+          },
+          {
+            "criterion": "Explains how title-prefix mismatches affect calibration metrics",
+            "weight": 7,
+            "category": "positive"
+          },
+          {
+            "criterion": "Discusses the impact of passage granularity on reranker signal learning",
+            "weight": 6,
+            "category": "positive"
+          },
+          {
+            "criterion": "Analyzes the effect of held-out leak checks with name-blinding on discrimination",
+            "weight": 8,
+            "category": "positive"
+          },
+          {
+            "criterion": "Explores trade-offs between calibration quality and robustness to metadata masking",
+            "weight": 7,
+            "category": "positive"
+          },
+          {
+            "criterion": "Integrates empirical findings from the paper to support the explanation",
+            "weight": 6,
+            "category": "positive"
+          },
+          {
+            "criterion": "Highlights the importance of multi-source retrieval settings in the observed effects",
+            "weight": 5,
+            "category": "positive"
+          },
+          {
+            "criterion": "Avoids simplistic recall; provides reasoning about model behavior under format shifts",
+            "weight": 7,
+            "category": "positive"
+          },
+          {
+            "criterion": "Does not confuse calibration degradation with overall accuracy loss",
+            "weight": -6,
+            "category": "negative"
+          },
+          {
+            "criterion": "Avoids attributing discrimination loss solely to passage text without considering metadata",
+            "weight": -5,
+            "category": "negative"
+          },
+          {
+            "criterion": "Does not overlook the impact of name-blinding in held-out leak checks",
+            "weight": -6,
+            "category": "negative"
+          },
+          {
+            "criterion": "Does not assume calibration is unaffected by retrieval granularity",
+            "weight": -5,
+            "category": "negative"
+          },
+          {
+            "criterion": "Avoids vague or generic statements unrelated to the reranker configuration",
+            "weight": -4,
+            "category": "negative"
+          }
+        ],
+        "question_type": "model calibration under data format shifts",
+        "reasoning_tags": [
+          "experimental_design",
+          "statistical_analysis",
+          "robustness_evaluation"
+        ]
+      },
+      "weak_scores": [
+        0.3148148148148148,
+        0.2037037037037037,
+        0.2037037037037037
+      ],
+      "strong_scores": [
+        0.0,
+        0.42592592592592593,
+        0.0
+      ],
+      "gap": null,
+      "feedback": "strong_avg 0.142 < 0.6"
+    },
+    {
+      "round": 3,
+      "status": "TOO_EASY",
+      "qa": {
+        "context": "In legal question answering systems, reranker models must handle multiple document sources whose formatting and metadata granularity vary widely. These variations challenge the calibration and discrimination abilities of cross-encoder rerankers, especially under conditions that obscure key identifying information such as named entities. Understanding how reranker calibration is affected by controlled manipulation of candidate passage metadata is crucial for robust retrieval across heterogeneous legal corpora.",
+        "question": "How does the presence or absence of title-prefix metadata during both training and inference influence the cross-encoder reranker’s calibration and discrimination when evaluated under a held-out name-blind leak check, and what implications does this have for designing training regimes that generalize across varied legal document formats?",
+        "reference_answer": "The study demonstrates that cross-encoder rerankers require consistent use of title-prefix metadata between training and inference to maintain effective calibration and discrimination. When this consistency is violated—such as omitting title prefixes during inference after training with them—the model suffers a measurable discrimination loss. Under held-out leak checks that hide named entities, this loss is exacerbated, showing that title-prefix information helps the model anchor its relevancy predictions beyond explicit entity recognition. Consequently, training regimes must enforce metadata formatting consistency to ensure generalization across diverse legal document formats, particularly when explicit identifiers may be concealed.",
+        "rubric": [
+          {
+            "criterion": "Identifies the role of title-prefix metadata consistency in calibration",
+            "weight": 8,
+            "category": "positive"
+          },
+          {
+            "criterion": "Explains interaction between title-prefix consistency and discrimination performance",
+            "weight": 7,
+            "category": "positive"
+          },
+          {
+            "criterion": "Connects held-out name-blind leak checks to challenges in entity recognition and model calibration",
+            "weight": 6,
+            "category": "positive"
+          },
+          {
+            "criterion": "Articulates the impact of training-inference mismatch on reranker robustness",
+            "weight": 7,
+            "category": "positive"
+          },
+          {
+            "criterion": "Describes implications for training regime design to handle metadata variation",
+            "weight": 6,
+            "category": "positive"
+          },
+          {
+            "criterion": "Uses evidence from experimental findings to support conclusions",
+            "weight": 8,
+            "category": "positive"
+          },
+          {
+            "criterion": "Distinguishes between calibration and discrimination effects clearly",
+            "weight": 7,
+            "category": "positive"
+          },
+          {
+            "criterion": "Acknowledges the multi-source nature of the legal retrieval setting",
+            "weight": 5,
+            "category": "positive"
+          },
+          {
+            "criterion": "Misattributes discrimination loss to factors unrelated to title-prefix formatting",
+            "weight": -8,
+            "category": "negative"
+          },
+          {
+            "criterion": "Overlooks the effect of held-out leak checks on model evaluation",
+            "weight": -7,
+            "category": "negative"
+          },
+          {
+            "criterion": "Confuses calibration quality with retrieval rank accuracy without distinction",
+            "weight": -6,
+            "category": "negative"
+          },
+          {
+            "criterion": "Fails to relate metadata formatting consistency to generalization across data sources",
+            "weight": -8,
+            "category": "negative"
+          },
+          {
+            "criterion": "Ignores evidence from experimental results to justify claims",
+            "weight": -9,
+            "category": "negative"
+          }
+        ],
+        "question_type": "model robustness evaluation",
+        "reasoning_tags": [
+          "experimental_design",
+          "statistical_inference",
+          "model_calibration"
+        ]
+      },
+      "weak_scores": [
+        0.7592592592592593,
+        1.0,
+        0.7407407407407407
+      ],
+      "strong_scores": [],
+      "gap": null,
+      "feedback": "weak_avg 0.833 > 0.65"
+    },
+    {
+      "round": 4,
+      "status": "TOO_EASY",
+      "qa": {
+        "context": "Retrieval systems in legal question answering must handle data from multiple sources, where document metadata and formatting affect model training and inference. Preventing information leakage through name-blind leak checks tests the model's robustness, but the interaction between leakage controls, reranker calibration, and passage segmentation granularity remains complex.",
+        "question": "How does implementing name-blind held-out leak checks influence the reranker’s calibration and discrimination when trained and evaluated on documents with varying passage granularity and title-prefix metadata, and what does this reveal about the model’s reliance on surface-level cues versus deeper semantic matching in legal retrieval tasks?",
+        "reference_answer": "The study demonstrates that name-blind held-out leak checks reduce the model’s calibration and discrimination performance when the reranker relies on title-prefix metadata, indicating that the model partially depends on surface-level cues tied to document titles. When passage granularity varies, this reliance becomes more pronounced, leading to discrimination losses. This outcome reveals that without leakage, the reranker struggles to generalize beyond superficial formatting cues and highlights the importance of aligning training and inference data formats to encourage deeper semantic matching rather than overfitting to metadata artifacts.",
+        "rubric": [
+          {
+            "criterion": "Identifies impact of name-blind leak checks on reranker calibration",
+            "weight": 8,
+            "category": "positive"
+          },
+          {
+            "criterion": "Explains the interaction between passage granularity and metadata formatting on model performance",
+            "weight": 7,
+            "category": "positive"
+          },
+          {
+            "criterion": "Distinguishes between reliance on surface-level cues and semantic matching",
+            "weight": 10,
+            "category": "positive"
+          },
+          {
+            "criterion": "Connects leakage prevention to generalization challenges in legal QA",
+            "weight": 6,
+            "category": "positive"
+          },
+          {
+            "criterion": "Articulates how training/inference format alignment affects robustness",
+            "weight": 7,
+            "category": "positive"
+          },
+          {
+            "criterion": "Includes implications for design of retrieval systems under multi-source conditions",
+            "weight": 5,
+            "category": "positive"
+          },
+          {
+            "criterion": "Integrates statistical reasoning about calibration and discrimination metrics",
+            "weight": 6,
+            "category": "positive"
+          },
+          {
+            "criterion": "Avoids superficial recall by focusing on reasoning about underlying mechanisms",
+            "weight": 9,
+            "category": "positive"
+          },
+          {
+            "criterion": "Fails to address the effect of metadata formatting on model reliance",
+            "weight": -8,
+            "category": "negative"
+          },
+          {
+            "criterion": "Conflates calibration loss with discrimination loss without distinction",
+            "weight": -6,
+            "category": "negative"
+          },
+          {
+            "criterion": "Ignores the influence of passage granularity variability",
+            "weight": -7,
+            "category": "negative"
+          },
+          {
+            "criterion": "Overstates findings beyond what data supports regarding semantic matching",
+            "weight": -5,
+            "category": "negative"
+          },
+          {
+            "criterion": "Merely restates paper findings without demonstrating understanding",
+            "weight": -9,
+            "category": "negative"
+          }
+        ],
+        "question_type": "impact of leakage prevention on model robustness",
+        "reasoning_tags": [
+          "generalization",
+          "model_behavior_analysis",
+          "statistical_inference"
+        ]
+      },
+      "weak_scores": [
+        0.5517241379310345,
+        0.5517241379310345,
+        0.7931034482758621
+      ],
+      "strong_scores": [],
+      "gap": null,
+      "feedback": "max_weak 0.793 > 0.75"
+    },
+    {
+      "round": 5,
+      "status": "TOO_EASY",
+      "qa": {
+        "context": "In legal information retrieval, cross-encoder rerankers must effectively score passages from diverse sources to identify relevant content. Passage granularity and the inclusion of metadata such as title prefixes can influence the model’s calibration and discrimination. Understanding how these factors interact when metadata is altered or removed during evaluation helps assess the model’s reliance on surface-level cues versus true semantic signals.",
+        "question": "If a cross-encoder reranker trained with title-prefixed passages is evaluated on candidate passages with artificially randomized or inconsistent title prefixes, how would you expect the model’s calibration and discrimination performance to change, and what does this imply about the nature of the features the reranker relies on in multi-source legal retrieval settings?",
+        "reference_answer": "The model’s calibration and discrimination performance would degrade when evaluated on passages with randomized or inconsistent title prefixes because it was trained with a consistent title-prefixed format, leading to a mismatch between training and inference distributions. This suggests the reranker relies significantly on the presence and consistency of title-prefix metadata as a key feature, indicating a dependence on surface-level cues rather than purely on the semantic content of the passages. Such reliance makes the model less robust to perturbations in metadata formatting and highlights the importance of matching candidate construction formats between training and inference.",
+        "rubric": [
+          {
+            "criterion": "Identifies degradation in calibration due to inconsistent title prefixes",
+            "weight": 9,
+            "category": "positive"
+          },
+          {
+            "criterion": "Recognizes negative impact on discrimination capability under metadata perturbation",
+            "weight": 9,
+            "category": "positive"
+          },
+          {
+            "criterion": "Connects performance drop to mismatch between training and evaluation data formats",
+            "weight": 8,
+            "category": "positive"
+          },
+          {
+            "criterion": "Infers dependency of reranker on surface-level metadata features",
+            "weight": 8,
+            "category": "positive"
+          },
+          {
+            "criterion": "Relates findings to multi-source legal retrieval challenges",
+            "weight": 7,
+            "category": "positive"
+          },
+          {
+            "criterion": "Explains implications for designing robust training regimes",
+            "weight": 7,
+            "category": "positive"
+          },
+          {
+            "criterion": "Considers semantic versus surface cue reliance in reranker behavior",
+            "weight": 8,
+            "category": "positive"
+          },
+          {
+            "criterion": "Mentions the importance of matching training and inference candidate formatting",
+            "weight": 6,
+            "category": "positive"
+          },
+          {
+            "criterion": "Fails to address the effect of metadata inconsistency on model calibration",
+            "weight": -8,
+            "category": "negative"
+          },
+          {
+            "criterion": "Neglects the role of passage granularity or metadata in model performance",
+            "weight": -7,
+            "category": "negative"
+          },
+          {
+            "criterion": "Assumes semantic robustness without evidence from formatting mismatch",
+            "weight": -9,
+            "category": "negative"
+          },
+          {
+            "criterion": "Confuses training-time formatting influence with inference-time effects",
+            "weight": -6,
+            "category": "negative"
+          },
+          {
+            "criterion": "Overlooks implications for multi-source retrieval complexity",
+            "weight": -7,
+            "category": "negative"
+          }
+        ],
+        "question_type": "model robustness to metadata perturbation",
+        "reasoning_tags": [
+          "experimental_design",
+          "statistical_inference",
+          "model_behavior_analysis"
+        ]
+      },
+      "weak_scores": [
+        0.7741935483870968,
+        0.7741935483870968,
+        0.7741935483870968
+      ],
+      "strong_scores": [],
+      "gap": null,
+      "feedback": "weak_avg 0.774 > 0.65"
+    },
+    {
+      "round": 6,
+      "status": "FAILED_STRONG",
+      "qa": {
+        "context": "Cross-encoder rerankers in legal question answering systems rely on textual features from candidate passages to distinguish relevant from irrelevant documents. Variations in how candidate passages are constructed—specifically the inclusion or exclusion of title prefixes during training and inference—can alter the distribution and saliency of these features. Additionally, tasks like held-out leak checks mask named entities to test model robustness beyond shallow cues. Understanding which features the model depends on and how sensitive it is to metadata formatting is critical for building reliable legal retrieval systems that generalize well across source variations and document formats.",
+        "question": "How would the cross-encoder reranker's reliance on title prefixes as features manifest in its calibration and discrimination performance when faced with systematically ablated metadata during inference, and what does this imply about the model's capacity for semantic understanding versus overfitting to surface-level cues in multi-source legal retrieval?",
+        "reference_answer": "The paper shows that cross-encoder rerankers trained with title-prefixed candidate passages rely heavily on these prefixes as discriminative features. When metadata such as title prefixes are systematically ablated or randomized at inference time, calibration deteriorates and discrimination performance suffers markedly. This indicates that the model overfits to the surface-level cue of title prefixes rather than leveraging deeper semantic content of the passages. Held-out name-blind leak checks further reveal that without these metadata cues, the model's ability to generalize and robustly distinguish relevant passages decreases, demonstrating a limited capacity for semantic understanding independent of formatting artifacts.",
+        "rubric": [
+          {
+            "criterion": "Identifies that title prefixes serve as strong surface-level features the model relies on",
+            "weight": 8,
+            "category": "positive"
+          },
+          {
+            "criterion": "Explains the effect of metadata ablation on calibration degradation",
+            "weight": 7,
+            "category": "positive"
+          },
+          {
+            "criterion": "Connects performance loss to diminished discrimination ability",
+            "weight": 8,
+            "category": "positive"
+          },
+          {
+            "criterion": "Discusses overfitting to surface cues rather than semantic understanding",
+            "weight": 9,
+            "category": "positive"
+          },
+          {
+            "criterion": "Relates findings to implications for multi-source legal retrieval robustness",
+            "weight": 7,
+            "category": "positive"
+          },
+          {
+            "criterion": "Recognizes the role of held-out name-blind leak checks in revealing reliance on metadata",
+            "weight": 6,
+            "category": "positive"
+          },
+          {
+            "criterion": "Describes how systematic ablation differs from random noise in testing feature reliance",
+            "weight": 5,
+            "category": "positive"
+          },
+          {
+            "criterion": "Avoids merely recalling experimental results without reasoning",
+            "weight": 6,
+            "category": "positive"
+          },
+          {
+            "criterion": "Does not confuse calibration with simple accuracy metrics",
+            "weight": 5,
+            "category": "positive"
+          },
+          {
+            "criterion": "Does not claim the model achieves strong semantic understanding despite feature ablation",
+            "weight": -8,
+            "category": "negative"
+          },
+          {
+            "criterion": "Does not ignore the distinction between training and inference formatting effects",
+            "weight": -7,
+            "category": "negative"
+          },
+          {
+            "criterion": "Avoids assuming improvements with metadata ablation",
+            "weight": -6,
+            "category": "negative"
+          },
+          {
+            "criterion": "Does not conflate held-out leak checks with normal test conditions",
+            "weight": -5,
+            "category": "negative"
+          },
+          {
+            "criterion": "Does not omit reasoning about both calibration and discrimination effects",
+            "weight": -7,
+            "category": "negative"
+          }
+        ],
+        "question_type": "feature sensitivity and generalization",
+        "reasoning_tags": [
+          "statistical_reasoning",
+          "model_robustness",
+          "feature_ablation"
+        ]
+      },
+      "weak_scores": [
+        0.3770491803278688,
+        0.3770491803278688,
+        0.2786885245901639
+      ],
+      "strong_scores": [
+        0.45901639344262296,
+        0.45901639344262296,
+        0.45901639344262296
+      ],
+      "gap": null,
+      "feedback": "strong_avg 0.459 < 0.6"
+    },
+    {
+      "round": 7,
+      "status": "ACCEPTED",
+      "qa": {
+        "context": "In legal QA systems, multi-source retrieval involves passages from heterogeneous sources with varying metadata and formatting conventions, such as title prefixes. Models trained on one formatting style may encounter different formats at inference, challenging their calibration and discrimination capabilities.",
+        "question": "How might a cross-encoder reranker's calibration and discrimination performance be affected when deployed on legal document sources with unseen passage granularity and novel metadata formats, and what strategies derived from the paper could mitigate degradation caused by such domain shifts?",
+        "reference_answer": "The paper demonstrates that mismatches in passage construction between training and inference, particularly regarding title prefix formatting, degrade both calibration and discrimination. This indicates that the reranker heavily relies on consistent metadata cues and passage granularity to function well. To mitigate such degradation when facing unseen formats, the paper suggests aligning training and inference passage formatting (e.g., consistent use of title prefixes) and highlights that name-blind leak checks expose the reranker's susceptibility to overfitting on surface cues rather than robust semantic features. Thus, training that incorporates diverse or generalized formatting and evaluation under name-blind conditions can improve robustness to domain shifts.",
+        "rubric": [
+          {
+            "criterion": "Identifies impact of unseen passage granularity on calibration",
+            "weight": 7,
+            "category": "positive"
+          },
+          {
+            "criterion": "Explains how inconsistent metadata formats cause discrimination loss",
+            "weight": 8,
+            "category": "positive"
+          },
+          {
+            "criterion": "Recognizes the reranker's dependence on surface-level cues like title prefixes",
+            "weight": 7,
+            "category": "positive"
+          },
+          {
+            "criterion": "Includes strategies for mitigating domain shift effects based on training/inference alignment",
+            "weight": 9,
+            "category": "positive"
+          },
+          {
+            "criterion": "Discusses implications of name-blind leak checks for evaluating robustness",
+            "weight": 6,
+            "category": "positive"
+          },
+          {
+            "criterion": "Articulates the difference between semantic generalization and overfitting to metadata",
+            "weight": 8,
+            "category": "positive"
+          },
+          {
+            "criterion": "Connects domain adaptation challenges to multi-source legal retrieval complexity",
+            "weight": 7,
+            "category": "positive"
+          },
+          {
+            "criterion": "Explains why calibration quality is sensitive to passage formatting consistency",
+            "weight": 7,
+            "category": "positive"
+          },
+          {
+            "criterion": "Fails to distinguish between calibration and discrimination concepts",
+            "weight": -6,
+            "category": "negative"
+          },
+          {
+            "criterion": "Overemphasizes recall of paper details without reasoning on domain shift effects",
+            "weight": -5,
+            "category": "negative"
+          },
+          {
+            "criterion": "Neglects the role of metadata formatting in performance degradation",
+            "weight": -7,
+            "category": "negative"
+          },
+          {
+            "criterion": "Mistakes name-blind leak checks as merely a data filtering mechanism rather than evaluation of model robustness",
+            "weight": -6,
+            "category": "negative"
+          },
+          {
+            "criterion": "Ignores the multi-source nature and treats retrieval sources as homogeneous",
+            "weight": -5,
+            "category": "negative"
+          }
+        ],
+        "question_type": "domain adaptation robustness",
+        "reasoning_tags": [
+          "generalization",
+          "feature_dependence",
+          "calibration"
+        ]
+      },
+      "weak_scores": [
+        0.5254237288135594,
+        0.3728813559322034,
+        0.03389830508474576
+      ],
+      "strong_scores": [
+        0.7796610169491526,
+        0.8983050847457628,
+        0.8813559322033898
+      ],
+      "gap": 0.5423728813559322,
+      "feedback": "accepted"
+    }
+  ]
+}

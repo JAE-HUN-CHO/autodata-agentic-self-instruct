@@ -1,0 +1,1104 @@
+{
+  "paper_id": "sample_paper_alpha",
+  "accepted": false,
+  "accepted_qa": null,
+  "n_rounds": 12,
+  "rounds": [
+    {
+      "round": 1,
+      "status": "FAILED_STRONG",
+      "qa": {
+        "context": "Training deep neural networks with low-precision formats like fp8 can lead to unstable loss dynamics. Adaptive gradient clipping strategies that adjust per-layer thresholds based on activation statistics are proposed to improve stability. However, the interaction between these adaptive thresholds and training progression, especially in very deep architectures, presents complex challenges.",
+        "question": "How does coupling the per-layer adaptive clipping threshold to the running variance of activations mitigate loss spikes during fp8 training, and under what conditions does this strategy fail according to the paper's analysis?",
+        "reference_answer": "Coupling the clipping threshold to the running variance of activations allows the threshold to scale dynamically with the activation distribution, preventing excessively large gradient values that cause loss spikes. This adaptive mechanism outperforms fixed-threshold clipping by reacting to the layer's current statistical behavior, enhancing training stability. However, the paper identifies failure modes in very deep stacks where the variance estimation becomes less reliable, leading to inappropriate threshold scaling and resulting in loss instability.",
+        "rubric": [
+          {
+            "criterion": "Correctly identifies the role of activation variance in setting adaptive thresholds",
+            "weight": 8,
+            "category": "positive"
+          },
+          {
+            "criterion": "Explains how dynamic threshold adjustment prevents large gradient-induced loss spikes",
+            "weight": 7,
+            "category": "positive"
+          },
+          {
+            "criterion": "Recognizes the limitations of fixed-threshold clipping in handling activation variability",
+            "weight": 6,
+            "category": "positive"
+          },
+          {
+            "criterion": "Describes the relationship between per-layer statistics and clipping efficacy",
+            "weight": 7,
+            "category": "positive"
+          },
+          {
+            "criterion": "Illustrates the failure conditions in very deep networks as analyzed in the paper",
+            "weight": 8,
+            "category": "positive"
+          },
+          {
+            "criterion": "Connects variance estimation reliability to threshold scaling accuracy",
+            "weight": 6,
+            "category": "positive"
+          },
+          {
+            "criterion": "Discusses the impact of threshold mis-scaling on training stability",
+            "weight": 6,
+            "category": "positive"
+          },
+          {
+            "criterion": "Avoids equating adaptive clipping success solely to fixed-threshold comparison without nuance",
+            "weight": 5,
+            "category": "positive"
+          },
+          {
+            "criterion": "Does not confuse general gradient clipping with the specific adaptive method analyzed",
+            "weight": -5,
+            "category": "negative"
+          },
+          {
+            "criterion": "Avoids claiming adaptive clipping is universally effective without exceptions",
+            "weight": -7,
+            "category": "negative"
+          },
+          {
+            "criterion": "Does not ignore failure analysis section findings",
+            "weight": -6,
+            "category": "negative"
+          },
+          {
+            "criterion": "Avoids conflating activation running variance with gradient magnitude directly",
+            "weight": -4,
+            "category": "negative"
+          }
+        ],
+        "question_type": "adaptive clipping threshold dynamics",
+        "reasoning_tags": [
+          "statistical_analysis",
+          "failure_mode_identification",
+          "dynamic_systems"
+        ]
+      },
+      "weak_scores": [
+        0.5849056603773585,
+        0.4716981132075472,
+        0.4716981132075472
+      ],
+      "strong_scores": [
+        0.32075471698113206,
+        0.5849056603773585,
+        0.4716981132075472
+      ],
+      "gap": null,
+      "feedback": "strong_avg 0.459 < 0.6"
+    },
+    {
+      "round": 2,
+      "status": "FAILED_STRONG",
+      "qa": {
+        "context": "Training deep neural networks with low-precision formats like fp8 introduces numerical instabilities that can cause sudden loss spikes. Adaptive gradient clipping techniques adjust clipping thresholds based on layer-specific statistics, aiming to stabilize training. However, understanding when such adaptive strategies might fail is crucial for designing robust training algorithms under precision constraints.",
+        "question": "Considering the dynamics of per-layer adaptive gradient clipping tied to activation variance, what specific architectural or training factors contribute to the failure of this method in very deep networks, and how do these factors exacerbate instability despite adaptive thresholding?",
+        "reference_answer": "The failure of adaptive gradient clipping in very deep networks primarily arises when the running variance estimates used for threshold adaptation become unreliable due to compounded numerical errors or highly skewed activation distributions in deep stacks. Deep architectures may induce activation statistics that evolve too rapidly or non-stationarily, causing the adaptive thresholds to either clip too aggressively or too loosely. This mismatch leads to unstable gradients and loss spikes, which adaptive clipping cannot adequately prevent. Additionally, depth-related issues such as gradient vanishing/explosion and layer-wise coupling effects disrupt the variance statistics that underpin the clipping thresholds.",
+        "rubric": [
+          {
+            "criterion": "Identifies the role of unreliable running variance estimates in deep networks",
+            "weight": 8,
+            "category": "positive"
+          },
+          {
+            "criterion": "Explains how rapidly changing activation distributions can impair threshold adaptation",
+            "weight": 7,
+            "category": "positive"
+          },
+          {
+            "criterion": "Connects depth-induced numerical instabilities (e.g., gradient vanishing/explosion) to clipping failure",
+            "weight": 9,
+            "category": "positive"
+          },
+          {
+            "criterion": "Describes the impact of layer-wise coupling on variance estimate reliability",
+            "weight": 6,
+            "category": "positive"
+          },
+          {
+            "criterion": "Accounts for how too aggressive or too loose clipping thresholds contribute to loss spikes",
+            "weight": 7,
+            "category": "positive"
+          },
+          {
+            "criterion": "Integrates dynamic system behavior of activation statistics over training iterations",
+            "weight": 6,
+            "category": "positive"
+          },
+          {
+            "criterion": "Avoids merely restating that failures occur without mechanistic explanation",
+            "weight": -8,
+            "category": "negative"
+          },
+          {
+            "criterion": "Does not confuse fixed threshold clipping failure modes with adaptive threshold failures",
+            "weight": -6,
+            "category": "negative"
+          },
+          {
+            "criterion": "Does not attribute failure solely to fp8 precision without linking to algorithmic causes",
+            "weight": -7,
+            "category": "negative"
+          },
+          {
+            "criterion": "Avoids superficial answers that ignore the interaction between architecture depth and clipping dynamics",
+            "weight": -9,
+            "category": "negative"
+          }
+        ],
+        "question_type": "adaptive clipping failure modes",
+        "reasoning_tags": [
+          "failure_mode_prediction",
+          "dynamic_systems_analysis",
+          "statistical_reasoning"
+        ]
+      },
+      "weak_scores": [
+        0.3023255813953488,
+        0.3023255813953488,
+        0.16279069767441862
+      ],
+      "strong_scores": [
+        0.3023255813953488,
+        0.3023255813953488,
+        0.3023255813953488
+      ],
+      "gap": null,
+      "feedback": "strong_avg 0.302 < 0.6"
+    },
+    {
+      "round": 3,
+      "status": "FAILED_STRONG",
+      "qa": {
+        "context": "In low-precision (fp8) neural network training, controlling gradient magnitudes is crucial to prevent loss spikes and maintain stability. Adaptive gradient clipping strategies that link clipping thresholds to activation variances per layer have shown promise. However, the effectiveness of such methods varies across network architectures and training conditions, sometimes resulting in instability, especially in very deep models.",
+        "question": "How does the variance-coupled adaptive clipping method influence the distribution of gradients during low-precision training, and why does this interaction lead to instability in very deep networks despite its initial effectiveness?",
+        "reference_answer": "The variance-coupled adaptive clipping method dynamically adjusts per-layer clipping thresholds based on the running variance of activations, which helps maintain gradient magnitudes within a stable range and avoids sudden loss spikes common with fixed thresholds. This dynamic adjustment aligns the clipping threshold closely with the layer's current activation scale, preserving training progression in low-precision settings. However, in very deep networks, the accumulation of variance estimation errors and delayed adaptation can cause misalignment between clipping thresholds and true activation statistics. This mismatch leads to under- or over-clipping, destabilizing gradients and causing loss spikes or convergence issues despite the adaptive mechanism.",
+        "rubric": [
+          {
+            "criterion": "Explains the purpose of coupling clipping thresholds to activation variance",
+            "weight": 8,
+            "category": "positive"
+          },
+          {
+            "criterion": "Describes how adaptive clipping adjusts gradient scale distributions dynamically",
+            "weight": 7,
+            "category": "positive"
+          },
+          {
+            "criterion": "Identifies the statistical relationship between activation variance and gradient magnitude",
+            "weight": 6,
+            "category": "positive"
+          },
+          {
+            "criterion": "Analyzes causes of instability in very deep networks with this adaptive method",
+            "weight": 9,
+            "category": "positive"
+          },
+          {
+            "criterion": "Explains how variance estimation errors accumulate during deep stacking",
+            "weight": 7,
+            "category": "positive"
+          },
+          {
+            "criterion": "Connects delayed adaptation of thresholds to misalignment issues",
+            "weight": 6,
+            "category": "positive"
+          },
+          {
+            "criterion": "Links misalignment to under- or over-clipping of gradients causing instability",
+            "weight": 8,
+            "category": "positive"
+          },
+          {
+            "criterion": "Distinguishes this failure mechanism from issues in fixed-threshold clipping",
+            "weight": 5,
+            "category": "positive"
+          },
+          {
+            "criterion": "Avoids conflating activation variance with gradient variance",
+            "weight": -5,
+            "category": "negative"
+          },
+          {
+            "criterion": "Does not attribute instability solely to low-precision format limitations without mechanism",
+            "weight": -4,
+            "category": "negative"
+          },
+          {
+            "criterion": "Avoids vague statements about 'failure' without mechanistic explanation",
+            "weight": -6,
+            "category": "negative"
+          },
+          {
+            "criterion": "Does not ignore the adaptive mechanism and focus only on fixed thresholds",
+            "weight": -5,
+            "category": "negative"
+          }
+        ],
+        "question_type": "training stability analysis",
+        "reasoning_tags": [
+          "statistical_reasoning",
+          "failure_mode_identification",
+          "algorithm_behavior"
+        ]
+      },
+      "weak_scores": [
+        0.21428571428571427,
+        0.32142857142857145,
+        0.3392857142857143
+      ],
+      "strong_scores": [
+        0.5357142857142857,
+        0.6428571428571429,
+        0.5357142857142857
+      ],
+      "gap": null,
+      "feedback": "strong_avg 0.571 < 0.6"
+    },
+    {
+      "round": 4,
+      "status": "FAILED_STRONG",
+      "qa": {
+        "context": "In fp8 low-precision neural network training, adaptive gradient clipping strategies can improve training stability by adjusting clipping thresholds per layer based on running statistics of activations. However, certain network architectures and training regimes still exhibit instability and loss spikes despite these adaptations, and understanding these failure modes is critical for robust low-precision training.",
+        "question": "What are the underlying mechanistic reasons identified in the paper that cause the variance-coupled adaptive gradient clipping method to fail in very deep network stacks, and how do these reasons differ from failure causes in shallower networks?",
+        "reference_answer": "The paper finds that in very deep networks, the variance-coupled adaptive clipping fails mainly because the running variance estimates become less reliable due to compounded noise and vanishing/exploding signal statistics across many layers. This leads to inappropriate clipping thresholds that either underclip or overclip gradients, causing instability. In contrast, shallower networks maintain more stable activation statistics enabling effective threshold adaptation. Therefore, the failure in deep stacks arises from the degradation of the variance signal used to set thresholds, while in shallower networks failure is less common due to more stable statistics.",
+        "rubric": [
+          {
+            "criterion": "Correct identification of the degradation of running variance estimates in deep stacks",
+            "weight": 8,
+            "category": "positive"
+          },
+          {
+            "criterion": "Explanation that noise accumulation across layers affects threshold reliability",
+            "weight": 7,
+            "category": "positive"
+          },
+          {
+            "criterion": "Differentiation between failure causes in deep versus shallow networks",
+            "weight": 6,
+            "category": "positive"
+          },
+          {
+            "criterion": "Recognition that inappropriate clipping thresholds lead to gradient instability",
+            "weight": 7,
+            "category": "positive"
+          },
+          {
+            "criterion": "Understanding that compounded vanishing/exploding activations distort variance signals",
+            "weight": 6,
+            "category": "positive"
+          },
+          {
+            "criterion": "Inclusion of how instability manifests as loss spikes or training collapse",
+            "weight": 5,
+            "category": "positive"
+          },
+          {
+            "criterion": "Awareness that adaptive clipping depends on accurate running statistics",
+            "weight": 5,
+            "category": "positive"
+          },
+          {
+            "criterion": "Clarifying that this failure mode is distinct from fixed-threshold issues",
+            "weight": 4,
+            "category": "positive"
+          },
+          {
+            "criterion": "Avoids conflating activation variance with gradient magnitude directly",
+            "weight": -7,
+            "category": "negative"
+          },
+          {
+            "criterion": "Does not incorrectly attribute failure solely to hyperparameter choice",
+            "weight": -6,
+            "category": "negative"
+          },
+          {
+            "criterion": "Avoids stating that failure is due to lack of adaptive clipping altogether",
+            "weight": -5,
+            "category": "negative"
+          },
+          {
+            "criterion": "Does not confuse the role of variance in threshold setting with a regularization technique",
+            "weight": -5,
+            "category": "negative"
+          },
+          {
+            "criterion": "Avoids mixing instability causes with general low-precision numerical errors",
+            "weight": -6,
+            "category": "negative"
+          }
+        ],
+        "question_type": "gradient clipping failure modes",
+        "reasoning_tags": [
+          "theoretical_analysis",
+          "training_dynamics",
+          "failure_mode_identification"
+        ]
+      },
+      "weak_scores": [
+        0.1875,
+        0.1875,
+        0.08333333333333333
+      ],
+      "strong_scores": [
+        0.1875,
+        0.1875,
+        0.3125
+      ],
+      "gap": null,
+      "feedback": "strong_avg 0.229 < 0.6"
+    },
+    {
+      "round": 5,
+      "status": "FAILED_STRONG",
+      "qa": {
+        "context": "Adaptive gradient clipping that adjusts per-layer thresholds based on running activation variance has been proposed to stabilize training in low-precision (fp8) regimes. While effective in many cases, certain network architectures or training conditions present failures. Understanding the mechanistic origins of these failures beyond shallow or heuristic explanations requires linking gradient distribution statistics, layerwise signal propagation, and numerical precision effects.",
+        "question": "How do the statistical properties of activation variance and gradient distributions during training interact with numerical precision effects to cause adaptive gradient clipping based on running variance to become ineffective or destabilizing in very deep neural network stacks, and what specific dynamics distinguish these failure cases from successful training scenarios?",
+        "reference_answer": "The paper demonstrates that adaptive clipping tied to running activation variance can prevent loss spikes by normalizing clipping thresholds relative to layerwise signal scales. However, in very deep networks, cumulative numerical errors and shifts in activation statistics cause the running variance estimates to become less representative of actual gradient magnitudes. This mismatch results in clipping thresholds that are either too loose or too strict, failing to prevent loss spikes or causing gradient starvation. Moreover, the paper identifies that in these deep stacks, layerwise variance can decorrelate across training steps due to compounded quantization noise and vanishing/exploding gradients, differentiating failure cases where variance-coupling fails from shallower networks where these statistics remain stable and effective.",
+        "rubric": [
+          {
+            "criterion": "Explains interaction between activation variance statistics and gradient distributions",
+            "weight": 8,
+            "category": "positive"
+          },
+          {
+            "criterion": "Discusses the role of numerical precision effects (fp8) in altering training dynamics",
+            "weight": 7,
+            "category": "positive"
+          },
+          {
+            "criterion": "Identifies how variance estimation errors contribute to adaptive clipping failures",
+            "weight": 9,
+            "category": "positive"
+          },
+          {
+            "criterion": "Distinguishes between deep and shallow network dynamics impacting method stability",
+            "weight": 8,
+            "category": "positive"
+          },
+          {
+            "criterion": "Connects gradient starvation or loss spikes to miscalibrated clipping thresholds",
+            "weight": 6,
+            "category": "positive"
+          },
+          {
+            "criterion": "Includes the effect of cumulative quantization noise on variance decorrelation",
+            "weight": 7,
+            "category": "positive"
+          },
+          {
+            "criterion": "Integrates multi-factor causal reasoning linking statistics, numerics, and depth",
+            "weight": 10,
+            "category": "positive"
+          },
+          {
+            "criterion": "Avoids mere restatement of method without explaining failure mechanics",
+            "weight": 8,
+            "category": "positive"
+          },
+          {
+            "criterion": "Does not confuse correlation with causation in variance versus gradient magnitude",
+            "weight": -6,
+            "category": "negative"
+          },
+          {
+            "criterion": "Does not incorrectly attribute failures solely to hyperparameter choices",
+            "weight": -5,
+            "category": "negative"
+          },
+          {
+            "criterion": "Avoids ignoring numerical precision impacts in failure explanations",
+            "weight": -7,
+            "category": "negative"
+          },
+          {
+            "criterion": "Does not oversimplify failure cases as random or unexplained noise",
+            "weight": -4,
+            "category": "negative"
+          }
+        ],
+        "question_type": "failure mode analysis",
+        "reasoning_tags": [
+          "mechanistic_reasoning",
+          "statistical_dynamics",
+          "robustness_assessment"
+        ]
+      },
+      "weak_scores": [
+        0.6507936507936508,
+        0.5396825396825397,
+        0.6507936507936508
+      ],
+      "strong_scores": [
+        0.6507936507936508,
+        0.6507936507936508,
+        0.6507936507936508
+      ],
+      "gap": 0.03703703703703709,
+      "feedback": "gap 0.037 < 0.2"
+    },
+    {
+      "round": 6,
+      "status": "FAILED_STRONG",
+      "qa": {
+        "context": "Adaptive gradient clipping that uses per-layer running variance of activations as a dynamic threshold has shown promise in stabilizing gradient updates during fp8 training. However, the method does not always succeed, particularly in very deep networks where training dynamics and numerical precision effects interplay in complex ways.",
+        "question": "Given the interplay between activation variance, gradient distributions, and numerical precision, what specific failure modes emerge when applying variance-coupled adaptive gradient clipping in very deep networks, and how do these modes contrast with the stabilization mechanisms effective in shallower architectures?",
+        "reference_answer": "The paper identifies that in very deep networks, the variance-coupled adaptive clipping fails because the running variance estimates become less reliable due to accumulated numerical noise and gradient signal degradation caused by low precision (fp8). This unreliability leads to inappropriate clipping thresholds that either under-clip or over-clip gradients, allowing loss spikes. Unlike shallower networks where variance coupling effectively adapts to the statistics and prevents spikes, very deep networks suffer from compounding variance misestimation and layerwise gradient explosion or vanishing triggered by numerical precision limitations, undermining the stabilization mechanism.",
+        "rubric": [
+          {
+            "criterion": "correctly identifies the role of running variance estimation in setting adaptive clipping thresholds",
+            "weight": 8,
+            "category": "positive"
+          },
+          {
+            "criterion": "explains how numerical noise accumulates in very deep networks affecting variance reliability",
+            "weight": 9,
+            "category": "positive"
+          },
+          {
+            "criterion": "distinguishes the failure modes due to over-clipping versus under-clipping in low-precision contexts",
+            "weight": 7,
+            "category": "positive"
+          },
+          {
+            "criterion": "articulates the contrast between failure causes in very deep versus shallower networks",
+            "weight": 8,
+            "category": "positive"
+          },
+          {
+            "criterion": "connects gradient explosion/vanishing phenomena with adaptive clipping failure",
+            "weight": 7,
+            "category": "positive"
+          },
+          {
+            "criterion": "incorporates the influence of fp8 numerical precision limitations into failure reasoning",
+            "weight": 8,
+            "category": "positive"
+          },
+          {
+            "criterion": "acknowledges compound effects of layerwise statistics misestimation on overall training stability",
+            "weight": 6,
+            "category": "positive"
+          },
+          {
+            "criterion": "avoids simplistic explanations that ignore numerical precision or network depth",
+            "weight": -7,
+            "category": "negative"
+          },
+          {
+            "criterion": "does not confound clipping threshold design with unrelated training hyperparameters",
+            "weight": -5,
+            "category": "negative"
+          },
+          {
+            "criterion": "does not rely on mere recall of method description without linking to failure analysis",
+            "weight": -6,
+            "category": "negative"
+          },
+          {
+            "criterion": "avoids conflating failure in variance coupling with general failure of gradient clipping",
+            "weight": -4,
+            "category": "negative"
+          },
+          {
+            "criterion": "does not overgeneralize failure causes beyond those identified in very deep network analysis",
+            "weight": -5,
+            "category": "negative"
+          }
+        ],
+        "question_type": "failure cause analysis under adaptive clipping",
+        "reasoning_tags": [
+          "statistical_reasoning",
+          "numerical_analysis",
+          "failure_mode_identification"
+        ]
+      },
+      "weak_scores": [
+        0.49056603773584906,
+        0.49056603773584906,
+        0.49056603773584906
+      ],
+      "strong_scores": [
+        0.49056603773584906,
+        0.49056603773584906,
+        0.49056603773584906
+      ],
+      "gap": null,
+      "feedback": "strong_avg 0.491 < 0.6"
+    },
+    {
+      "round": 7,
+      "status": "TOO_EASY",
+      "qa": {
+        "context": "Adaptive gradient clipping methods that use running activation variance as a baseline for threshold setting have potential for stabilizing low-precision (fp8) training of neural networks. However, these methods exhibit failure in certain training regimes associated with network depth and threshold dynamics, necessitating an understanding of how evolving threshold schedules impact gradient distributions and loss stability.",
+        "question": "How does the temporal evolution of per-layer adaptive clipping thresholds, when tied to running activation variance, influence the stability of gradient updates during fp8 training across different network depths, and what specific characteristics of threshold dynamics are implicated in destabilizing loss behavior in very deep networks according to the paper?",
+        "reference_answer": "The paper finds that coupling clipping thresholds to running activation variance helps maintain stable gradients and prevents loss spikes during early and moderate depth training. However, in very deep networks, the evolving thresholds can become misaligned with the true gradient distribution due to cumulative effects on variance estimates, leading to overly aggressive or insufficient clipping. This threshold drift distorts gradient statistics, causing instability and loss spikes as the network depth increases. The failure arises from delayed or noisy variance estimates and the interaction of fp8 quantization errors, which degrade the effectiveness of adaptive thresholding in these deep stacks.",
+        "rubric": [
+          {
+            "criterion": "Identifies role of temporal evolution of thresholds in gradient stability",
+            "weight": 8,
+            "category": "positive"
+          },
+          {
+            "criterion": "Explains how running activation variance guides threshold setting",
+            "weight": 7,
+            "category": "positive"
+          },
+          {
+            "criterion": "Connects threshold misalignment to cumulative network depth effects",
+            "weight": 9,
+            "category": "positive"
+          },
+          {
+            "criterion": "Describes impact of threshold drift on gradient distribution statistics",
+            "weight": 8,
+            "category": "positive"
+          },
+          {
+            "criterion": "Discusses interplay between quantization errors and variance estimates",
+            "weight": 7,
+            "category": "positive"
+          },
+          {
+            "criterion": "Differentiates stable behavior in shallow vs unstable in very deep networks",
+            "weight": 6,
+            "category": "positive"
+          },
+          {
+            "criterion": "Relates loss spikes to thresholding dynamics rather than static clipping",
+            "weight": 7,
+            "category": "positive"
+          },
+          {
+            "criterion": "Considers effects of delayed or noisy variance estimates",
+            "weight": 6,
+            "category": "positive"
+          },
+          {
+            "criterion": "Avoids simply restating that method fails—explains underlying mechanism",
+            "weight": 9,
+            "category": "positive"
+          },
+          {
+            "criterion": "Infers subtle cumulative effects on thresholding rather than immediate errors",
+            "weight": 8,
+            "category": "positive"
+          },
+          {
+            "criterion": "Fails to link threshold dynamics to gradient instability or loss spikes",
+            "weight": -8,
+            "category": "negative"
+          },
+          {
+            "criterion": "Mistakes static threshold clipping behavior for adaptive threshold failure",
+            "weight": -7,
+            "category": "negative"
+          },
+          {
+            "criterion": "Ignores the role of quantization effects in failure modes",
+            "weight": -6,
+            "category": "negative"
+          },
+          {
+            "criterion": "Focuses on architectural factors but omits statistical or numerical reasoning",
+            "weight": -5,
+            "category": "negative"
+          },
+          {
+            "criterion": "Misattributes instability solely to network depth without threshold dynamics",
+            "weight": -7,
+            "category": "negative"
+          }
+        ],
+        "question_type": "failure mode analysis via threshold dynamics",
+        "reasoning_tags": [
+          "statistical_modelling",
+          "numerical_stability",
+          "architectural_tradeoff"
+        ]
+      },
+      "weak_scores": [
+        0.52,
+        0.7466666666666667,
+        0.8266666666666667
+      ],
+      "strong_scores": [],
+      "gap": null,
+      "feedback": "weak_avg 0.698 > 0.65"
+    },
+    {
+      "round": 8,
+      "status": "TOO_EASY",
+      "qa": {
+        "context": "Adaptive gradient clipping strategies that set clipping thresholds based on running estimates of activation variance are proposed to stabilize training under low-precision (fp8) regimes. While these methods reduce gradient explosion and loss spikes in many settings, their effectiveness diminishes in very deep network stacks where complex interactions among activations, gradients, and numerical precision can lead to instability.",
+        "question": "How do the statistical changes in activation variance and gradient norms throughout very deep network stacks contribute to the breakdown of variance-coupled adaptive gradient clipping under fp8 training, and in what ways do these breakdown mechanisms differ fundamentally from the stabilization dynamics seen in shallower networks?",
+        "reference_answer": "The paper finds that in very deep networks, activation variance estimates become less reliable due to the cumulative effects of low precision and deeper nonlinear transformations, which distort the statistical assumptions underlying variance-coupled thresholding. This leads to thresholds that are either too aggressive or too lax, causing gradient distributions to deviate from stable regimes and resulting in loss spikes or gradient explosion. In contrast, shallower networks maintain more stable activation statistics, allowing the adaptive thresholds to effectively prevent gradient anomalies, thus stabilizing training.",
+        "rubric": [
+          {
+            "criterion": "Identifies the role of activation variance estimation degradation in deep stacks",
+            "weight": 8,
+            "category": "positive"
+          },
+          {
+            "criterion": "Explains how gradient norm distributions deviate in very deep networks under low precision",
+            "weight": 7,
+            "category": "positive"
+          },
+          {
+            "criterion": "Distinguishes between stabilization mechanisms in shallow versus deep network regimes",
+            "weight": 7,
+            "category": "positive"
+          },
+          {
+            "criterion": "Connects numerical precision limitations to statistical distortion of activation variance",
+            "weight": 6,
+            "category": "positive"
+          },
+          {
+            "criterion": "Mentions the impact of cumulative nonlinear transformations on variance estimates",
+            "weight": 5,
+            "category": "positive"
+          },
+          {
+            "criterion": "Includes the effect of threshold miscalibration on gradient clipping effectiveness",
+            "weight": 5,
+            "category": "positive"
+          },
+          {
+            "criterion": "Recognizes the resulting training instabilities such as loss spikes and gradient explosion",
+            "weight": 7,
+            "category": "positive"
+          },
+          {
+            "criterion": "Avoids purely descriptive answers lacking connections between variance dynamics and failure",
+            "weight": 8,
+            "category": "positive"
+          },
+          {
+            "criterion": "Does not confuse variance-coupled clipping with fixed-threshold clipping mechanisms",
+            "weight": 7,
+            "category": "positive"
+          },
+          {
+            "criterion": "Does not omit the influence of fp8 numerical precision restrictions on adaptive clipping",
+            "weight": 6,
+            "category": "positive"
+          },
+          {
+            "criterion": "Fails to address the difference in behavior between shallow and deep networks",
+            "weight": -8,
+            "category": "negative"
+          },
+          {
+            "criterion": "Overgeneralizes failure without linking to activation or gradient statistical changes",
+            "weight": -7,
+            "category": "negative"
+          },
+          {
+            "criterion": "Attributes failure solely to network depth without discussing variance estimation",
+            "weight": -6,
+            "category": "negative"
+          },
+          {
+            "criterion": "Misinterprets variance-coupling as a static rather than adaptive method",
+            "weight": -5,
+            "category": "negative"
+          },
+          {
+            "criterion": "Ignores the role of low numerical precision in the failure mechanisms",
+            "weight": -7,
+            "category": "negative"
+          }
+        ],
+        "question_type": "failure mode characterization",
+        "reasoning_tags": [
+          "statistical_analysis",
+          "numerical_precision",
+          "failure_mode_identification"
+        ]
+      },
+      "weak_scores": [
+        1.0,
+        1.0,
+        0.8939393939393939
+      ],
+      "strong_scores": [],
+      "gap": null,
+      "feedback": "weak_avg 0.965 > 0.65"
+    },
+    {
+      "round": 9,
+      "status": "FAILED_STRONG",
+      "qa": {
+        "context": "Adaptive gradient clipping methods aim to stabilize training under low-precision constraints by dynamically tuning clipping thresholds based on layer-wise statistics. However, the interaction between activation variance, gradient distributions, network depth, and numerical precision introduces complex failure modes that can degrade training stability.",
+        "question": "How does the interaction between the correlation structure of activation variance across layers and the numerical precision constraints in fp8 training create specific failure modes for variance-adaptive gradient clipping in very deep networks, and what characteristic patterns in these correlation dynamics differentiate failure scenarios from stable training cases?",
+        "reference_answer": "The paper finds that in very deep networks, the correlation structure of activation variance across layers can become skewed or less consistent, causing the running variance estimates used for clipping threshold adaptation to become unreliable. Under fp8 precision constraints, these inaccurate thresholds fail to prevent large gradient spikes, leading to loss instability. Stable training cases show more consistent, well-behaved inter-layer variance correlations that allow adaptive clipping thresholds to effectively scale with true activation dynamics, while failure cases exhibit disrupted or noisy correlation patterns that break this relationship.",
+        "rubric": [
+          {
+            "criterion": "Identifies how inter-layer activation variance correlations affect threshold estimation",
+            "weight": 8,
+            "category": "positive"
+          },
+          {
+            "criterion": "Explains the role of fp8 numerical precision in amplifying instability due to threshold misestimation",
+            "weight": 7,
+            "category": "positive"
+          },
+          {
+            "criterion": "Distinguishes the characteristic correlation patterns in stable vs. failing training runs",
+            "weight": 6,
+            "category": "positive"
+          },
+          {
+            "criterion": "Connects variance-coupled adaptive clipping failure modes specifically to very deep network architectures",
+            "weight": 7,
+            "category": "positive"
+          },
+          {
+            "criterion": "Details how inaccurate variance estimates translate into ineffective clipping thresholds",
+            "weight": 8,
+            "category": "positive"
+          },
+          {
+            "criterion": "Describes dynamic interaction between activation variance correlations and gradient distribution changes",
+            "weight": 6,
+            "category": "positive"
+          },
+          {
+            "criterion": "Discusses how failure modes contrast with mechanisms that maintain stability in shallower networks",
+            "weight": 5,
+            "category": "positive"
+          },
+          {
+            "criterion": "Avoids generic reasoning by grounding answers in specific correlation dynamics described in the paper",
+            "weight": 7,
+            "category": "positive"
+          },
+          {
+            "criterion": "Does not confuse running variance estimation with fixed threshold clipping approaches",
+            "weight": -6,
+            "category": "negative"
+          },
+          {
+            "criterion": "Does not attribute failure solely to poor initial threshold choice ignoring dynamics",
+            "weight": -5,
+            "category": "negative"
+          },
+          {
+            "criterion": "Avoids conflating network depth effects with unrelated hyperparameter tuning issues",
+            "weight": -5,
+            "category": "negative"
+          },
+          {
+            "criterion": "Does not misinterpret the role of gradient spikes as a cause rather than a symptom",
+            "weight": -6,
+            "category": "negative"
+          }
+        ],
+        "question_type": "failure mode analysis in precision-constrained training",
+        "reasoning_tags": [
+          "dynamics_reasoning",
+          "failure_mode_identification",
+          "numerical_precision"
+        ]
+      },
+      "weak_scores": [
+        0.5,
+        0.5,
+        0.5925925925925926
+      ],
+      "strong_scores": [
+        0.5,
+        0.5,
+        0.5
+      ],
+      "gap": null,
+      "feedback": "strong_avg 0.500 < 0.6"
+    },
+    {
+      "round": 10,
+      "status": "FAILED_STRONG",
+      "qa": {
+        "context": "Adaptive gradient clipping methods that tie clipping thresholds to running activation variance show promise in stabilizing low-precision (fp8) training. However, these methods sometimes fail in very deep networks. Understanding the distinct failure modes requires analyzing how activation statistics and fp8 numerical limitations jointly influence gradient dynamics layer-by-layer, beyond aggregate threshold effects.",
+        "question": "How does the interaction between layer-wise activation variance trends and layer-specific fp8 quantization errors generate distinct failure modes in very deep networks when using variance-coupled adaptive gradient clipping, and how can these failure modes be characterized by their impact on gradient norm distributions across layers?",
+        "reference_answer": "The paper identifies that in very deep networks, layer-wise activation variance can become increasingly skewed or non-stationary, causing variance-coupled clipping thresholds to misalign with true gradient magnitudes. When combined with fp8 numerical quantization noise that disproportionately affects smaller gradients, this misalignment results in some layers experiencing excessive clipping while others do not clip enough, fragmenting the gradient norm distribution. These fragmented gradient norms lead to unstable loss behavior and training divergence. The failure modes can be characterized by patterns where certain layers exhibit clipped gradient norms below stable thresholds while others permit gradient explosion, undermining the overall adaptive clipping strategy’s effectiveness.",
+        "rubric": [
+          {
+            "criterion": "Identifies the role of layer-wise activation variance trends in threshold misalignment",
+            "weight": 8,
+            "category": "positive"
+          },
+          {
+            "criterion": "Explains how fp8 quantization noise affects gradient magnitudes differently across layers",
+            "weight": 8,
+            "category": "positive"
+          },
+          {
+            "criterion": "Describes how combined effects cause inconsistent gradient clipping across layers",
+            "weight": 9,
+            "category": "positive"
+          },
+          {
+            "criterion": "Characterizes failure modes in terms of gradient norm distribution fragmentation",
+            "weight": 7,
+            "category": "positive"
+          },
+          {
+            "criterion": "Connects failure mode patterns to training instability and loss divergence",
+            "weight": 7,
+            "category": "positive"
+          },
+          {
+            "criterion": "Differentiates failure scenarios from stable training by statistical and numerical factors",
+            "weight": 6,
+            "category": "positive"
+          },
+          {
+            "criterion": "Incorporates understanding of numerical precision constraints into failure analysis",
+            "weight": 7,
+            "category": "positive"
+          },
+          {
+            "criterion": "Avoids simple recall, requiring reasoning about interacting factors",
+            "weight": 10,
+            "category": "positive"
+          },
+          {
+            "criterion": "Does not confuse activation variance trends with gradient norm behavior",
+            "weight": -8,
+            "category": "negative"
+          },
+          {
+            "criterion": "Does not ignore the impact of fp8 quantization noise on gradient magnitudes",
+            "weight": -7,
+            "category": "negative"
+          },
+          {
+            "criterion": "Does not treat failure as a single uniform phenomenon across all layers",
+            "weight": -7,
+            "category": "negative"
+          },
+          {
+            "criterion": "Does not conflate threshold coupling mechanism with unrelated stabilization techniques",
+            "weight": -6,
+            "category": "negative"
+          },
+          {
+            "criterion": "Avoids circular reasoning that clipping proves itself stable or unstable",
+            "weight": -5,
+            "category": "negative"
+          }
+        ],
+        "question_type": "failure mode decomposition",
+        "reasoning_tags": [
+          "statistical_analysis",
+          "numerical_precision",
+          "failure_mode_characterization"
+        ]
+      },
+      "weak_scores": [
+        0.46774193548387094,
+        0.46774193548387094,
+        0.46774193548387094
+      ],
+      "strong_scores": [
+        0.46774193548387094,
+        0.46774193548387094,
+        0.46774193548387094
+      ],
+      "gap": null,
+      "feedback": "strong_avg 0.468 < 0.6"
+    },
+    {
+      "round": 11,
+      "status": "FAILED_STRONG",
+      "qa": {
+        "context": "Adaptive gradient clipping methods that dynamically tie clipping thresholds to activation variance aim to stabilize training under low-precision (fp8) constraints. However, these approaches exhibit complex failure behaviors in very deep neural networks due to intricate interactions between activation statistics, gradient distributions, and quantization noise. Understanding how these factors combine to produce distinct failure modes is critical for improving low-precision training robustness.",
+        "question": "What distinct failure modes arise from the interplay between layer-wise activation variance statistics and fp8 quantization effects in very deep networks using variance-coupled adaptive gradient clipping, and how do these modes manifest differently in terms of gradient clipping dynamics and loss stability compared to shallower networks?",
+        "reference_answer": "The paper identifies that in very deep networks, the coupling of clipping thresholds to running activation variance can lead to failure modes characterized by mismatches between the activation variance trends and quantization noise accumulation. Specifically, certain layers exhibit either underestimated or overestimated thresholds due to drift or correlation shifts in activation statistics, causing ineffective clipping—either too aggressive, which hampers gradient flow, or too lenient, which allows unstable gradient spikes. This contrasts with shallower networks where the adaptive threshold closely tracks activation variance and effectively stabilizes training. These failure modes manifest as loss spikes, unstable gradient norm distributions, and eventual training divergence unique to deep stacks under fp8 precision, highlighting the sensitivity of variance-coupled clipping to deeper layer statistics and numerical precision errors.",
+        "rubric": [
+          {
+            "criterion": "Identifies that failure modes arise from interaction between activation variance statistics and fp8 quantization effects in deep networks",
+            "weight": 10,
+            "category": "positive"
+          },
+          {
+            "criterion": "Distinguishes failure manifestations in gradient clipping dynamics such as clipping threshold misestimations",
+            "weight": 9,
+            "category": "positive"
+          },
+          {
+            "criterion": "Explains the contrast between failure behaviors in deep versus shallower networks",
+            "weight": 8,
+            "category": "positive"
+          },
+          {
+            "criterion": "Recognizes how drift or correlation changes in activation statistics impact adaptive clipping thresholds",
+            "weight": 7,
+            "category": "positive"
+          },
+          {
+            "criterion": "Connects quantization noise accumulation effects specifically to exacerbation of failure modes",
+            "weight": 7,
+            "category": "positive"
+          },
+          {
+            "criterion": "Explains the consequence of threshold misalignment on gradient norm distributions and loss stability",
+            "weight": 6,
+            "category": "positive"
+          },
+          {
+            "criterion": "Highlights that different layers can experience distinct failure behaviors within the same deep network",
+            "weight": 6,
+            "category": "positive"
+          },
+          {
+            "criterion": "Describes how failure modes lead to training divergence or loss spikes under fp8 training",
+            "weight": 5,
+            "category": "positive"
+          },
+          {
+            "criterion": "Avoids merely stating that 'failure occurs' without specifically linking to mechanisms",
+            "weight": -8,
+            "category": "negative"
+          },
+          {
+            "criterion": "Does not confuse the effect of clipping threshold coupling with unrelated training hyperparameters",
+            "weight": -7,
+            "category": "negative"
+          },
+          {
+            "criterion": "Avoids attributing failure solely to numerical precision without considering activation statistics",
+            "weight": -6,
+            "category": "negative"
+          },
+          {
+            "criterion": "Does not treat failure modes as uniform across network depth",
+            "weight": -6,
+            "category": "negative"
+          },
+          {
+            "criterion": "Does not ignore the role of correlation shifts in activation variance",
+            "weight": -5,
+            "category": "negative"
+          }
+        ],
+        "question_type": "failure mode characterization",
+        "reasoning_tags": [
+          "statistical_analysis",
+          "numerical_precision",
+          "failure_mode_identification"
+        ]
+      },
+      "weak_scores": [
+        0.41379310344827586,
+        0.3103448275862069,
+        0.41379310344827586
+      ],
+      "strong_scores": [
+        0.4482758620689655,
+        0.4482758620689655,
+        0.4482758620689655
+      ],
+      "gap": null,
+      "feedback": "strong_avg 0.448 < 0.6"
+    },
+    {
+      "round": 12,
+      "status": "TOO_EASY",
+      "qa": {
+        "context": "Adaptive gradient clipping methods that tie clipping thresholds to running activation variance have shown promise in stabilizing fp8 training. However, their performance degrades in very deep networks, where complex interactions between activation statistics, gradient norms, and low-precision numerical effects can lead to training instabilities. Understanding these failure modes requires dissecting how layer-wise statistical properties and quantization errors affect gradient clipping dynamics differently than in shallower networks.",
+        "question": "How do layer-wise correlations in activation variance and the quantization noise inherent to fp8 precision jointly contribute to specific failure modes of variance-coupled adaptive gradient clipping in very deep neural networks, and in what ways do these failure modes disrupt the expected gradient norm regulation compared to stable training regimes?",
+        "reference_answer": "The paper finds that in very deep networks, correlations in activation variance across layers can amplify quantization noise effects from fp8 precision, causing the adaptive clipping thresholds—tied to running variance—to become misaligned with the true gradient distribution. This misalignment leads to insufficient clipping in some layers and overly aggressive clipping in others, disrupting gradient norm regulation. Unlike in shallower networks where activation variance and quantization noise interact more benignly, these combined effects in deep stacks cause destabilizing loss spikes and ultimately failure of the adaptive clipping scheme.",
+        "rubric": [
+          {
+            "criterion": "Identifies joint role of activation variance correlations and fp8 quantization noise",
+            "weight": 9,
+            "category": "positive"
+          },
+          {
+            "criterion": "Explains mechanism by which variance correlations amplify quantization noise impact",
+            "weight": 8,
+            "category": "positive"
+          },
+          {
+            "criterion": "Describes how misalignment of clipping thresholds arises from these interactions",
+            "weight": 7,
+            "category": "positive"
+          },
+          {
+            "criterion": "Differentiates failure modes in very deep networks from stable regimes in shallower networks",
+            "weight": 8,
+            "category": "positive"
+          },
+          {
+            "criterion": "Connects failure modes to disruptions in gradient norm regulation and loss stability",
+            "weight": 7,
+            "category": "positive"
+          },
+          {
+            "criterion": "Incorporates role of running activation variance as an adaptive threshold basis",
+            "weight": 6,
+            "category": "positive"
+          },
+          {
+            "criterion": "Includes implications on layer-specific clipping behavior (under- and over-clipping)",
+            "weight": 6,
+            "category": "positive"
+          },
+          {
+            "criterion": "Avoids simplistic recall or restatement without mechanistic insight",
+            "weight": 10,
+            "category": "positive"
+          },
+          {
+            "criterion": "Does not attribute failures solely to numerical precision without variance interplay",
+            "weight": -5,
+            "category": "negative"
+          },
+          {
+            "criterion": "Avoids conflating correlation effects with independent layer behavior",
+            "weight": -4,
+            "category": "negative"
+          },
+          {
+            "criterion": "Does not treat activation variance or quantization effects as isolated causes",
+            "weight": -5,
+            "category": "negative"
+          },
+          {
+            "criterion": "Does not ignore impact on gradient distribution and clipping dynamics",
+            "weight": -4,
+            "category": "negative"
+          },
+          {
+            "criterion": "Avoids vague or overly general descriptions lacking specificity to fp8 training",
+            "weight": -3,
+            "category": "negative"
+          }
+        ],
+        "question_type": "failure mode characterization",
+        "reasoning_tags": [
+          "statistical_analysis",
+          "precision_effects",
+          "mechanistic_reasoning"
+        ]
+      },
+      "weak_scores": [
+        0.6557377049180327,
+        0.6557377049180327,
+        0.6557377049180327
+      ],
+      "strong_scores": [],
+      "gap": null,
+      "feedback": "weak_avg 0.656 > 0.65"
+    }
+  ]
+}

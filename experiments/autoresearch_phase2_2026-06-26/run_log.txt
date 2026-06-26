@@ -1,0 +1,174 @@
+[paper] sample_paper_alpha
+  [sample_paper_alpha] r1: challenger…
+  [sample_paper_alpha] r1: quality_verifier… (+7.7s)
+  [sample_paper_alpha] r1: weak×3… (+9.1s)
+  [sample_paper_alpha] r1: TOO_EASY (degenerate all-zero weak rollouts) [14.8s]
+  [sample_paper_alpha] r2: challenger…
+  [sample_paper_alpha] r2: quality_verifier… (+16.8s)
+  [sample_paper_alpha] r2: weak×3… (+18.2s)
+  [sample_paper_alpha] r2: strong×3… (+25.2s)
+  [sample_paper_alpha] r2: FAILED_STRONG (strong_avg 0.000 < 0.6) [47.9s]
+  [sample_paper_alpha] r3: challenger…
+  [sample_paper_alpha] r3: quality_verifier… (+7.2s)
+  [sample_paper_alpha] r3: weak×3… (+9.0s)
+  [sample_paper_alpha] r3: strong×3… (+16.6s)
+  [sample_paper_alpha] r3: FAILED_STRONG (strong_avg 0.232 < 0.6) [45.0s]
+  [sample_paper_alpha] r4: challenger…
+  [sample_paper_alpha] r4: quality_verifier… (+7.8s)
+  [sample_paper_alpha] r4: weak×3… (+9.1s)
+  [sample_paper_alpha] r4: strong×3… (+15.1s)
+  [sample_paper_alpha] r4: FAILED_STRONG (strong_avg 0.593 < 0.6) [34.4s]
+  [sample_paper_alpha] r5: challenger…
+  [sample_paper_alpha] r5: quality_verifier… (+9.2s)
+  [sample_paper_alpha] r5: weak×3… (+10.4s)
+  [sample_paper_alpha] r5: strong×3… (+17.0s)
+  [sample_paper_alpha] r5: FAILED_STRONG (strong_avg 0.451 < 0.6) [46.2s]
+  [sample_paper_alpha] r6: challenger…
+  [sample_paper_alpha] r6: quality_verifier… (+7.7s)
+  [sample_paper_alpha] r6: weak×3… (+9.1s)
+  [sample_paper_alpha] r6: strong×3… (+16.1s)
+  [sample_paper_alpha] r6: FAILED_STRONG (strong_avg 0.309 < 0.6) [38.1s]
+  [sample_paper_alpha] r7: challenger…
+  [sample_paper_alpha] r7: quality_verifier… (+7.2s)
+  [sample_paper_alpha] r7: weak×3… (+8.5s)
+  [sample_paper_alpha] r7: strong×3… (+14.5s)
+  [sample_paper_alpha] r7: FAILED_STRONG (strong_avg 0.056 < 0.6) [38.5s]
+  [sample_paper_alpha] r8: challenger…
+  [sample_paper_alpha] r8: quality_verifier… (+9.4s)
+  [sample_paper_alpha] r8: weak×3… (+11.1s)
+  [sample_paper_alpha] r8: strong×3… (+17.1s)
+  [sample_paper_alpha] r8: FAILED_STRONG (strong_avg 0.260 < 0.6) [38.3s]
+  [sample_paper_alpha] r9: challenger…
+  [sample_paper_alpha] r9: quality_verifier… (+7.9s)
+  [sample_paper_alpha] r9: weak×3… (+9.3s)
+  [sample_paper_alpha] r9: strong×3… (+15.4s)
+  [sample_paper_alpha] r9: FAILED_STRONG (strong_avg 0.538 < 0.6) [36.1s]
+  [sample_paper_alpha] r10: challenger…
+  [sample_paper_alpha] r10: quality_verifier… (+10.7s)
+  [sample_paper_alpha] r10: weak×3… (+12.0s)
+  [sample_paper_alpha] r10: strong×3… (+19.1s)
+  [sample_paper_alpha] r10: FAILED_STRONG (strong_avg 0.000 < 0.6) [38.8s]
+  [sample_paper_alpha] r11: challenger…
+  [sample_paper_alpha] r11: quality_verifier… (+10.6s)
+  [sample_paper_alpha] r11: weak×3… (+11.9s)
+  [sample_paper_alpha] r11: strong×3… (+19.9s)
+  [sample_paper_alpha] r11: FAILED_STRONG (strong_avg 0.385 < 0.6) [39.8s]
+  [sample_paper_alpha] r12: challenger…
+  [sample_paper_alpha] r12: quality_verifier… (+11.1s)
+  [sample_paper_alpha] r12: weak×3… (+12.6s)
+  [sample_paper_alpha] r12: strong×3… (+18.5s)
+  [sample_paper_alpha] r12: FAILED_STRONG (strong_avg 0.371 < 0.6) [45.8s]
+  [sample_paper_alpha] REJECTED after 12 rounds
+[paper] sample_paper_alpha done in 463.6s (accepted=False, rounds=12)
+[paper] sample_paper_beta
+  [sample_paper_beta] r1: challenger…
+  [sample_paper_beta] r1: quality_verifier… (+11.3s)
+  [sample_paper_beta] r1: weak×3… (+13.0s)
+  [sample_paper_beta] r1: TOO_EASY (weak_avg 0.900 > 0.65) [21.9s]
+  [sample_paper_beta] r2: challenger…
+  [sample_paper_beta] r2: quality_verifier… (+12.5s)
+  [sample_paper_beta] r2: weak×3… (+14.0s)
+  [sample_paper_beta] r2: strong×3… (+20.5s)
+  [sample_paper_beta] r2: FAILED_STRONG (strong_avg 0.142 < 0.6) [43.4s]
+  [sample_paper_beta] r3: challenger…
+  [sample_paper_beta] r3: quality_verifier… (+8.5s)
+  [sample_paper_beta] r3: weak×3… (+9.9s)
+  [sample_paper_beta] r3: TOO_EASY (weak_avg 0.833 > 0.65) [17.0s]
+  [sample_paper_beta] r4: challenger…
+  [sample_paper_beta] r4: quality_verifier… (+10.1s)
+  [sample_paper_beta] r4: weak×3… (+12.0s)
+  [sample_paper_beta] r4: TOO_EASY (max_weak 0.793 > 0.75) [19.0s]
+  [sample_paper_beta] r5: challenger…
+  [sample_paper_beta] r5: quality_verifier… (+14.2s)
+  [sample_paper_beta] r5: weak×3… (+16.8s)
+  [sample_paper_beta] r5: TOO_EASY (weak_avg 0.774 > 0.65) [30.0s]
+  [sample_paper_beta] r6: challenger…
+  [sample_paper_beta] r6: quality_verifier… (+13.6s)
+  [sample_paper_beta] r6: weak×3… (+15.2s)
+  [sample_paper_beta] r6: strong×3… (+22.3s)
+  [sample_paper_beta] r6: FAILED_STRONG (strong_avg 0.459 < 0.6) [44.5s]
+  [sample_paper_beta] r7: challenger…
+  [sample_paper_beta] r7: quality_verifier… (+8.8s)
+  [sample_paper_beta] r7: weak×3… (+10.2s)
+  [sample_paper_beta] r7: strong×3… (+17.2s)
+  [sample_paper_beta] r7: ACCEPTED (weak=0.311 strong=0.853 gap=0.542) [40.3s]
+[paper] sample_paper_beta done in 216.1s (accepted=True, rounds=7)
+[paper] tutorial_paper
+  [tutorial_paper] r1: challenger…
+  [tutorial_paper] r1: quality_verifier… (+23.1s)
+  [tutorial_paper] r1: weak×3… (+25.5s)
+  [tutorial_paper] r1: strong×3… (+38.5s)
+  [tutorial_paper] r1: FAILED_STRONG (strong_avg 0.000 < 0.6) [63.6s]
+  [tutorial_paper] r2: challenger…
+  [tutorial_paper] r2: quality_verifier… (+10.4s)
+  [tutorial_paper] r2: weak×3… (+11.8s)
+  [tutorial_paper] r2: TOO_EASY (weak_avg 0.967 > 0.65) [18.8s]
+  [tutorial_paper] r3: challenger…
+  [tutorial_paper] r3: quality_verifier… (+11.9s)
+  [tutorial_paper] r3: weak×3… (+13.5s)
+  [tutorial_paper] r3: strong×3… (+26.3s)
+  [tutorial_paper] r3: FAILED_STRONG (strong_avg 0.000 < 0.6) [50.8s]
+  [tutorial_paper] r4: challenger…
+  [tutorial_paper] r4: quality_verifier… (+11.6s)
+  [tutorial_paper] r4: weak×3… (+13.3s)
+  [tutorial_paper] r4: strong×3… (+20.0s)
+  [tutorial_paper] r4: FAILED_STRONG (strong_avg 0.444 < 0.6) [41.3s]
+  [tutorial_paper] r5: challenger…
+  [tutorial_paper] r5: quality_verifier… (+16.8s)
+  [tutorial_paper] r5: weak×3… (+18.3s)
+  [tutorial_paper] r5: strong×3… (+26.4s)
+  [tutorial_paper] r5: FAILED_STRONG (strong_avg 0.239 < 0.6) [63.7s]
+  [tutorial_paper] r6: challenger…
+  [tutorial_paper] r6: quality_verifier… (+16.8s)
+  [tutorial_paper] r6: weak×3… (+18.3s)
+  [tutorial_paper] r6: strong×3… (+25.0s)
+  [tutorial_paper] r6: FAILED_STRONG (strong_avg 0.242 < 0.6) [45.4s]
+  [tutorial_paper] r7: challenger…
+  [tutorial_paper] r7: quality_verifier… (+18.3s)
+  [tutorial_paper] r7: weak×3… (+20.0s)
+  [tutorial_paper] r7: strong×3… (+27.4s)
+  [tutorial_paper] r7: FAILED_STRONG (strong_avg 0.565 < 0.6) [49.2s]
+  [tutorial_paper] r8: challenger…
+  [tutorial_paper] r8: quality_verifier… (+9.0s)
+  [tutorial_paper] r8: weak×3… (+11.0s)
+  [tutorial_paper] r8: strong×3… (+17.7s)
+  [tutorial_paper] r8: FAILED_STRONG (strong_avg 0.280 < 0.6) [34.8s]
+  [tutorial_paper] r9: challenger…
+  [tutorial_paper] r9: quality_verifier… (+9.0s)
+  [tutorial_paper] r9: weak×3… (+10.4s)
+  [tutorial_paper] r9: strong×3… (+18.2s)
+  [tutorial_paper] r9: FAILED_STRONG (strong_avg 0.158 < 0.6) [41.8s]
+  [tutorial_paper] r10: challenger…
+  [tutorial_paper] r10: quality_verifier… (+10.5s)
+  [tutorial_paper] r10: weak×3… (+12.2s)
+  [tutorial_paper] r10: strong×3… (+24.6s)
+  [tutorial_paper] r10: FAILED_STRONG (strong_avg 0.000 < 0.6) [47.2s]
+  [tutorial_paper] r11: challenger…
+  [tutorial_paper] r11: quality_verifier… (+14.2s)
+  [tutorial_paper] r11: weak×3… (+15.8s)
+  [tutorial_paper] r11: strong×3… (+25.7s)
+  [tutorial_paper] r11: FAILED_STRONG (gap -0.040 < 0.2) [95.9s]
+  [tutorial_paper] r12: challenger…
+  [tutorial_paper] r12: quality_verifier… (+13.0s)
+  [tutorial_paper] r12: weak×3… (+14.4s)
+  [tutorial_paper] r12: strong×3… (+21.4s)
+  [tutorial_paper] r12: FAILED_STRONG (strong_avg 0.450 < 0.6) [46.4s]
+  [tutorial_paper] REJECTED after 12 rounds
+[paper] tutorial_paper done in 598.9s (accepted=False, rounds=12)
+
+=== corpus stats ===
+{
+  "papers_processed": 3,
+  "papers_accepted": 1,
+  "acceptance_rate": 0.3333,
+  "mean_rounds_to_accept": 7,
+  "accepted_weak_avg": 0.3107,
+  "accepted_strong_avg": 0.8531,
+  "accepted_gap_avg": 0.5424,
+  "failure_mode_counts": {
+    "TOO_EASY": 6,
+    "FAILED_STRONG": 24
+  }
+}
+
+dataset -> /tmp/autoresearch_phase2/dataset.jsonl

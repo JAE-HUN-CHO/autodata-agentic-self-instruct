@@ -1,0 +1,58 @@
+Title: Retrieval-Augmented Generation with Calibration-Aware Reranking for Open-Domain QA
+       (Tutorial mock paper for Agentic Self-Instruct corpus diversification)
+
+Abstract
+We investigate how the calibration of a cross-encoder reranker interacts with the
+diversity of retrieved passages in a retrieval-augmented generation (RAG) pipeline
+for open-domain question answering. We find that uncalibrated rerankers produce
+overconfident top-k orderings that systematically hide passages from minority
+sources, reducing downstream answer accuracy by 4-7 absolute points on long-tail
+queries. A simple temperature-scaling step on the reranker's logits, fit on a held-out
+calibration set of 2k examples, recovers most of the gap and improves answer faithfulness
+as measured by a GPT-4-based factuality judge.
+
+1. Setup
+We use a dense retriever (BGE-large) over a 30M-document corpus, retrieve top-100
+candidates per query, then rerank with a cross-encoder (BGE-reranker-v2-m3) to a
+final top-5 set that the generator (a 7B chat model) conditions on. Queries are
+drawn from Natural Questions and TriviaQA, with a held-out "long-tail" slice of
+1k queries whose gold passages come from low-frequency Wikipedia sections.
+
+2. The calibration gap
+On the long-tail slice the reranker's top-5 precision drops from 0.71 (head) to
+0.42 (tail), while the retriever's top-100 recall stays above 0.85 — the
+retrieved set contains the gold passage, but the reranker pushes it out of top-5
+in favor of confidently-scored but wrong candidates. The reranker's score
+distribution on the tail is sharply peaked (entropy 1.2 nats vs 2.4 on head),
+indicating overconfidence.
+
+3. Method: temperature-scaling the reranker
+We fit a single scalar temperature T on a 2k-query calibration set by minimizing
+the negative log-likelihood of the gold passage's reranker score among the top-100
+candidates. Optimal T is 1.85 ± 0.07 across three random calibration splits.
+Applied at inference, scaled logits widen the score distribution and let
+lower-confidence-but-correct candidates surface.
+
+4. Findings
+4.1 Long-tail top-5 precision recovers from 0.42 -> 0.61, closing 70% of the
+    head-tail gap with no retraining and at zero inference cost (T is a single
+    multiply).
+4.2 Downstream answer accuracy on the long-tail slice improves by 5.3 absolute
+    points (38.1 -> 43.4 EM), tracking the precision recovery.
+4.3 The GPT-4 factuality judge marks 11% more answers as "fully supported by
+    cited passages" — an independent confirmation that the new top-5 sets carry
+    the actual evidence.
+
+5. Ablations
+- Larger calibration set (8k examples) yields the same T within 0.04.
+- Temperature scaling helps less when the underlying retriever recall is weak
+  (< 0.75 at top-100), because the gold passage isn't there to surface.
+- The win does not transfer to a generator-time reranker (using the generator's
+  own logits): generator log-probabilities are already well-calibrated, so
+  scaling has no effect.
+
+6. Limitations
+We do not study cross-domain generalization of T — the calibrator is fit on
+Natural Questions and applied unchanged to TriviaQA. The two are similar enough
+that this works, but a more distant domain (e.g. legal QA) would likely need
+its own calibration set.

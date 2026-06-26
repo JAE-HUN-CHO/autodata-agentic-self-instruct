@@ -1,0 +1,254 @@
+{
+  "paper_id": "tutorial_paper",
+  "accepted": true,
+  "accepted_qa": {
+    "context": "Gradient clipping is critical for stable training of very deep transformers in low-precision (fp8) settings. While variance-coupled adaptive clipping thresholds dynamically adjust to layer activation statistics, training dynamics can be disrupted by the interplay between non-stationary activation distributions and numerical precision limitations. Understanding how these factors combine to cause or prevent catastrophic loss spikes requires analysis of moving average estimation and precision effects in the clipping schedule.",
+    "question": "Considering the role of exponential moving averages (EMAs) and numerical precision in estimating layer activation variance, why does computing the EMA in fp8 precision rather than in fp32 cause the catastrophic loss spikes to reappear, and how does this interaction inform the design of stable adaptive gradient clipping schedules in deep transformer training?",
+    "reference_answer": "Computing the EMA of per-layer activation variance in fp8 precision leads to underflow on small-magnitude variance values, causing inaccurate and lagging variance estimates. This imprecise estimation prevents the adaptive clipping threshold from properly tracking the true activation variance tail, resulting in insufficient clipping and catastrophic loss spikes around step ~6k. Using a CPU shadow copy in fp32 precision prevents underflow, providing accurate variance estimates and stable clipping thresholds, thereby avoiding spikes. Hence, numerical precision affects the reliability of the variance estimation, informing that stable adaptive clipping schedules must incorporate high-precision EMA calculations to maintain fidelity in low-precision training environments.",
+    "rubric": [
+      {
+        "criterion": "Identifies precision underflow in fp8 EMA as cause of inaccurate variance tracking",
+        "weight": 10,
+        "category": "positive"
+      },
+      {
+        "criterion": "Explains impact of small-magnitude variance underflow on threshold accuracy",
+        "weight": 9,
+        "category": "positive"
+      },
+      {
+        "criterion": "Connects imprecise variance estimates to re-emergence of loss spikes",
+        "weight": 8,
+        "category": "positive"
+      },
+      {
+        "criterion": "Describes how fp32 shadow copy mitigates numerical underflow issues",
+        "weight": 7,
+        "category": "positive"
+      },
+      {
+        "criterion": "Discusses the necessity of stable adaptive clipping schedules in the context of numerical precision",
+        "weight": 6,
+        "category": "positive"
+      },
+      {
+        "criterion": "Mentions the interaction between activation statistics dynamics and EMA estimation",
+        "weight": 5,
+        "category": "positive"
+      },
+      {
+        "criterion": "Includes understanding of how lagging EMA affects the threshold's responsiveness",
+        "weight": 5,
+        "category": "positive"
+      },
+      {
+        "criterion": "Avoids attributing spikes solely to clipping multiplier or schedule without precision considerations",
+        "weight": -6,
+        "category": "negative"
+      },
+      {
+        "criterion": "Does not confuse EMA computation precision with the clipping threshold computation precision",
+        "weight": -5,
+        "category": "negative"
+      },
+      {
+        "criterion": "Does not erroneously attribute failure to non-stationarity without considering EMA precision",
+        "weight": -4,
+        "category": "negative"
+      },
+      {
+        "criterion": "Avoids simplistic answers focusing only on fp8 limitations without connecting to loss spikes",
+        "weight": -5,
+        "category": "negative"
+      }
+    ],
+    "question_type": "adaptive clipping failure analysis",
+    "reasoning_tags": [
+      "statistical_dynamics",
+      "numerical_precision",
+      "algorithmic_tradeoffs"
+    ]
+  },
+  "n_rounds": 2,
+  "rounds": [
+    {
+      "round": 1,
+      "status": "TOO_EASY",
+      "qa": {
+        "context": "In training deep transformer models with mixed precision (fp8), gradient clipping thresholds per layer are crucial to stabilize training and avoid loss spikes. Fixed global thresholds can fail to capture dynamic activation magnitude changes, while thresholds coupled to activation variance offer an adaptive alternative. However, variance non-stationarity arising from curriculum data mixing challenges the responsiveness of such adaptive clipping schemes.",
+        "question": "How does coupling per-layer gradient clipping thresholds to the exponential moving variance of activations mitigate catastrophic loss spikes in fp8 training compared to fixed global thresholds, and why does this approach fail under non-stationary activation variance conditions encountered during curriculum-style data mixing?",
+        "reference_answer": "Coupling the clipping threshold to the exponential moving variance of per-layer activations (tau_l = k * sqrt(V_l)) enables the threshold to adapt to the varying scale of activations dynamically, preventing loss spikes that fixed global thresholds miss, as the latter cannot react to layer- or time-dependent activation changes. This adaptation effectively suppresses spikes around step ~6k in deep transformer training. However, when activation variance is non-stationary across micro-batches—such as in curriculum-style data mixing—the EMA lags behind true changes in variance, causing the threshold to be misaligned with the actual tail magnitude. This lag leads to delayed loss spikes (~400 steps after), as the threshold underestimates the required clipping level. The problem is partially resolved by employing a two-timescale EMA that can track fast variance changes more effectively.",
+        "rubric": [
+          {
+            "criterion": "Identifies the fundamental difference between fixed global and variance-coupled thresholds",
+            "weight": 8,
+            "category": "positive"
+          },
+          {
+            "criterion": "Explains how per-layer variance coupling dynamically adapts the threshold to changing activation scales",
+            "weight": 9,
+            "category": "positive"
+          },
+          {
+            "criterion": "Connects threshold adaptation to prevention of catastrophic loss spikes during training",
+            "weight": 8,
+            "category": "positive"
+          },
+          {
+            "criterion": "Recognizes the impact of activation variance non-stationarity on threshold effectiveness",
+            "weight": 7,
+            "category": "positive"
+          },
+          {
+            "criterion": "Explains why EMA lag causes delayed loss spikes with curriculum-style data mixing",
+            "weight": 9,
+            "category": "positive"
+          },
+          {
+            "criterion": "Describes the two-timescale EMA solution and how it mitigates lag in threshold adaptation",
+            "weight": 7,
+            "category": "positive"
+          },
+          {
+            "criterion": "Acknowledges the role of fp32 shadow copy in accurate EMA computation and spike suppression",
+            "weight": 6,
+            "category": "positive"
+          },
+          {
+            "criterion": "Avoids conflating threshold scaling factor k tuning with the core mechanism of variance coupling",
+            "weight": 5,
+            "category": "positive"
+          },
+          {
+            "criterion": "Does not confuse the suppression of spikes with throughput improvements or hardware overhead",
+            "weight": 4,
+            "category": "positive"
+          },
+          {
+            "criterion": "Fails to address why fixed global thresholds cannot prevent spikes in dynamic activation regimes",
+            "weight": -8,
+            "category": "negative"
+          },
+          {
+            "criterion": "Incorrectly attributes loss spikes to gradient quantization rather than variance estimate lag",
+            "weight": -7,
+            "category": "negative"
+          },
+          {
+            "criterion": "Mistakes the cause of lag for a failure of the clipping multiplier k parameter",
+            "weight": -6,
+            "category": "negative"
+          },
+          {
+            "criterion": "Overlooks that the EMA is computed on CPU in higher precision to avoid fp8 underflow",
+            "weight": -5,
+            "category": "negative"
+          },
+          {
+            "criterion": "Incorrectly claims variance coupling eliminates all loss spikes regardless of data distribution",
+            "weight": -7,
+            "category": "negative"
+          }
+        ],
+        "question_type": "gradient clipping adaptation",
+        "reasoning_tags": [
+          "algorithmic_reasoning",
+          "statistical_analysis",
+          "training_dynamics"
+        ]
+      },
+      "weak_scores": [
+        0.7936507936507936,
+        0.7936507936507936,
+        0.7936507936507936
+      ],
+      "strong_scores": [],
+      "gap": null,
+      "feedback": "weak_avg 0.794 > 0.65"
+    },
+    {
+      "round": 2,
+      "status": "ACCEPTED",
+      "qa": {
+        "context": "Gradient clipping is critical for stable training of very deep transformers in low-precision (fp8) settings. While variance-coupled adaptive clipping thresholds dynamically adjust to layer activation statistics, training dynamics can be disrupted by the interplay between non-stationary activation distributions and numerical precision limitations. Understanding how these factors combine to cause or prevent catastrophic loss spikes requires analysis of moving average estimation and precision effects in the clipping schedule.",
+        "question": "Considering the role of exponential moving averages (EMAs) and numerical precision in estimating layer activation variance, why does computing the EMA in fp8 precision rather than in fp32 cause the catastrophic loss spikes to reappear, and how does this interaction inform the design of stable adaptive gradient clipping schedules in deep transformer training?",
+        "reference_answer": "Computing the EMA of per-layer activation variance in fp8 precision leads to underflow on small-magnitude variance values, causing inaccurate and lagging variance estimates. This imprecise estimation prevents the adaptive clipping threshold from properly tracking the true activation variance tail, resulting in insufficient clipping and catastrophic loss spikes around step ~6k. Using a CPU shadow copy in fp32 precision prevents underflow, providing accurate variance estimates and stable clipping thresholds, thereby avoiding spikes. Hence, numerical precision affects the reliability of the variance estimation, informing that stable adaptive clipping schedules must incorporate high-precision EMA calculations to maintain fidelity in low-precision training environments.",
+        "rubric": [
+          {
+            "criterion": "Identifies precision underflow in fp8 EMA as cause of inaccurate variance tracking",
+            "weight": 10,
+            "category": "positive"
+          },
+          {
+            "criterion": "Explains impact of small-magnitude variance underflow on threshold accuracy",
+            "weight": 9,
+            "category": "positive"
+          },
+          {
+            "criterion": "Connects imprecise variance estimates to re-emergence of loss spikes",
+            "weight": 8,
+            "category": "positive"
+          },
+          {
+            "criterion": "Describes how fp32 shadow copy mitigates numerical underflow issues",
+            "weight": 7,
+            "category": "positive"
+          },
+          {
+            "criterion": "Discusses the necessity of stable adaptive clipping schedules in the context of numerical precision",
+            "weight": 6,
+            "category": "positive"
+          },
+          {
+            "criterion": "Mentions the interaction between activation statistics dynamics and EMA estimation",
+            "weight": 5,
+            "category": "positive"
+          },
+          {
+            "criterion": "Includes understanding of how lagging EMA affects the threshold's responsiveness",
+            "weight": 5,
+            "category": "positive"
+          },
+          {
+            "criterion": "Avoids attributing spikes solely to clipping multiplier or schedule without precision considerations",
+            "weight": -6,
+            "category": "negative"
+          },
+          {
+            "criterion": "Does not confuse EMA computation precision with the clipping threshold computation precision",
+            "weight": -5,
+            "category": "negative"
+          },
+          {
+            "criterion": "Does not erroneously attribute failure to non-stationarity without considering EMA precision",
+            "weight": -4,
+            "category": "negative"
+          },
+          {
+            "criterion": "Avoids simplistic answers focusing only on fp8 limitations without connecting to loss spikes",
+            "weight": -5,
+            "category": "negative"
+          }
+        ],
+        "question_type": "adaptive clipping failure analysis",
+        "reasoning_tags": [
+          "statistical_dynamics",
+          "numerical_precision",
+          "algorithmic_tradeoffs"
+        ]
+      },
+      "weak_scores": [
+        0.08,
+        0.08,
+        0.0
+      ],
+      "strong_scores": [
+        0.6,
+        0.6,
+        0.6
+      ],
+      "gap": 0.5466666666666666,
+      "feedback": "accepted"
+    }
+  ]
+}

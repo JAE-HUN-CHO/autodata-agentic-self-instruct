@@ -1,0 +1,34 @@
+# Agentic Self-Instruct -- OpenAI configuration with App C.1 thresholds.
+#
+# Same lineup as config/openai_paper_faithful_config.yaml, only difference is
+# strong_avg_min: 0.60 (App C.1 default) instead of 0.65 (Sec 3.1 prose).
+# Per the autoresearch loop: the previous tutorial_paper run had r11
+# strong_avg=0.614 which would have accepted at 0.60.
+
+papers_path: experiments/autoresearch_corpus
+
+acceptance_criteria:
+  weak_avg_max: 0.65
+  weak_attempt_max: 0.75
+  strong_avg_min: 0.60      # App C.1 default
+  strong_avg_max: 0.95
+  gap_min: 0.20
+
+loop:
+  n_attempts: 3
+  max_rounds: 12
+  parallel_attempts: true
+
+sampling:
+  challenger: 0.9
+  weak_solver: 0.7
+  strong_solver: 0.7
+  judge: 0.0
+  quality_verifier: 0.0
+
+models:
+  challenger:    { model: "gpt-4.1-mini", base_url: "https://api.openai.com/v1", api_key: "env:OPENAI_API_KEY", max_retries: 5 }
+  quality_verifier: { model: "gpt-4.1-mini", base_url: "https://api.openai.com/v1", api_key: "env:OPENAI_API_KEY", max_retries: 5 }
+  judge:         { model: "gpt-4.1-mini", base_url: "https://api.openai.com/v1", api_key: "env:OPENAI_API_KEY", max_retries: 5 }
+  strong_solver: { model: "gpt-4.1",      base_url: "https://api.openai.com/v1", api_key: "env:OPENAI_API_KEY", max_retries: 5 }
+  weak_solver:   { model: "gpt-4.1-nano", base_url: "https://api.openai.com/v1", api_key: "env:OPENAI_API_KEY", max_retries: 5 }

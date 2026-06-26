@@ -1,0 +1,36 @@
+# Agentic Self-Instruct -- OpenAI Phase-2 autoresearch config.
+#
+# Phase 1 (config/openai_appc1_config.yaml) hit 1/3 accepted -- the App C.1 0.60
+# threshold alone was not enough to lift the acceptance rate toward the paper's
+# reported ~50-60%. Phase 2 upgrades the strong solver to gpt-5-mini (a reasoning
+# model) so it can climb past 0.60 more reliably on detail-heavy papers. The
+# OpenAICompatibleProvider auto-adapts to reasoning models' temperature /
+# max_completion_tokens quirks on the first 400, so no other code changes needed.
+
+papers_path: experiments/autoresearch_corpus
+
+acceptance_criteria:
+  weak_avg_max: 0.65
+  weak_attempt_max: 0.75
+  strong_avg_min: 0.60      # keep App C.1 default
+  strong_avg_max: 0.95
+  gap_min: 0.20
+
+loop:
+  n_attempts: 3
+  max_rounds: 12
+  parallel_attempts: true
+
+sampling:
+  challenger: 0.9
+  weak_solver: 0.7
+  strong_solver: 0.7
+  judge: 0.0
+  quality_verifier: 0.0
+
+models:
+  challenger:    { model: "gpt-4.1-mini", base_url: "https://api.openai.com/v1", api_key: "env:OPENAI_API_KEY", max_retries: 5 }
+  quality_verifier: { model: "gpt-4.1-mini", base_url: "https://api.openai.com/v1", api_key: "env:OPENAI_API_KEY", max_retries: 5 }
+  judge:         { model: "gpt-4.1-mini", base_url: "https://api.openai.com/v1", api_key: "env:OPENAI_API_KEY", max_retries: 5 }
+  strong_solver: { model: "gpt-5-mini",   base_url: "https://api.openai.com/v1", api_key: "env:OPENAI_API_KEY", max_retries: 5, timeout: 180 }
+  weak_solver:   { model: "gpt-4.1-nano", base_url: "https://api.openai.com/v1", api_key: "env:OPENAI_API_KEY", max_retries: 5 }

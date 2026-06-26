@@ -1,0 +1,1139 @@
+{
+  "paper_id": "tutorial_paper",
+  "accepted": false,
+  "accepted_qa": null,
+  "n_rounds": 12,
+  "rounds": [
+    {
+      "round": 1,
+      "status": "TOO_EASY",
+      "qa": {
+        "context": "Training very deep transformer models in low-precision formats like fp8 requires careful control of gradient magnitudes to prevent catastrophic loss spikes. A method couples the per-layer gradient clipping threshold to the running variance of activations, updated via exponential moving averages (EMA). However, in scenarios with rapidly changing data distributions, such as curriculum learning, the variance estimates can lag, reintroducing spikes. Evaluating how this method adapts to non-stationary activation statistics and how parameter settings influence training stability is critical for scaling.",
+        "question": "How does the use of a two-timescale exponential moving average improve the stability of variance-coupled gradient clipping during curriculum-style data mixing, and why might a single EMA with a fixed momentum fail in this scenario?",
+        "reference_answer": "A single EMA with a fixed momentum (beta = 0.98) smooths activation variance estimates but cannot track rapid non-stationary changes caused by curriculum-style data mixing, where data distributions shift abruptly across micro-batches. This lag causes the clipping threshold tau to underestimate the true tail variance temporarily, leading to delayed catastrophic loss spikes around step 6,500. Introducing a two-timescale EMA—combining a fast EMA (beta = 0.9) and a slow EMA (beta = 0.99)—enables the threshold to respond more quickly to sudden changes while maintaining stability over the long term. The fast EMA captures rapid variance shifts, reducing lag, and thus prevents spikes without sacrificing the smoothing benefits of the slow EMA.",
+        "rubric": [
+          {
+            "criterion": "Identifies lag in variance estimate as the key problem with single EMA",
+            "weight": 8,
+            "category": "positive"
+          },
+          {
+            "criterion": "Explains how non-stationary activation statistics arise from curriculum-style data mixing",
+            "weight": 7,
+            "category": "positive"
+          },
+          {
+            "criterion": "Describes the mechanism of a two-timescale EMA combining fast and slow components",
+            "weight": 8,
+            "category": "positive"
+          },
+          {
+            "criterion": "Connects the lag in threshold adaptation to the reappearance of loss spikes",
+            "weight": 9,
+            "category": "positive"
+          },
+          {
+            "criterion": "Addresses trade-off between responsiveness and smoothing in EMA design",
+            "weight": 7,
+            "category": "positive"
+          },
+          {
+            "criterion": "Mentions the specific values of beta used (0.9 and 0.99) and their roles",
+            "weight": 6,
+            "category": "positive"
+          },
+          {
+            "criterion": "Notes the spike delay of approximately 400 steps as evidence of lag",
+            "weight": 5,
+            "category": "positive"
+          },
+          {
+            "criterion": "Acknowledges that the method prevents spikes without throughput cost",
+            "weight": 4,
+            "category": "positive"
+          },
+          {
+            "criterion": "Incorrectly treats the EMA lag as a fixed scheduling problem rather than a data distribution issue",
+            "weight": -7,
+            "category": "negative"
+          },
+          {
+            "criterion": "Fails to link activation variance non-stationarity to threshold lag and spikes",
+            "weight": -8,
+            "category": "negative"
+          },
+          {
+            "criterion": "Misattributes the need for two-timescale EMA to hardware or numerical precision limits",
+            "weight": -6,
+            "category": "negative"
+          },
+          {
+            "criterion": "Claims that a single EMA can track rapid variance changes effectively",
+            "weight": -9,
+            "category": "negative"
+          },
+          {
+            "criterion": "Overlooks the significance of coupling tau to sqrt(V_l) in preventing spikes",
+            "weight": -5,
+            "category": "negative"
+          },
+          {
+            "criterion": "Neglects the impact of fp8 underflow on variance estimates in the analysis",
+            "weight": -4,
+            "category": "negative"
+          },
+          {
+            "criterion": "Confuses the role of the CPU fp32 shadow copy with EMA speed",
+            "weight": -6,
+            "category": "negative"
+          }
+        ],
+        "question_type": "adaptive gradient clipping dynamics",
+        "reasoning_tags": [
+          "statistical_reasoning",
+          "algorithmic_design",
+          "failure_analysis"
+        ]
+      },
+      "weak_scores": [
+        0.5925925925925926,
+        0.7222222222222222,
+        0.7222222222222222
+      ],
+      "strong_scores": [],
+      "gap": null,
+      "feedback": "weak_avg 0.679 > 0.65"
+    },
+    {
+      "round": 2,
+      "status": "FAILED_STRONG",
+      "qa": {
+        "context": "Training deep transformer models with hundreds of layers in low-precision formats like fp8 introduces instability risks, particularly in the interaction between adaptive gradient clipping thresholds and shifting activation statistics. Selecting an appropriate multiplier for variance-coupled clipping thresholds is critical to balancing gradient explosion and over-clipping, especially as model depth and parameter count increase.",
+        "question": "Considering the findings on the effect of varying the clipping multiplier k, how does its optimal choice relate to model scale and layer depth, and what are the underlying tradeoffs that dictate increasing k beyond 6 in deeper transformer stacks?",
+        "reference_answer": "The paper's ablation studies show that while k=6 provides a stable clipping threshold across model widths from 1.3B to 70B parameters, this setting becomes too aggressive in very deep models (e.g., a 96-layer, 130B-parameter transformer). In such cases, k must be increased to around 7.5 to prevent over-clipping of the deepest layers, which can stall training. The tradeoff is between suppressing large gradient spikes (requiring smaller k) and avoiding excessive clipping that harms training progress (requiring larger k), especially as layer depth increases the dynamic range of activations and gradients.",
+        "rubric": [
+          {
+            "criterion": "Identifies the relationship between model scale/depth and clipping multiplier tuning",
+            "weight": 10,
+            "category": "positive"
+          },
+          {
+            "criterion": "Explains why deeper stacks require a relaxed (larger) k to avoid over-clipping",
+            "weight": 9,
+            "category": "positive"
+          },
+          {
+            "criterion": "Describes how too small k leads to gradient over-clipping and training stalling",
+            "weight": 8,
+            "category": "positive"
+          },
+          {
+            "criterion": "Recognizes that k=6 is optimal for moderate-scale models but not universally",
+            "weight": 7,
+            "category": "positive"
+          },
+          {
+            "criterion": "Discusses the balance between suppressing spikes and preserving gradient signal",
+            "weight": 7,
+            "category": "positive"
+          },
+          {
+            "criterion": "Mentions that deeper layers have larger dynamic range of activations/gradients",
+            "weight": 6,
+            "category": "positive"
+          },
+          {
+            "criterion": "Connects the empirical ablation results to the theoretical understanding of variance coupling",
+            "weight": 6,
+            "category": "positive"
+          },
+          {
+            "criterion": "Avoids conflating the role of k with the EMA beta parameters",
+            "weight": 5,
+            "category": "positive"
+          },
+          {
+            "criterion": "Does not incorrectly state that increasing k prevents spike occurrences entirely",
+            "weight": -8,
+            "category": "negative"
+          },
+          {
+            "criterion": "Does not ignore the interaction between activation variance statistics and clipping thresholds",
+            "weight": -7,
+            "category": "negative"
+          },
+          {
+            "criterion": "Avoids attributing failure modes solely to hardware or precision limitations",
+            "weight": -6,
+            "category": "negative"
+          },
+          {
+            "criterion": "Does not confuse the fixed global threshold baseline with variance coupling",
+            "weight": -5,
+            "category": "negative"
+          }
+        ],
+        "question_type": "adaptive threshold tuning",
+        "reasoning_tags": [
+          "statistical_analysis",
+          "algorithmic_tradeoffs",
+          "model_scaling"
+        ]
+      },
+      "weak_scores": [
+        0.15517241379310345,
+        0.6551724137931034,
+        0.4482758620689655
+      ],
+      "strong_scores": [
+        0.5517241379310345,
+        0.5517241379310345,
+        0.4482758620689655
+      ],
+      "gap": null,
+      "feedback": "strong_avg 0.517 < 0.65"
+    },
+    {
+      "round": 3,
+      "status": "TOO_EASY",
+      "qa": {
+        "context": "Gradient clipping thresholds in fp8 training of large transformer models are adapted layer-wise based on the exponential moving variance of activations. This adaptive thresholding aims to prevent catastrophic loss spikes that fixed threshold clipping fails to address. However, the approach relies on precise statistical tracking and can be affected by numerical precision issues and non-stationarities in activation statistics induced by training data schedules.",
+        "question": "How do numerical precision limitations and non-stationary activation statistics each contribute to the resurgence of catastrophic loss spikes in variance-coupled gradient clipping, and what mechanisms or adjustments does the paper propose to mitigate these distinct failure modes?",
+        "reference_answer": "Numerical precision limitations in computing the exponential moving average (EMA) of activation variances in fp8 cause underflow on small-magnitude variance values, which leads to inaccurate thresholds and thus loss spikes; this was demonstrated by the restoration of spikes when the fp32 shadow copy was removed. Non-stationary activation statistics, especially due to curriculum-style data mixing, cause the EMA-based threshold to lag behind the true activation variance tail by about 400 steps, resulting in delayed spikes. To mitigate these, the paper uses an fp32 shadow copy to avoid fp8 underflow, and introduces a two-timescale EMA (fast and slow beta values) to better track rapid variance changes and close the lag gap, thus suppressing loss spikes in both cases.",
+        "rubric": [
+          {
+            "criterion": "Identifies the role of numerical precision limits causing EMA underflow and its effect on threshold accuracy",
+            "weight": 8,
+            "category": "positive"
+          },
+          {
+            "criterion": "Explains how fp8 underflow impacts variance tracking and consequently gradient clipping efficacy",
+            "weight": 7,
+            "category": "positive"
+          },
+          {
+            "criterion": "Recognizes non-stationarity of activation variance from curriculum-style data mixing as a source of lag in threshold adaptation",
+            "weight": 7,
+            "category": "positive"
+          },
+          {
+            "criterion": "Describes how lag in tracking variance tails leads to delayed but similar catastrophic loss spikes",
+            "weight": 6,
+            "category": "positive"
+          },
+          {
+            "criterion": "Articulates the use of an fp32 shadow copy EMA to prevent fp8 underflow and stabilize threshold computation",
+            "weight": 8,
+            "category": "positive"
+          },
+          {
+            "criterion": "Describes the two-timescale EMA approach with different beta values to handle rapid variance changes",
+            "weight": 9,
+            "category": "positive"
+          },
+          {
+            "criterion": "Differentiates the distinct failure modes (numerical precision vs. dynamic data shifts) and corresponding solutions",
+            "weight": 8,
+            "category": "positive"
+          },
+          {
+            "criterion": "Avoids conflating the causes of loss spikes and the mitigation strategies",
+            "weight": -8,
+            "category": "negative"
+          },
+          {
+            "criterion": "Does not ignore the role of fp32 shadow copy in stabilizing variance estimates",
+            "weight": -6,
+            "category": "negative"
+          },
+          {
+            "criterion": "Avoids attributing lag-related spikes solely to clipping multiplier k or model scale instead of data distribution changes",
+            "weight": -5,
+            "category": "negative"
+          },
+          {
+            "criterion": "Does not overlook the temporal delay (~400 steps) characteristic of lag-induced spikes",
+            "weight": -5,
+            "category": "negative"
+          }
+        ],
+        "question_type": "adaptive clipping failure analysis",
+        "reasoning_tags": [
+          "dynamic_systems",
+          "numerical_precision",
+          "tradeoff_analysis"
+        ]
+      },
+      "weak_scores": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "strong_scores": [],
+      "gap": null,
+      "feedback": "degenerate all-zero weak rollouts"
+    },
+    {
+      "round": 4,
+      "status": "FAILED_STRONG",
+      "qa": {
+        "context": "Gradient clipping thresholds critically influence training stability in deep transformers, especially when combined with low-precision arithmetic like fp8. Choosing a fixed global threshold can lead to catastrophic loss spikes, while per-layer adaptive thresholds can prevent them. However, the interplay between the threshold multiplier, model scale, and depth affects the delicate balance between suppressing spikes and maintaining training progress.",
+        "question": "How does the interaction between the clipping multiplier k and model depth influence the effectiveness of variance-coupled gradient clipping, and why must k be increased for very deep transformer stacks to avoid over-clipping despite the risk of allowing loss spikes?",
+        "reference_answer": "The paper shows that the optimal clipping multiplier k = 6 is stable for model widths from 1.3B to 70B parameters but becomes insufficient for very deep models such as the 96-layer 130B transformer stack. At this scale, the deepest layers exhibit smaller activation variances, causing a fixed k = 6 to over-clip gradients and stall training progress. Therefore, k must be relaxed to around 7.5 to reduce over-clipping in these deepest layers, balancing between preventing loss spikes and preserving gradient magnitudes for effective training.",
+        "rubric": [
+          {
+            "criterion": "Identifies the link between layer depth and changes in activation variance distributions",
+            "weight": 8,
+            "category": "positive"
+          },
+          {
+            "criterion": "Explains why smaller variances in deeper layers cause over-clipping at fixed k",
+            "weight": 8,
+            "category": "positive"
+          },
+          {
+            "criterion": "Discusses the tradeoff between preventing spikes and maintaining gradient signal",
+            "weight": 7,
+            "category": "positive"
+          },
+          {
+            "criterion": "Recognizes that relaxing k mitigates over-clipping without reintroducing spikes",
+            "weight": 7,
+            "category": "positive"
+          },
+          {
+            "criterion": "Acknowledges the stability of k=6 across a broad parameter range but its failure in very deep stacks",
+            "weight": 6,
+            "category": "positive"
+          },
+          {
+            "criterion": "Connects the need for adaptive k to scaling behavior in transformer architectures",
+            "weight": 6,
+            "category": "positive"
+          },
+          {
+            "criterion": "Describes the interaction of variance-coupling with model depth beyond simple global thresholding",
+            "weight": 5,
+            "category": "positive"
+          },
+          {
+            "criterion": "Avoids mistakenly attributing over-clipping solely to numerical precision issues",
+            "weight": -8,
+            "category": "negative"
+          },
+          {
+            "criterion": "Does not conflate the reasons for loss spikes with those for training plateau due to over-clipping",
+            "weight": -7,
+            "category": "negative"
+          },
+          {
+            "criterion": "Avoids describing threshold adaptation mechanisms unrelated to the multiplier k",
+            "weight": -6,
+            "category": "negative"
+          },
+          {
+            "criterion": "Does not treat k as a mere hyperparameter without physical or statistical grounding",
+            "weight": -5,
+            "category": "negative"
+          },
+          {
+            "criterion": "Avoids superficial or high-level answers lacking reference to layerwise variance or depth",
+            "weight": -7,
+            "category": "negative"
+          }
+        ],
+        "question_type": "adaptive clipping threshold design",
+        "reasoning_tags": [
+          "statistical_analysis",
+          "numerical_precision",
+          "scaling_behavior"
+        ]
+      },
+      "weak_scores": [
+        0.0,
+        0.02127659574468085,
+        0.0
+      ],
+      "strong_scores": [
+        0.0425531914893617,
+        0.0425531914893617,
+        0.0
+      ],
+      "gap": null,
+      "feedback": "strong_avg 0.028 < 0.65"
+    },
+    {
+      "round": 5,
+      "status": "FAILED_STRONG",
+      "qa": {
+        "context": "Training very deep transformer models with low-precision (fp8) computations requires managing gradient norms carefully to avoid training instabilities like catastrophic loss spikes. Variance-coupled gradient clipping adapts the clipping threshold per layer based on the moving variance of activations, aiming to maintain stable training dynamics. However, this approach involves subtle interactions between the timescale of variance estimates, numerical precision limits, data distribution shifts, and model depth, all of which impact the robustness of the clipping mechanism.",
+        "question": "How do the timescale of the exponential moving average (EMA) used to track activation variance, the numerical precision of variance computation, and the structural depth of the transformer jointly affect the ability of variance-coupled gradient clipping to prevent catastrophic loss spikes, and what adjustments does the paper identify as necessary to maintain stable training under varying training regimes and model scales?",
+        "reference_answer": "The paper finds that using a single-timescale EMA with fixed momentum (beta=0.98) to track activation variance can lag behind true non-stationary statistics during curriculum-style data mixing, causing delayed loss spikes; a two-timescale EMA (fast beta=0.9 and slow beta=0.99) reduces this lag and prevents the spikes. Additionally, computing the variance EMA in fp8 precision leads to underflow and restores spikes, so the EMA must be maintained in fp32 on a CPU shadow copy to ensure stability. Regarding model depth, the fixed clipping multiplier k=6 works well from 1.3B to 70B parameters but over-clips in very deep (96-layer, 130B) models, requiring an increased k (~7.5) to avoid suppressing gradients excessively in deep layers, balancing between preventing spikes and maintaining training progress.",
+        "rubric": [
+          {
+            "criterion": "Identifies lag in EMA tracking activation variance as a cause of delayed loss spikes under non-stationary data",
+            "weight": 8,
+            "category": "positive"
+          },
+          {
+            "criterion": "Explains the necessity of a two-timescale EMA to reduce lag and align thresholds with changing variance",
+            "weight": 9,
+            "category": "positive"
+          },
+          {
+            "criterion": "Discusses the impact of fp8 underflow on variance estimation leading to loss spikes",
+            "weight": 7,
+            "category": "positive"
+          },
+          {
+            "criterion": "Recognizes the solution of maintaining variance EMA in fp32 on a CPU shadow copy",
+            "weight": 7,
+            "category": "positive"
+          },
+          {
+            "criterion": "Describes how model depth influences the choice of the clipping multiplier k to prevent over-clipping",
+            "weight": 8,
+            "category": "positive"
+          },
+          {
+            "criterion": "Connects the effect of increasing k in deeper models to avoiding gradient suppression while still mitigating spikes",
+            "weight": 8,
+            "category": "positive"
+          },
+          {
+            "criterion": "Integrates how timescale of EMA, numerical precision, and model depth collectively impact clipping effectiveness",
+            "weight": 10,
+            "category": "positive"
+          },
+          {
+            "criterion": "Accounts for the role of curriculum-style data mixing in complicating variance tracking",
+            "weight": 6,
+            "category": "positive"
+          },
+          {
+            "criterion": "Avoids conflating variance-coupling failure due to EMA lag with failures due to clipping multiplier choice",
+            "weight": -5,
+            "category": "negative"
+          },
+          {
+            "criterion": "Does not overlook the necessity of fp32 precision for stable variance EMA computation",
+            "weight": -6,
+            "category": "negative"
+          },
+          {
+            "criterion": "Does not erroneously claim that increasing k alone solves all stability issues",
+            "weight": -6,
+            "category": "negative"
+          },
+          {
+            "criterion": "Avoids ignoring the interplay between dynamic training regimes and variance estimation",
+            "weight": -5,
+            "category": "negative"
+          },
+          {
+            "criterion": "Does not generalize findings to architectures or quantization schemes not tested in the paper",
+            "weight": -4,
+            "category": "negative"
+          },
+          {
+            "criterion": "Ensures that the explanation distinguishes between causes of spikes and mitigation strategies",
+            "weight": 9,
+            "category": "positive"
+          },
+          {
+            "criterion": "Avoids describing only empirical results without connecting them to underlying mechanisms",
+            "weight": 7,
+            "category": "positive"
+          }
+        ],
+        "question_type": "gradient clipping stability analysis",
+        "reasoning_tags": [
+          "dynamic_systems",
+          "statistical_analysis",
+          "numerical_precision"
+        ]
+      },
+      "weak_scores": [
+        0.0759493670886076,
+        0.0759493670886076,
+        0.13924050632911392
+      ],
+      "strong_scores": [
+        0.26582278481012656,
+        0.26582278481012656,
+        0.189873417721519
+      ],
+      "gap": null,
+      "feedback": "strong_avg 0.241 < 0.65"
+    },
+    {
+      "round": 6,
+      "status": "TOO_EASY",
+      "qa": {
+        "context": "Training deep transformer models in low-precision formats like fp8 introduces unique challenges for gradient clipping, which must adapt to changing activation statistics per layer. Balancing clipping strength to avoid loss spikes without impairing training requires understanding how statistical estimation, numerical precision, and model architecture depth jointly influence the behavior of adaptive clipping thresholds.",
+        "question": "Why does the paper find that a fixed multiplier k=6 for variance-coupled gradient clipping is stable across a range of model widths but needs to be increased to around 7.5 for deeper (96-layer) transformer stacks, and how do the interplay between layer depth, activation variance estimation, and numerical clipping tradeoffs explain this adjustment?",
+        "reference_answer": "The paper shows that while k=6 provides a balance between under-clipping and over-clipping for models ranging from 1.3B to 70B parameters, deeper transformer stacks (96 layers, 130B parameters) experience over-clipping in the deepest layers if k=6 is used. This arises because deeper layers tend to have different activation variance profiles and may be more sensitive to aggressive clipping. Increasing k to approximately 7.5 relaxes the clipping threshold, preventing excessive gradient suppression at these depths. This adjustment reflects the interaction between the need to accommodate larger or more variable activation variances in deeper layers, the limitations of variance estimation (EMA lag and numerical precision effects), and the tradeoff between avoiding loss spikes (which require tighter clipping) and preserving gradient flow (which requires looser clipping).",
+        "rubric": [
+          {
+            "criterion": "Identifies relationship between k values and model depth",
+            "weight": 8,
+            "category": "positive"
+          },
+          {
+            "criterion": "Explains how deeper layers exhibit distinct activation variance profiles affecting clipping",
+            "weight": 8,
+            "category": "positive"
+          },
+          {
+            "criterion": "Connects over-clipping at fixed k=6 to degraded training stability in deep stacks",
+            "weight": 7,
+            "category": "positive"
+          },
+          {
+            "criterion": "Describes the role of variance estimation inaccuracies and numerical precision in influencing threshold settings",
+            "weight": 7,
+            "category": "positive"
+          },
+          {
+            "criterion": "Explains tradeoff between preventing loss spikes and avoiding excessive gradient suppression",
+            "weight": 9,
+            "category": "positive"
+          },
+          {
+            "criterion": "Acknowledges that increasing k loosens clipping to adapt to layer-wise variance shifts in deep models",
+            "weight": 6,
+            "category": "positive"
+          },
+          {
+            "criterion": "Notes that the adjustment of k is an empirical tuning to maintain training stability",
+            "weight": 5,
+            "category": "positive"
+          },
+          {
+            "criterion": "Fails to consider differential activation variance per layer",
+            "weight": -8,
+            "category": "negative"
+          },
+          {
+            "criterion": "Neglects interaction between numerical precision limits and threshold setting",
+            "weight": -7,
+            "category": "negative"
+          },
+          {
+            "criterion": "Misinterprets increasing k as increasing risk of loss spikes rather than mitigating over-clipping",
+            "weight": -6,
+            "category": "negative"
+          },
+          {
+            "criterion": "Overlooks empirical evidence from ablation studies on k values",
+            "weight": -7,
+            "category": "negative"
+          },
+          {
+            "criterion": "Confuses the role of the multiplier k with EMA parameters or clipping computation precision",
+            "weight": -5,
+            "category": "negative"
+          }
+        ],
+        "question_type": "gradient clipping threshold adaptation",
+        "reasoning_tags": [
+          "statistical_analysis",
+          "numerical_precision",
+          "model_scaling"
+        ]
+      },
+      "weak_scores": [
+        0.9,
+        0.58,
+        0.9
+      ],
+      "strong_scores": [],
+      "gap": null,
+      "feedback": "weak_avg 0.793 > 0.65"
+    },
+    {
+      "round": 7,
+      "status": "FAILED_STRONG",
+      "qa": {
+        "context": "Training deep transformer models with low-precision formats such as fp8 introduces challenges in stabilizing gradients during optimization. Specifically, coupling gradient clipping thresholds to activation variance is proposed to suppress catastrophic loss spikes. However, factors such as numerical underflow in variance computation and non-stationary activation statistics due to curriculum-style data mixing complicate threshold estimation and timing.",
+        "question": "How does the interplay between numerical precision in the exponential moving average computation and the choice of EMA momentum parameters influence the responsiveness and accuracy of variance-coupled gradient clipping thresholds during dynamically changing activation statistics, and why is a two-timescale EMA preferred over a single-timescale EMA in addressing loss spikes associated with curriculum-style data mixing?",
+        "reference_answer": "Numerical precision critically impacts the accurate estimation of activation variance. Computing the EMA in fp8 leads to underflow issues that cause variance estimates to become too small, resulting in insufficient clipping and loss spikes. Using an fp32 shadow copy preserves precision and prevents such underflows. The choice of EMA momentum also influences threshold adaptation speed. A single-timescale EMA with fixed momentum lags behind rapid changes in activation variance caused by curriculum-style data mixing, causing delayed clipping threshold adjustment and subsequent loss spikes. A two-timescale EMA, combining a fast and a slow momentum, enables quicker adaptation to sudden changes while maintaining stability against noise, thereby closing the gap and effectively suppressing spikes.",
+        "rubric": [
+          {
+            "criterion": "Explains how fp8 computation leads to numerical underflow affecting variance estimates",
+            "weight": 8,
+            "category": "positive"
+          },
+          {
+            "criterion": "Describes the role of an fp32 shadow copy in preserving numerical precision",
+            "weight": 7,
+            "category": "positive"
+          },
+          {
+            "criterion": "Analyzes why single-timescale EMA lags behind non-stationary variance in curriculum training",
+            "weight": 8,
+            "category": "positive"
+          },
+          {
+            "criterion": "Explains how two-timescale EMA improves responsiveness to variance changes",
+            "weight": 9,
+            "category": "positive"
+          },
+          {
+            "criterion": "Connects delayed clipping threshold adaptation to resurgence of loss spikes",
+            "weight": 7,
+            "category": "positive"
+          },
+          {
+            "criterion": "Details how coupling clip thresholds to EMA of activation variance enables per-layer adaptation",
+            "weight": 6,
+            "category": "positive"
+          },
+          {
+            "criterion": "Discusses interaction between EMA momentum parameters and variance responsiveness",
+            "weight": 7,
+            "category": "positive"
+          },
+          {
+            "criterion": "Identifies curriculum-style data mixing as the cause of non-stationary activation variance",
+            "weight": 6,
+            "category": "positive"
+          },
+          {
+            "criterion": "Explains why simple fixed global thresholds fail to prevent loss spikes",
+            "weight": 5,
+            "category": "positive"
+          },
+          {
+            "criterion": "Avoids superficial or purely descriptive explanations without mechanistic insight",
+            "weight": -6,
+            "category": "negative"
+          },
+          {
+            "criterion": "Does not conflate clipping multiplier tuning effects with EMA dynamics",
+            "weight": -5,
+            "category": "negative"
+          },
+          {
+            "criterion": "Avoids ignoring the role of numerical precision in variance estimation",
+            "weight": -7,
+            "category": "negative"
+          },
+          {
+            "criterion": "Does not misattribute loss spikes solely to model size or depth without considering EMA and precision",
+            "weight": -6,
+            "category": "negative"
+          },
+          {
+            "criterion": "Does not claim the variance-coupled method eliminates all loss spikes without exceptions",
+            "weight": -4,
+            "category": "negative"
+          },
+          {
+            "criterion": "Avoids restating the paper's findings verbatim without synthesis or explanation",
+            "weight": -5,
+            "category": "negative"
+          }
+        ],
+        "question_type": "gradient clipping threshold adaptation",
+        "reasoning_tags": [
+          "dynamical_systems",
+          "numerical_precision",
+          "multi-scale_adaptation"
+        ]
+      },
+      "weak_scores": [
+        0.07936507936507936,
+        0.19047619047619047,
+        0.19047619047619047
+      ],
+      "strong_scores": [
+        0.19047619047619047,
+        0.19047619047619047,
+        0.19047619047619047
+      ],
+      "gap": null,
+      "feedback": "strong_avg 0.190 < 0.65"
+    },
+    {
+      "round": 8,
+      "status": "FAILED_STRONG",
+      "qa": {
+        "context": "Training very deep transformer models with low-precision floating-point formats like fp8 poses challenges in stable gradient updates. Adaptive per-layer gradient clipping using statistics of activations can mitigate loss spikes, but layers' activation variances evolve over time and differ by depth. Numerical precision, momentum parameters of moving averages, and model scale all influence how clipping thresholds track these statistics, impacting stability.",
+        "question": "How do the challenges of low-precision variance estimation and layer-depth-dependent activation dynamics jointly affect the design choices for momentum parameters and clipping multipliers in variance-coupled gradient clipping, particularly as model depth increases from 40 to 96 layers, and what tradeoffs emerge in balancing clipping threshold responsiveness against over-clipping risks?",
+        "reference_answer": "As transformer depth grows, deeper layers exhibit different activation variance behaviors, and the EMA estimates of variance must be precise to avoid underflow in fp8. Using only a single-timescale EMA with fixed beta leads to lag in tracking true variance changes, especially with curriculum data mixing causing non-stationary statistics. The paper finds that the EMA momentum parameters must be adjusted, incorporating a two-timescale EMA to better track variance changes, reducing lag and loss spikes. Furthermore, the fixed multiplier k=6 that works well for up to 70B-parameter models (around 40 layers) becomes too aggressive for a 96-layer 130B model, causing over-clipping and degraded training. Increasing k to about 7.5 relaxes the clip thresholds for deepest layers, accommodating their differing variance dynamics. Thus, the tradeoff is between responsiveness (fast EMA decay) to non-stationarity versus stability in variance estimates to avoid noise amplification and the risk of clipping too aggressively, which can stall training. Balancing these requires careful tuning of EMA momentum and multiplier k with model depth and numerical precision constraints.",
+        "rubric": [
+          {
+            "criterion": "Identifies interaction between numerical precision limitations and variance estimation accuracy",
+            "weight": 8,
+            "category": "positive"
+          },
+          {
+            "criterion": "Explains how layer depth influences activation variance dynamics and clipping needs",
+            "weight": 7,
+            "category": "positive"
+          },
+          {
+            "criterion": "Links EMA momentum parameters to responsiveness versus stability tradeoff",
+            "weight": 7,
+            "category": "positive"
+          },
+          {
+            "criterion": "Describes the need for two-timescale EMA to address non-stationary activation variance",
+            "weight": 8,
+            "category": "positive"
+          },
+          {
+            "criterion": "Justifies increasing clipping multiplier k for deeper models to prevent over-clipping",
+            "weight": 7,
+            "category": "positive"
+          },
+          {
+            "criterion": "Discusses how low-precision fp8 computations exacerbate variance underflow and lag effects",
+            "weight": 6,
+            "category": "positive"
+          },
+          {
+            "criterion": "Connects training stability improvements to these adaptive parameter choices",
+            "weight": 7,
+            "category": "positive"
+          },
+          {
+            "criterion": "Avoids simply stating that parameters are tuned without explaining underlying dynamics",
+            "weight": 6,
+            "category": "positive"
+          },
+          {
+            "criterion": "Does not confuse fixed global threshold clipping with variance-coupled clipping nuances",
+            "weight": -8,
+            "category": "negative"
+          },
+          {
+            "criterion": "Does not ignore the role of curriculum-style data mixing in causing non-stationarity",
+            "weight": -6,
+            "category": "negative"
+          },
+          {
+            "criterion": "Does not treat EMA momentum tuning and clipping multiplier adjustment as independent or unrelated",
+            "weight": -7,
+            "category": "negative"
+          },
+          {
+            "criterion": "Avoids attributing loss spikes solely to model scale without reference to precision and EMA effects",
+            "weight": -7,
+            "category": "negative"
+          },
+          {
+            "criterion": "Does not claim that increasing k always improves training without discussing over-clipping risks",
+            "weight": -6,
+            "category": "negative"
+          }
+        ],
+        "question_type": "adaptive gradient clipping dynamics",
+        "reasoning_tags": [
+          "numerical_analysis",
+          "temporal_adaptation",
+          "scaling_behavior"
+        ]
+      },
+      "weak_scores": [
+        0.125,
+        0.25,
+        0.10714285714285714
+      ],
+      "strong_scores": [
+        0.35714285714285715,
+        0.23214285714285715,
+        0.23214285714285715
+      ],
+      "gap": null,
+      "feedback": "strong_avg 0.274 < 0.65"
+    },
+    {
+      "round": 9,
+      "status": "FAILED_STRONG",
+      "qa": {
+        "context": "In training large-scale deep transformer models with more than 40 layers using low-precision floating point (fp8), adaptive gradient clipping thresholds that scale with per-layer activation variance can prevent catastrophic loss spikes. However, the effectiveness of this variance-coupled clipping method depends intricately on the precision of variance estimation, the dynamics of activation statistics during training (which may be non-stationary due to data mixing), and the structural depth of the model. The choice of clipping multiplier and EMA momentum parameters needs to balance responsiveness to changes in activation variance with the risk of over-clipping, and may vary with model scale.",
+        "question": "How do interactions among the numerical precision used for computing activation variance, the temporal dynamics of activation statistics influenced by training data curriculum, and the increasing transformer depth jointly constrain the design of gradient clipping schedules and multipliers in variance-coupled clipping, and what principled adjustments does the paper identify to ensure stable training across these varying factors?",
+        "reference_answer": "The paper finds that computing the exponential moving average (EMA) of per-layer activation variance in fp8 causes underflow, leading to unreliable thresholds and loss spikes; using a fp32 shadow copy for EMA computation resolves this precision issue. When activation variance is non-stationary across micro-batches due to curriculum-style data mixing, a single-timescale EMA lags behind true variance changes, causing delayed spikes; introducing a two-timescale EMA (fast beta=0.9 stacked on slow beta=0.99) enables faster adaptation and removes these spikes. As transformer depth increases (notably at 96 layers), the fixed clipping multiplier k=6 over-clips deep layers, degrading training; increasing k to approximately 7.5 relaxes clipping to maintain gradient flow. Thus, stable training requires (1) high-precision EMA computation to avoid underflow, (2) momentum schedules responsive to activation variance dynamics via two-timescale EMA, and (3) scaling the clipping multiplier with model depth to balance clipping strength against over- or under-clipping risks.",
+        "rubric": [
+          {
+            "criterion": "Identifies fp8 underflow in variance EMA as a key numerical precision challenge",
+            "weight": 9,
+            "category": "positive"
+          },
+          {
+            "criterion": "Explains the role of fp32 shadow copy in maintaining reliable variance estimates",
+            "weight": 8,
+            "category": "positive"
+          },
+          {
+            "criterion": "Describes how non-stationary activation statistics arise from curriculum-style data mixing",
+            "weight": 7,
+            "category": "positive"
+          },
+          {
+            "criterion": "Analyzes why a single-timescale EMA fails to track rapidly changing variance",
+            "weight": 8,
+            "category": "positive"
+          },
+          {
+            "criterion": "Details how a two-timescale EMA improves threshold responsiveness and stabilizes training",
+            "weight": 9,
+            "category": "positive"
+          },
+          {
+            "criterion": "Connects increasing transformer depth with changes in activation variance distributions",
+            "weight": 6,
+            "category": "positive"
+          },
+          {
+            "criterion": "Explains the tradeoff between clipping multiplier k values and over-clipping risks at greater depths",
+            "weight": 8,
+            "category": "positive"
+          },
+          {
+            "criterion": "Synthesizes how numerical precision, EMA momentum design, and clipping multiplier jointly affect gradient clipping efficacy",
+            "weight": 10,
+            "category": "positive"
+          },
+          {
+            "criterion": "Recognizes that adjustments must be principled and linked to observed variance and depth effects",
+            "weight": 7,
+            "category": "positive"
+          },
+          {
+            "criterion": "Avoids merely restating facts without relating them to joint constraints among precision, dynamics, and depth",
+            "weight": 9,
+            "category": "positive"
+          },
+          {
+            "criterion": "Does not erroneously claim that fixed threshold clipping suffices under non-stationary conditions",
+            "weight": -7,
+            "category": "negative"
+          },
+          {
+            "criterion": "Avoids confusing the effect of clipping multiplier k with unrelated hyperparameters",
+            "weight": -6,
+            "category": "negative"
+          },
+          {
+            "criterion": "Does not neglect the role of EMA momentum parameters when discussing responsiveness to variance shifts",
+            "weight": -8,
+            "category": "negative"
+          },
+          {
+            "criterion": "Avoids conflating the impact of model width with transformer depth in clipping multiplier adjustments",
+            "weight": -5,
+            "category": "negative"
+          }
+        ],
+        "question_type": "adaptive threshold tuning",
+        "reasoning_tags": [
+          "numerical_precision",
+          "dynamic_statistics",
+          "model_scaling"
+        ]
+      },
+      "weak_scores": [
+        0.16049382716049382,
+        0.16049382716049382,
+        0.16049382716049382
+      ],
+      "strong_scores": [
+        0.25925925925925924,
+        0.35802469135802467,
+        0.16049382716049382
+      ],
+      "gap": null,
+      "feedback": "strong_avg 0.259 < 0.65"
+    },
+    {
+      "round": 10,
+      "status": "FAILED_STRONG",
+      "qa": {
+        "context": "Training deep transformer models in low-precision fp8 formats requires careful gradient clipping to maintain stability. Activations vary across layers and over training steps, especially when mixing diverse data types. Numerical issues and changing activation distributions challenge the design of per-layer adaptive clipping thresholds.",
+        "question": "How does the choice to compute the exponential moving average (EMA) of activation variance in fp32 on a CPU shadow copy versus in fp8 affect the stability of variance-coupled gradient clipping, and why is this choice critical for preventing catastrophic loss spikes in deep transformer training?",
+        "reference_answer": "The paper demonstrates that computing the EMA of activation variance in fp8 leads to underflow issues for small variance values, causing inaccurate and lagging estimates of activation statistics. This imprecision results in insufficient clipping thresholds, which fail to prevent sharp loss spikes (observed in 5/8 seeds). In contrast, maintaining a fp32 shadow copy of the EMA on the CPU preserves numerical precision, enabling accurate variance estimates and reliable adaptive clipping thresholds that successfully suppress loss spikes in all seeds without throughput loss. Therefore, the precision of the variance moment computation is critical to the effectiveness of the variance-coupled clipping method.",
+        "rubric": [
+          {
+            "criterion": "Identifies fp8 underflow as a source of inaccurate variance estimation",
+            "weight": 8,
+            "category": "positive"
+          },
+          {
+            "criterion": "Explains how inaccurate variance estimates degrade clipping threshold effectiveness",
+            "weight": 7,
+            "category": "positive"
+          },
+          {
+            "criterion": "Details why low-magnitude variance values are prone to fp8 underflow",
+            "weight": 6,
+            "category": "positive"
+          },
+          {
+            "criterion": "Recognizes the role of the CPU shadow copy in preserving numerical precision",
+            "weight": 6,
+            "category": "positive"
+          },
+          {
+            "criterion": "Relates variance estimation quality directly to training loss stability",
+            "weight": 7,
+            "category": "positive"
+          },
+          {
+            "criterion": "Mentions evidence from experiments comparing fp8 EMA vs. fp32 EMA",
+            "weight": 5,
+            "category": "positive"
+          },
+          {
+            "criterion": "Connects the choice of EMA precision to the prevention of catastrophic loss spikes",
+            "weight": 7,
+            "category": "positive"
+          },
+          {
+            "criterion": "Does not confuse EMA momentum scheme with numerical precision effects",
+            "weight": -5,
+            "category": "negative"
+          },
+          {
+            "criterion": "Avoids attributing loss spikes solely to the clipping multiplier k or other hyperparameters",
+            "weight": -4,
+            "category": "negative"
+          },
+          {
+            "criterion": "Does not incorrectly claim fp8 EMA is preferable or sufficient",
+            "weight": -8,
+            "category": "negative"
+          },
+          {
+            "criterion": "Avoids vague or purely descriptive answers without causal insight",
+            "weight": -3,
+            "category": "negative"
+          },
+          {
+            "criterion": "Does not mix the effect of curriculum data mixing with EMA precision issues",
+            "weight": -4,
+            "category": "negative"
+          }
+        ],
+        "question_type": "gradient clipping threshold adaptation",
+        "reasoning_tags": [
+          "numerical_precision",
+          "dynamic_statistical_estimation",
+          "model_scaling"
+        ]
+      },
+      "weak_scores": [
+        0.06521739130434782,
+        0.06521739130434782,
+        0.06521739130434782
+      ],
+      "strong_scores": [
+        0.3695652173913043,
+        0.3695652173913043,
+        0.3695652173913043
+      ],
+      "gap": null,
+      "feedback": "strong_avg 0.370 < 0.65"
+    },
+    {
+      "round": 11,
+      "status": "FAILED_STRONG",
+      "qa": {
+        "context": "Training very deep transformer models with fp8 precision introduces instability risks due to quantization effects on activation statistics. Gradient clipping thresholds that depend on estimated activation variance require careful tuning and numerical precision to maintain stability, especially when activation distributions and model depth vary.",
+        "question": "How do the interactions between numerical precision in variance estimation, the non-stationarity of activation variance caused by curriculum data mixing, and increasing model depth collectively influence the design choices for gradient clipping multipliers and EMA momentum schedules, and what adjustments does the paper propose to achieve stable training under these compounded challenges?",
+        "reference_answer": "The paper shows that computing the EMA of activation variance in fp32 on a CPU shadow copy is critical to avoid underflow issues that occur with fp8, which cause loss spikes. Non-stationary activation variance from curriculum-style data mixing causes a lag in the variance-coupled threshold with a single-timescale EMA, reintroducing spikes delayed by ~400 steps; a two-timescale EMA (fast beta=0.9 stacked on slow beta=0.99) corrects this lag. Increasing model depth to 96 layers requires raising the clipping multiplier k from 6 to ~7.5 to prevent over-clipping the deepest layers, as deeper layers have different variance dynamics and are more sensitive to clipping. These adjustments collectively balance threshold responsiveness, numerical stability, and depth-specific activation dynamics to maintain stable training.",
+        "rubric": [
+          {
+            "criterion": "Identifies the role of fp32 computation of EMA to prevent fp8 underflow",
+            "weight": 8,
+            "category": "positive"
+          },
+          {
+            "criterion": "Explains how non-stationary activation variance leads to lag in clipping thresholds",
+            "weight": 7,
+            "category": "positive"
+          },
+          {
+            "criterion": "Describes the use of a two-timescale EMA to address lag from curriculum data mixing",
+            "weight": 9,
+            "category": "positive"
+          },
+          {
+            "criterion": "Analyzes why deeper transformer stacks require increasing the clipping multiplier k",
+            "weight": 7,
+            "category": "positive"
+          },
+          {
+            "criterion": "Connects increased depth to altered activation variance dynamics affecting clipping",
+            "weight": 6,
+            "category": "positive"
+          },
+          {
+            "criterion": "Links the interaction of numerical precision and EMA parameters in maintaining threshold accuracy",
+            "weight": 7,
+            "category": "positive"
+          },
+          {
+            "criterion": "Discusses the tradeoff between over-clipping and allowing loss spikes",
+            "weight": 6,
+            "category": "positive"
+          },
+          {
+            "criterion": "Integrates multiple interacting factors (precision, dynamics, depth) in a coherent explanation",
+            "weight": 8,
+            "category": "positive"
+          },
+          {
+            "criterion": "Mentions the step delay (~400) caused by single-timescale EMA lag",
+            "weight": 5,
+            "category": "positive"
+          },
+          {
+            "criterion": "Avoids attributing stability solely to one factor, demonstrating compound effects",
+            "weight": 6,
+            "category": "positive"
+          },
+          {
+            "criterion": "Incorrectly ignores numerical precision as a cause of loss spikes",
+            "weight": -8,
+            "category": "negative"
+          },
+          {
+            "criterion": "Fails to account for non-stationary variance's effect on threshold lag",
+            "weight": -7,
+            "category": "negative"
+          },
+          {
+            "criterion": "Neglects model depth influence on clipping multiplier choice",
+            "weight": -7,
+            "category": "negative"
+          },
+          {
+            "criterion": "Misattributes spike suppression exclusively to multiplier k without EMA adjustments",
+            "weight": -6,
+            "category": "negative"
+          },
+          {
+            "criterion": "Confuses the role of fp32 shadow copy with other precision mechanisms",
+            "weight": -5,
+            "category": "negative"
+          }
+        ],
+        "question_type": "gradient clipping threshold adaptation",
+        "reasoning_tags": [
+          "numerical_precision",
+          "dynamic_statistics",
+          "model_scaling"
+        ]
+      },
+      "weak_scores": [
+        0.18840579710144928,
+        0.18840579710144928,
+        0.18840579710144928
+      ],
+      "strong_scores": [
+        0.6811594202898551,
+        0.6811594202898551,
+        0.4782608695652174
+      ],
+      "gap": null,
+      "feedback": "strong_avg 0.614 < 0.65"
+    },
+    {
+      "round": 12,
+      "status": "FAILED_STRONG",
+      "qa": {
+        "context": "Training deep transformer stacks using low-precision floating-point formats such as fp8 requires carefully designed gradient clipping strategies to stabilize training. The paper studies how coupling per-layer gradient clipping thresholds to the exponential moving variance of activations improves stability, but this approach faces challenges when activation statistics are non-stationary or when model depth increases substantially. These challenges interact with the choice of EMA momentum parameters, clipping multipliers, and numerical precision of variance computation.",
+        "question": "How do the interdependencies between numerical precision of variance estimation, activation variance non-stationarity during curriculum-style data mixing, and increasing transformer depth inform the recommended design of EMA momentum schedules and clipping multipliers, and what are the underlying mechanisms by which these adjustments maintain training stability across such heterogeneous conditions?",
+        "reference_answer": "The paper finds that computing exponential moving averages (EMA) of activation variance in higher precision (fp32 on a CPU shadow copy) is crucial to avoid underflow issues inherent in fp8, which otherwise lead to catastrophic loss spikes. During curriculum-style data mixing, activation variance exhibits rapid non-stationarity across micro-batches, causing single-timescale EMA momentum schedules to lag behind the true variance tail, resulting in delayed loss spikes. To address this, a two-timescale EMA with a fast momentum (beta=0.9) stacked on a slow momentum (beta=0.99) is introduced, which better tracks rapid changes in variance and closes the lag gap. As transformer depth increases (e.g., from ~40 to 96 layers), variance statistics and clipping dynamics change, necessitating an increase in the clipping multiplier k (from 6 to approximately 7.5) to avoid over-clipping deeper layers that may have inherently different activation variance profiles. Together, these adjustments counterbalance numerical precision limitations, statistical volatility, and structural depth effects, thereby preserving stable training regimes under the combined challenges of low-precision fp8 computation, dynamic data curricula, and deep model architectures.",
+        "rubric": [
+          {
+            "criterion": "Identifies the critical role of high-precision EMA computation to avoid underflow-related loss spikes",
+            "weight": 8,
+            "category": "positive"
+          },
+          {
+            "criterion": "Explains how activation variance non-stationarity from curriculum data mixing affects EMA responsiveness",
+            "weight": 7,
+            "category": "positive"
+          },
+          {
+            "criterion": "Describes the mechanism by which a single-timescale EMA causes lag in adapting clipping thresholds",
+            "weight": 7,
+            "category": "positive"
+          },
+          {
+            "criterion": "Details how the two-timescale EMA design improves adaptation to rapidly changing variance",
+            "weight": 8,
+            "category": "positive"
+          },
+          {
+            "criterion": "Links the increase in clipping multiplier k to mitigating over-clipping risks at greater transformer depths",
+            "weight": 6,
+            "category": "positive"
+          },
+          {
+            "criterion": "Clarifies how deeper layers’ activation variance profiles differ and impact clipping threshold design",
+            "weight": 6,
+            "category": "positive"
+          },
+          {
+            "criterion": "Synthesizes the combined effect of numerical precision, variance non-stationarity, and model depth on gradient clipping stability",
+            "weight": 9,
+            "category": "positive"
+          },
+          {
+            "criterion": "Addresses why ignoring precision or variance dynamics leads to recurrent loss spikes",
+            "weight": 7,
+            "category": "positive"
+          },
+          {
+            "criterion": "Does not confuse the roles of EMA shadow copy precision and EMA momentum parameters",
+            "weight": -5,
+            "category": "negative"
+          },
+          {
+            "criterion": "Avoids conflating clipping multiplier k tuning with unrelated hyperparameter effects",
+            "weight": -4,
+            "category": "negative"
+          },
+          {
+            "criterion": "Does not incorrectly attribute loss spikes solely to model scale without considering data mixing effects",
+            "weight": -5,
+            "category": "negative"
+          },
+          {
+            "criterion": "Avoids suggesting that single EMA momentum can reliably track highly non-stationary variance",
+            "weight": -6,
+            "category": "negative"
+          },
+          {
+            "criterion": "Does not overlook the impact of low fp8 precision on variance underflow in the presence of small activation variances",
+            "weight": -7,
+            "category": "negative"
+          }
+        ],
+        "question_type": "adaptive threshold design tradeoffs",
+        "reasoning_tags": [
+          "numerical_precision",
+          "statistical_dynamics",
+          "model_scaling"
+        ]
+      },
+      "weak_scores": [
+        0.0,
+        0.0,
+        0.034482758620689655
+      ],
+      "strong_scores": [
+        0.39655172413793105,
+        0.25862068965517243,
+        0.0
+      ],
+      "gap": null,
+      "feedback": "strong_avg 0.218 < 0.65"
+    }
+  ]
+}

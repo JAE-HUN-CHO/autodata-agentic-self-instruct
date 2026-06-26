@@ -1,0 +1,363 @@
+{
+  "paper_id": "sample_paper_beta",
+  "accepted": true,
+  "accepted_qa": {
+    "context": "In legal question answering systems, cross-encoder rerankers are used to refine retrieval results by scoring candidate passages. The calibration of these rerankers—how well their scores reflect true relevance probabilities—can be sensitive to how the input passages are formatted and the granularity of retrieval units. Different sources may impose different passage structures, and held-out evaluation can introduce distribution shifts, such as name-blind leak checks, that challenge model robustness.",
+    "question": "How does the alignment between training and inference candidate formatting affect the calibration of cross-encoder rerankers when tested under held-out name-blind leak check conditions, and what statistical evidence from the legal QA experiments supports this relationship?",
+    "reference_answer": "The paper finds that when the candidate construction format used during training includes title prefixes, the reranker calibration remains well-aligned during inference only if the same formatting is maintained; misalignment leads to degraded calibration. Furthermore, under held-out name-blind leak conditions, the discrimination capability of the reranker decreases due to the removal of name-based cues, indicating that calibration robustness critically depends on consistent formatting and distributional assumptions. Statistical results show significant drops in discrimination metrics (e.g., AUC or accuracy) when these conditions are violated, demonstrating that calibration is sensitive to the match between training and inference formatting and the presence of leakage cues.",
+    "rubric": [
+      {
+        "criterion": "Identifies the importance of matching training and inference candidate formatting for calibration",
+        "weight": 8,
+        "category": "positive"
+      },
+      {
+        "criterion": "Explains the impact of name-blind leak check on reranker discrimination performance",
+        "weight": 7,
+        "category": "positive"
+      },
+      {
+        "criterion": "Connects calibration quality to distribution shifts induced by formatting mismatches",
+        "weight": 6,
+        "category": "positive"
+      },
+      {
+        "criterion": "References empirical evidence (e.g., statistical metrics) from experiments",
+        "weight": 6,
+        "category": "positive"
+      },
+      {
+        "criterion": "Describes how passage granularity interacts with candidate formatting to affect robustness",
+        "weight": 5,
+        "category": "positive"
+      },
+      {
+        "criterion": "Shows understanding of held-out evaluation procedures in multi-source legal QA",
+        "weight": 5,
+        "category": "positive"
+      },
+      {
+        "criterion": "Articulates the consequences for designing robust cross-encoder reranker pipelines",
+        "weight": 4,
+        "category": "positive"
+      },
+      {
+        "criterion": "Distinguishes between calibration and discrimination in reranker performance measures",
+        "weight": 4,
+        "category": "positive"
+      },
+      {
+        "criterion": "Avoids mere recall without connecting to the impact on evaluation robustness",
+        "weight": 3,
+        "category": "positive"
+      },
+      {
+        "criterion": "Fails to recognize that formatting mismatch alone can degrade calibration",
+        "weight": -7,
+        "category": "negative"
+      },
+      {
+        "criterion": "Ignores the statistical significance or quantitative results supporting claims",
+        "weight": -6,
+        "category": "negative"
+      },
+      {
+        "criterion": "Confuses the effect of name-blind leakage with general performance degradation",
+        "weight": -5,
+        "category": "negative"
+      },
+      {
+        "criterion": "Overgeneralizes findings beyond the experimental setup without justification",
+        "weight": -4,
+        "category": "negative"
+      },
+      {
+        "criterion": "Treats calibration and discrimination as synonymous metrics",
+        "weight": -4,
+        "category": "negative"
+      }
+    ],
+    "question_type": "calibration robustness analysis",
+    "reasoning_tags": [
+      "experimental_design",
+      "statistical_analysis",
+      "robustness_evaluation"
+    ]
+  },
+  "n_rounds": 3,
+  "rounds": [
+    {
+      "round": 1,
+      "status": "TOO_EASY",
+      "qa": {
+        "context": "In multi-source legal retrieval systems, the granularity of passages and the formatting of candidate inputs can influence the calibration and discrimination capability of cross-encoder rerankers. Ensuring reliable model behavior requires understanding how training and inference-time input formatting alignment impacts performance, especially under name-blind scenarios to prevent leakage.",
+        "question": "How does the mismatch between training-time and inference-time candidate formatting, specifically the presence or absence of title prefixes, impact the calibration and discrimination performance of cross-encoder rerankers in legal QA, and what are the implications for designing robust retrieval pipelines?",
+        "reference_answer": "The paper finds that effective reranker calibration depends critically on matching candidate formatting between training and inference: when title-prefixed passages are used during training but omitted at inference, calibration degrades and discrimination performance drops. This highlights the importance of consistent data preparation to maintain reranker reliability. Additionally, enforcing name-blind held-out leak checks further quantifies the discrimination loss, underscoring the need for careful pipeline design to avoid leaking information that can inflate performance artificially.",
+        "rubric": [
+          {
+            "criterion": "Identifies the role of title-prefixed candidate formatting in reranker calibration",
+            "weight": 8,
+            "category": "positive"
+          },
+          {
+            "criterion": "Explains the impact of mismatched training/inference formatting on discrimination performance",
+            "weight": 9,
+            "category": "positive"
+          },
+          {
+            "criterion": "Recognizes the significance of calibration in cross-encoder rerankers within legal retrieval",
+            "weight": 7,
+            "category": "positive"
+          },
+          {
+            "criterion": "Incorporates understanding of name-blind held-out leak checks and their effect",
+            "weight": 7,
+            "category": "positive"
+          },
+          {
+            "criterion": "Discusses practical considerations for retrieval pipeline design based on findings",
+            "weight": 6,
+            "category": "positive"
+          },
+          {
+            "criterion": "Demonstrates comprehension of multi-source legal retrieval challenges",
+            "weight": 5,
+            "category": "positive"
+          },
+          {
+            "criterion": "Connects reranker input consistency to model generalization and robustness",
+            "weight": 6,
+            "category": "positive"
+          },
+          {
+            "criterion": "Avoids vague or superficial answers lacking connection to training vs. inference",
+            "weight": 5,
+            "category": "positive"
+          },
+          {
+            "criterion": "Fails to address the calibration aspect of reranker performance",
+            "weight": -7,
+            "category": "negative"
+          },
+          {
+            "criterion": "Confuses passage granularity effects with candidate formatting effects",
+            "weight": -8,
+            "category": "negative"
+          },
+          {
+            "criterion": "Overlooks the significance of name-blind leakage checks in performance quantification",
+            "weight": -6,
+            "category": "negative"
+          },
+          {
+            "criterion": "Assumes performance is invariant to candidate input formatting",
+            "weight": -9,
+            "category": "negative"
+          },
+          {
+            "criterion": "Provides answer based solely on recall without reasoning",
+            "weight": -5,
+            "category": "negative"
+          }
+        ],
+        "question_type": "reranker calibration sensitivity",
+        "reasoning_tags": [
+          "experimental_design",
+          "model_generalization",
+          "data_formatting"
+        ]
+      },
+      "weak_scores": [
+        0.7735849056603774,
+        0.7735849056603774,
+        0.9056603773584906
+      ],
+      "strong_scores": [],
+      "gap": null,
+      "feedback": "weak_avg 0.818 > 0.65"
+    },
+    {
+      "round": 2,
+      "status": "FAILED_STRONG",
+      "qa": {
+        "context": "In legal question answering systems, candidate passage granularity and their formatting have been observed to influence the effectiveness of reranking models. Calibration of cross-encoder rerankers is crucial for reliable decision-making, particularly when multiple data sources and variations in input formatting are involved. Understanding how different training and inference-time conditions affect model discrimination and calibration is a key challenge in this domain.",
+        "question": "Considering the interaction between passage granularity and candidate formatting, how does name-blind leakage during held-out evaluation affect the cross-encoder reranker's ability to discriminate relevant passages, and what does this reveal about the robustness of the retriever-reranker pipeline in multi-source legal QA settings?",
+        "reference_answer": "The paper demonstrates that when held-out leak checks are name-blind, there is a quantifiable loss in discrimination performance of the cross-encoder reranker. This indicates that the model partially relies on source or title cues to distinguish relevant passages. Hence, name-blind leakage compromises calibration robustness, revealing that the retriever-reranker pipeline's effectiveness depends on consistent passage identification features across training and evaluation, especially in multi-source scenarios.",
+        "rubric": [
+          {
+            "criterion": "Identifies the role of name-blind leakage in held-out evaluation",
+            "weight": 8,
+            "category": "positive"
+          },
+          {
+            "criterion": "Analyzes the impact of leakage on discrimination performance",
+            "weight": 9,
+            "category": "positive"
+          },
+          {
+            "criterion": "Explains the relationship between passage granularity and model calibration",
+            "weight": 7,
+            "category": "positive"
+          },
+          {
+            "criterion": "Connects multi-source retrieval challenges to reranker robustness",
+            "weight": 6,
+            "category": "positive"
+          },
+          {
+            "criterion": "Discusses implications for retriever-reranker pipeline design",
+            "weight": 6,
+            "category": "positive"
+          },
+          {
+            "criterion": "Uses evidence from the paper's experimental findings",
+            "weight": 7,
+            "category": "positive"
+          },
+          {
+            "criterion": "Distinguishes between training-time and inference-time formatting effects",
+            "weight": 8,
+            "category": "positive"
+          },
+          {
+            "criterion": "Avoids conflating correlation with causation in observed results",
+            "weight": -6,
+            "category": "negative"
+          },
+          {
+            "criterion": "Does not overlook the necessity of consistent formatting between training and inference",
+            "weight": -7,
+            "category": "negative"
+          },
+          {
+            "criterion": "Does not simply restate paper claims without deeper analysis",
+            "weight": -5,
+            "category": "negative"
+          },
+          {
+            "criterion": "Avoids attributing discrimination loss solely to model architecture instead of data formatting",
+            "weight": -6,
+            "category": "negative"
+          }
+        ],
+        "question_type": "model calibration impact analysis",
+        "reasoning_tags": [
+          "statistical_reasoning",
+          "experimental_design",
+          "performance_evaluation"
+        ]
+      },
+      "weak_scores": [
+        0.23529411764705882,
+        0.09803921568627451,
+        0.23529411764705882
+      ],
+      "strong_scores": [
+        0.39215686274509803,
+        0.39215686274509803,
+        0.39215686274509803
+      ],
+      "gap": null,
+      "feedback": "strong_avg 0.392 < 0.6"
+    },
+    {
+      "round": 3,
+      "status": "ACCEPTED",
+      "qa": {
+        "context": "In legal question answering systems, cross-encoder rerankers are used to refine retrieval results by scoring candidate passages. The calibration of these rerankers—how well their scores reflect true relevance probabilities—can be sensitive to how the input passages are formatted and the granularity of retrieval units. Different sources may impose different passage structures, and held-out evaluation can introduce distribution shifts, such as name-blind leak checks, that challenge model robustness.",
+        "question": "How does the alignment between training and inference candidate formatting affect the calibration of cross-encoder rerankers when tested under held-out name-blind leak check conditions, and what statistical evidence from the legal QA experiments supports this relationship?",
+        "reference_answer": "The paper finds that when the candidate construction format used during training includes title prefixes, the reranker calibration remains well-aligned during inference only if the same formatting is maintained; misalignment leads to degraded calibration. Furthermore, under held-out name-blind leak conditions, the discrimination capability of the reranker decreases due to the removal of name-based cues, indicating that calibration robustness critically depends on consistent formatting and distributional assumptions. Statistical results show significant drops in discrimination metrics (e.g., AUC or accuracy) when these conditions are violated, demonstrating that calibration is sensitive to the match between training and inference formatting and the presence of leakage cues.",
+        "rubric": [
+          {
+            "criterion": "Identifies the importance of matching training and inference candidate formatting for calibration",
+            "weight": 8,
+            "category": "positive"
+          },
+          {
+            "criterion": "Explains the impact of name-blind leak check on reranker discrimination performance",
+            "weight": 7,
+            "category": "positive"
+          },
+          {
+            "criterion": "Connects calibration quality to distribution shifts induced by formatting mismatches",
+            "weight": 6,
+            "category": "positive"
+          },
+          {
+            "criterion": "References empirical evidence (e.g., statistical metrics) from experiments",
+            "weight": 6,
+            "category": "positive"
+          },
+          {
+            "criterion": "Describes how passage granularity interacts with candidate formatting to affect robustness",
+            "weight": 5,
+            "category": "positive"
+          },
+          {
+            "criterion": "Shows understanding of held-out evaluation procedures in multi-source legal QA",
+            "weight": 5,
+            "category": "positive"
+          },
+          {
+            "criterion": "Articulates the consequences for designing robust cross-encoder reranker pipelines",
+            "weight": 4,
+            "category": "positive"
+          },
+          {
+            "criterion": "Distinguishes between calibration and discrimination in reranker performance measures",
+            "weight": 4,
+            "category": "positive"
+          },
+          {
+            "criterion": "Avoids mere recall without connecting to the impact on evaluation robustness",
+            "weight": 3,
+            "category": "positive"
+          },
+          {
+            "criterion": "Fails to recognize that formatting mismatch alone can degrade calibration",
+            "weight": -7,
+            "category": "negative"
+          },
+          {
+            "criterion": "Ignores the statistical significance or quantitative results supporting claims",
+            "weight": -6,
+            "category": "negative"
+          },
+          {
+            "criterion": "Confuses the effect of name-blind leakage with general performance degradation",
+            "weight": -5,
+            "category": "negative"
+          },
+          {
+            "criterion": "Overgeneralizes findings beyond the experimental setup without justification",
+            "weight": -4,
+            "category": "negative"
+          },
+          {
+            "criterion": "Treats calibration and discrimination as synonymous metrics",
+            "weight": -4,
+            "category": "negative"
+          }
+        ],
+        "question_type": "calibration robustness analysis",
+        "reasoning_tags": [
+          "experimental_design",
+          "statistical_analysis",
+          "robustness_evaluation"
+        ]
+      },
+      "weak_scores": [
+        0.6666666666666666,
+        0.6666666666666666,
+        0.5833333333333334
+      ],
+      "strong_scores": [
+        0.8541666666666666,
+        0.7916666666666666,
+        1.0
+      ],
+      "gap": 0.24305555555555558,
+      "feedback": "accepted"
+    }
+  ]
+}

@@ -1,0 +1,13 @@
+{
+  "papers_processed": 3,
+  "papers_accepted": 1,
+  "acceptance_rate": 0.3333,
+  "mean_rounds_to_accept": 7,
+  "accepted_weak_avg": 0.3107,
+  "accepted_strong_avg": 0.8531,
+  "accepted_gap_avg": 0.5424,
+  "failure_mode_counts": {
+    "TOO_EASY": 6,
+    "FAILED_STRONG": 24
+  }
+}

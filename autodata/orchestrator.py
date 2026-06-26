@@ -129,6 +129,29 @@ class AgenticSelfInstruct:
             self._log(f"  [{paper_id}] r{round_no}: challenger…")
             qa = self.challenger.generate(paper_text, failures, round_no)
 
+            # 0) deterministic rubric sanity check (runs before the LLM QV).
+            # _parse_rubric silently drops malformed entries, which on a noisy model output
+            # can leave an empty or no-positive-weight rubric. The LLM QV doesn't inspect
+            # rubric shape, and the judge will still emit a `normalized_score` for an empty
+            # rubric -- so without this gate, a degenerate rubric can ride all the way to
+            # dataset.jsonl. Reject deterministically and let the failure feed back to the
+            # challenger as a regular FAILED_QV.
+            n_pos = sum(1 for c in qa.rubric if c.is_positive)
+            n_neg = sum(1 for c in qa.rubric if not c.is_positive)
+            # Sum raw positive weights directly. QAItem.max_positive_weight() applies an
+            # `or 1` fallback for the divide-by-zero guard in scoring, which would let a
+            # rubric of only `weight=0` positive criteria slip past this gate.
+            positive_weight_sum = sum(c.weight for c in qa.rubric if c.is_positive)
+            if not qa.rubric or n_pos < 1 or positive_weight_sum <= 0:
+                msg = (
+                    f"rubric is unusable after parse: total={len(qa.rubric)}, "
+                    f"positive={n_pos}, negative={n_neg}, "
+                    f"positive_weight_sum={positive_weight_sum}"
+                )
+                rounds.append(RoundResult(round_no, FAILED_QV, qa=qa, feedback=msg))
+                self._log(f"  [{paper_id}] r{round_no}: FAILED_QV ({msg}) [{time.time()-t0:.1f}s]")
+                continue
+
             # 1) quality verifier
             self._log(f"  [{paper_id}] r{round_no}: quality_verifier… (+{time.time()-t0:.1f}s)")
             verdict = self.qv.check(qa)

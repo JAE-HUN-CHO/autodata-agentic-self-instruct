@@ -14,6 +14,7 @@ from autodata import (
     Challenger, Solver, QualityVerifier, RubricJudge, MockProvider,
     ACCEPTED, TOO_EASY,
 )
+from autodata.schemas import QAItem, RubricCriterion, FAILED_QV
 from autodata.subagents import _parse_rubric
 
 
@@ -126,6 +127,69 @@ def test_parse_rubric_handles_dict_wrapper_and_garbage():
     # one level of dict unwrap
     out = _parse_rubric({"items": [{"criterion": "x", "weight": 1}]})
     assert len(out) == 1 and out[0].criterion == "x"
+
+
+class _StubChallenger:
+    """Test double: returns a pre-built QAItem regardless of input. Lets the test
+    drive the orchestrator's deterministic pre-QV rubric gate without having to
+    coerce the MockProvider into emitting malformed JSON."""
+    def __init__(self, qa: QAItem):
+        self._qa = qa
+
+    def generate(self, paper_text, failures_block, round_no):
+        return self._qa
+
+
+def _pipeline_with_stub_challenger(qa: QAItem, max_rounds=2):
+    weak = Solver(MockProvider("w", "weak"))
+    strong = Solver(MockProvider("s", "strong"))
+    judge = RubricJudge(MockProvider("j", "tool"))
+    qv = QualityVerifier(MockProvider("q", "tool"))
+    return AgenticSelfInstruct(
+        challenger=_StubChallenger(qa), weak_solver=weak, strong_solver=strong,
+        judge=judge, quality_verifier=qv, max_rounds=max_rounds, verbose=False,
+    )
+
+
+def test_orchestrator_rejects_empty_rubric_before_qv():
+    # An empty rubric -- the worst case from _parse_rubric silently dropping every entry.
+    # Without the pre-QV gate, the judge would still score this via normalized_score and
+    # the example could end up in dataset.jsonl. The gate must mark it FAILED_QV instead.
+    qa = QAItem(context="ctx", question="q", reference_answer="ref", rubric=[])
+    pipe = _pipeline_with_stub_challenger(qa, max_rounds=2)
+    res = pipe.run_paper("p_empty", "text")
+    assert res.accepted is False
+    assert all(r.status == FAILED_QV for r in res.rounds)
+    assert "unusable after parse" in res.rounds[0].feedback
+
+
+def test_orchestrator_rejects_rubric_with_no_positive_criteria():
+    # All-negative rubric -> max_positive_weight() falls back to 1, judge can still
+    # produce a score, but the example is meaningless. Must FAILED_QV.
+    qa = QAItem(
+        context="ctx", question="q", reference_answer="ref",
+        rubric=[RubricCriterion(criterion="Avoids error", weight=-3, category="negative")],
+    )
+    pipe = _pipeline_with_stub_challenger(qa, max_rounds=2)
+    res = pipe.run_paper("p_no_pos", "text")
+    assert res.accepted is False
+    assert all(r.status == FAILED_QV for r in res.rounds)
+    assert "positive=0" in res.rounds[0].feedback
+
+
+def test_orchestrator_rejects_rubric_with_zero_positive_weight_sum():
+    # The gate's third branch: a rubric that has a positive criterion but whose total
+    # positive weight is 0. QAItem.max_positive_weight() would have masked this with its
+    # `or 1` fallback; the gate's direct positive-weight sum catches it.
+    qa = QAItem(
+        context="ctx", question="q", reference_answer="ref",
+        rubric=[RubricCriterion(criterion="Trivial check", weight=0, category="positive")],
+    )
+    pipe = _pipeline_with_stub_challenger(qa, max_rounds=2)
+    res = pipe.run_paper("p_zero_weight", "text")
+    assert res.accepted is False
+    assert all(r.status == FAILED_QV for r in res.rounds)
+    assert "positive_weight_sum=0" in res.rounds[0].feedback
 
 
 def test_parallel_attempts_matches_serial():

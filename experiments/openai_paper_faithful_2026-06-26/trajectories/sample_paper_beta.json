@@ -1,0 +1,283 @@
+{
+  "paper_id": "sample_paper_beta",
+  "accepted": true,
+  "accepted_qa": {
+    "context": "In multi-source legal document retrieval, different granularities of text passages and their formatting influence the effectiveness of reranker models. Ensuring that training conditions align with inference scenarios is challenging, and methods like hold-out leak checks that obscure identifying information add complexity to evaluating model performance.",
+    "question": "How does maintaining consistent passage granularity and prefix formatting between training and inference phases influence a cross-encoder reranker's ability to discriminate relevant legal documents, particularly when comparing standard versus name-blind hold-out leak check protocols?",
+    "reference_answer": "The study finds that matching passage granularity and title-prefixed formatting between training and inference is crucial for the cross-encoder reranker's calibration and discrimination performance. When this consistency is maintained, the model better distinguishes relevant legal passages. However, introducing name-blind hold-out leak checks reduces discrimination performance by obscuring entity-level signals, highlighting how leakage of identifying information can artificially inflate results if not controlled.",
+    "rubric": [
+      {
+        "criterion": "Identifies the importance of consistent passage granularity in training and inference",
+        "weight": 8,
+        "category": "positive"
+      },
+      {
+        "criterion": "Explains the effect of title-prefixed candidate formatting on model calibration",
+        "weight": 7,
+        "category": "positive"
+      },
+      {
+        "criterion": "Describes how name-blind hold-out leak checking modifies discrimination results",
+        "weight": 7,
+        "category": "positive"
+      },
+      {
+        "criterion": "Connects formatting consistency to improved reranker discrimination capability",
+        "weight": 6,
+        "category": "positive"
+      },
+      {
+        "criterion": "Accounts for multi-source data challenges in legal retrieval",
+        "weight": 5,
+        "category": "positive"
+      },
+      {
+        "criterion": "Recognizes the risk of leakage inflating performance metrics in cross-validation",
+        "weight": 6,
+        "category": "positive"
+      },
+      {
+        "criterion": "Differentiates between calibration and discrimination impacts",
+        "weight": 5,
+        "category": "positive"
+      },
+      {
+        "criterion": "Articulates the role of prefixing titles in candidate construction",
+        "weight": 5,
+        "category": "positive"
+      },
+      {
+        "criterion": "Acknowledges complexities arising from multi-source retrieval settings",
+        "weight": 4,
+        "category": "positive"
+      },
+      {
+        "criterion": "Fails to address the relation between formatting mismatches and model generalization",
+        "weight": -7,
+        "category": "negative"
+      },
+      {
+        "criterion": "Overlooks the impact of hold-out leak checks on evaluation validity",
+        "weight": -6,
+        "category": "negative"
+      },
+      {
+        "criterion": "Conflates calibration improvement with discrimination gains",
+        "weight": -5,
+        "category": "negative"
+      },
+      {
+        "criterion": "Ignores the specific effect of title-prefixed formatting on reranker input",
+        "weight": -4,
+        "category": "negative"
+      },
+      {
+        "criterion": "Misattributes performance degradation solely to data sparsity instead of formatting",
+        "weight": -6,
+        "category": "negative"
+      },
+      {
+        "criterion": "Generalizes findings without considering multi-source retrieval complexities",
+        "weight": -5,
+        "category": "negative"
+      }
+    ],
+    "question_type": "model calibration impact analysis",
+    "reasoning_tags": [
+      "experimental_design",
+      "statistical_inference",
+      "model_generalization"
+    ]
+  },
+  "n_rounds": 2,
+  "rounds": [
+    {
+      "round": 1,
+      "status": "FAILED_STRONG",
+      "qa": {
+        "context": "Legal question answering systems often employ cross-encoder rerankers to improve retrieval from multiple sources. The calibration of these rerankers—how well their confidence scores reflect true relevance—is influenced by factors like passage granularity and candidate formatting. Ensuring consistency in training and inference conditions is critical, and certain leak checks can affect model discrimination.",
+        "question": "How does the mismatch between training-time and inference-time candidate formatting affect the calibration and discrimination performance of cross-encoder rerankers in multi-source legal retrieval, and what role does name-blind hold-out leak checking play in this dynamic?",
+        "reference_answer": "The paper finds that when the passage granularity or candidate formatting used during training does not match the formatting at inference time—specifically regarding title prefixes—there is a degradation in reranker calibration and discrimination performance. Title-prefixed candidate construction must be consistent across training and inference to maintain optimal calibration. Additionally, name-blind hold-out leak checks, which exclude explicit identifiers, cause a measurable loss in discrimination ability because the model can no longer rely on leaked names as shortcuts, highlighting the importance of careful leak control in evaluation.",
+        "rubric": [
+          {
+            "criterion": "Identifies impact of formatting mismatch on reranker calibration",
+            "weight": 8,
+            "category": "positive"
+          },
+          {
+            "criterion": "Explains the necessity of consistent title-prefixed candidate construction",
+            "weight": 7,
+            "category": "positive"
+          },
+          {
+            "criterion": "Describes how inference-time formatting affects confidence scores",
+            "weight": 6,
+            "category": "positive"
+          },
+          {
+            "criterion": "Analyzes the effect of name-blind hold-out leak checks on discrimination",
+            "weight": 7,
+            "category": "positive"
+          },
+          {
+            "criterion": "Connects leak checking practices with model robustness in legal retrieval",
+            "weight": 6,
+            "category": "positive"
+          },
+          {
+            "criterion": "Illustrates the interaction between passage granularity and reranker performance",
+            "weight": 5,
+            "category": "positive"
+          },
+          {
+            "criterion": "Includes discussion of multi-source retrieval challenges",
+            "weight": 4,
+            "category": "positive"
+          },
+          {
+            "criterion": "Avoids confusion between calibration and recall metrics",
+            "weight": -5,
+            "category": "negative"
+          },
+          {
+            "criterion": "Does not conflate candidate formatting with input document content",
+            "weight": -4,
+            "category": "negative"
+          },
+          {
+            "criterion": "Does not overlook the role of leak controls in evaluation validity",
+            "weight": -6,
+            "category": "negative"
+          },
+          {
+            "criterion": "Distinguishes between training and inference conditions clearly",
+            "weight": -5,
+            "category": "negative"
+          }
+        ],
+        "question_type": "reranker calibration impact",
+        "reasoning_tags": [
+          "calibration_analysis",
+          "robustness_evaluation",
+          "experimental_design"
+        ]
+      },
+      "weak_scores": [
+        0.2558139534883721,
+        0.2558139534883721,
+        0.2558139534883721
+      ],
+      "strong_scores": [
+        0.2558139534883721,
+        0.2558139534883721,
+        0.2558139534883721
+      ],
+      "gap": null,
+      "feedback": "strong_avg 0.256 < 0.65"
+    },
+    {
+      "round": 2,
+      "status": "ACCEPTED",
+      "qa": {
+        "context": "In multi-source legal document retrieval, different granularities of text passages and their formatting influence the effectiveness of reranker models. Ensuring that training conditions align with inference scenarios is challenging, and methods like hold-out leak checks that obscure identifying information add complexity to evaluating model performance.",
+        "question": "How does maintaining consistent passage granularity and prefix formatting between training and inference phases influence a cross-encoder reranker's ability to discriminate relevant legal documents, particularly when comparing standard versus name-blind hold-out leak check protocols?",
+        "reference_answer": "The study finds that matching passage granularity and title-prefixed formatting between training and inference is crucial for the cross-encoder reranker's calibration and discrimination performance. When this consistency is maintained, the model better distinguishes relevant legal passages. However, introducing name-blind hold-out leak checks reduces discrimination performance by obscuring entity-level signals, highlighting how leakage of identifying information can artificially inflate results if not controlled.",
+        "rubric": [
+          {
+            "criterion": "Identifies the importance of consistent passage granularity in training and inference",
+            "weight": 8,
+            "category": "positive"
+          },
+          {
+            "criterion": "Explains the effect of title-prefixed candidate formatting on model calibration",
+            "weight": 7,
+            "category": "positive"
+          },
+          {
+            "criterion": "Describes how name-blind hold-out leak checking modifies discrimination results",
+            "weight": 7,
+            "category": "positive"
+          },
+          {
+            "criterion": "Connects formatting consistency to improved reranker discrimination capability",
+            "weight": 6,
+            "category": "positive"
+          },
+          {
+            "criterion": "Accounts for multi-source data challenges in legal retrieval",
+            "weight": 5,
+            "category": "positive"
+          },
+          {
+            "criterion": "Recognizes the risk of leakage inflating performance metrics in cross-validation",
+            "weight": 6,
+            "category": "positive"
+          },
+          {
+            "criterion": "Differentiates between calibration and discrimination impacts",
+            "weight": 5,
+            "category": "positive"
+          },
+          {
+            "criterion": "Articulates the role of prefixing titles in candidate construction",
+            "weight": 5,
+            "category": "positive"
+          },
+          {
+            "criterion": "Acknowledges complexities arising from multi-source retrieval settings",
+            "weight": 4,
+            "category": "positive"
+          },
+          {
+            "criterion": "Fails to address the relation between formatting mismatches and model generalization",
+            "weight": -7,
+            "category": "negative"
+          },
+          {
+            "criterion": "Overlooks the impact of hold-out leak checks on evaluation validity",
+            "weight": -6,
+            "category": "negative"
+          },
+          {
+            "criterion": "Conflates calibration improvement with discrimination gains",
+            "weight": -5,
+            "category": "negative"
+          },
+          {
+            "criterion": "Ignores the specific effect of title-prefixed formatting on reranker input",
+            "weight": -4,
+            "category": "negative"
+          },
+          {
+            "criterion": "Misattributes performance degradation solely to data sparsity instead of formatting",
+            "weight": -6,
+            "category": "negative"
+          },
+          {
+            "criterion": "Generalizes findings without considering multi-source retrieval complexities",
+            "weight": -5,
+            "category": "negative"
+          }
+        ],
+        "question_type": "model calibration impact analysis",
+        "reasoning_tags": [
+          "experimental_design",
+          "statistical_inference",
+          "model_generalization"
+        ]
+      },
+      "weak_scores": [
+        0.39622641509433965,
+        0.39622641509433965,
+        0.39622641509433965
+      ],
+      "strong_scores": [
+        0.7358490566037735,
+        0.6037735849056604,
+        0.7358490566037735
+      ],
+      "gap": 0.2955974842767295,
+      "feedback": "accepted"
+    }
+  ]
+}
