@@ -46,7 +46,12 @@ def _parse_rubric(raw_rubric) -> list[RubricCriterion]:
             weight_i = int(weight)
         except (TypeError, ValueError):
             continue
-        category = str(c.get("category", "positive" if weight_i >= 0 else "negative"))
+        # Force category to agree with the sign of the weight. The judge (schemas.is_positive
+        # / rubric_eval) keys scoring off `category` alone, so a model that returns a
+        # contradictory pair like {weight: -4, category: "positive"} would otherwise have its
+        # penalty counted as a positive-weight credit (and pollute the positive-weight
+        # denominator), flipping accept/reject. Weight sign is the source of truth.
+        category = "positive" if weight_i >= 0 else "negative"
         out.append(RubricCriterion(criterion=str(crit_text), weight=weight_i, category=category))
     return out
 

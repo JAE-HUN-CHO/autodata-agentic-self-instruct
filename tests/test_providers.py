@@ -169,7 +169,10 @@ def test_parse_retry_after_http_date_form():
 
 
 # --- NIM 429: rate-limited; honor Retry-After and recover ------------------
-def test_429_retries_and_honors_retry_after(monkeypatch=None):
+# These tests patch autodata.llm.time.sleep by hand (save/restore) rather than via the
+# pytest `monkeypatch` fixture, because this module is also run as a plain script
+# (`python tests/test_providers.py`) where the __main__ runner calls each test with no args.
+def test_429_retries_and_honors_retry_after():
     import autodata.llm as llm_mod
     fake = _FakeRequests([
         _FakeResp(429, body="rate limited", headers={"Retry-After": "0"}),

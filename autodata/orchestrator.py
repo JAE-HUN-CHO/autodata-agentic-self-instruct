@@ -19,6 +19,11 @@ from .schemas import (
 from .subagents import Challenger, Solver, QualityVerifier
 from .rubric_eval import RubricJudge
 
+# Cap on concurrent solver→judge calls per round, independent of n_attempts. Keeps a
+# misconfigured high n_attempts from opening a burst of network calls all at once
+# (NIM rate-limits, and the per-key window is easy to trip — see provider 429 handling).
+MAX_PARALLEL_ATTEMPTS = 8
+
 
 @dataclass
 class AcceptanceCriteria:
@@ -96,7 +101,8 @@ class AgenticSelfInstruct:
             return self.judge.evaluate(qa, ans).score
 
         if self.parallel_attempts and self.n_attempts > 1:
-            with ThreadPoolExecutor(max_workers=self.n_attempts) as ex:
+            max_workers = min(self.n_attempts, MAX_PARALLEL_ATTEMPTS)
+            with ThreadPoolExecutor(max_workers=max_workers) as ex:
                 return list(ex.map(one_attempt, range(self.n_attempts)))
         return [one_attempt(i) for i in range(self.n_attempts)]
 

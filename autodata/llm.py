@@ -19,6 +19,7 @@ import hashlib
 import json
 import os
 import re
+import threading
 import time
 
 
@@ -130,42 +131,54 @@ class OpenAICompatibleProvider:
         self.name = name or model
         self.timeout = timeout
         self.max_retries = max_retries
-        # adaptation state, learned from 400s and remembered for subsequent calls
+        # Adaptation state, learned from 400s and remembered for subsequent calls. A single
+        # provider instance is intentionally shared across the orchestrator's parallel solver
+        # attempts (so the 400→adapt lesson is learned once, not re-paid per worker). These
+        # flags are guarded by a lock and only ever transition one way (enabled → disabled),
+        # so concurrent adaptation converges deterministically rather than thrashing.
         self._send_temperature = True
         self._token_param = "max_tokens"
         self._send_json_format = True
+        self._adapt_lock = threading.Lock()
 
     def _adapt_from_400(self, body: str, json_mode: bool) -> bool:
         """Mutate request shape based on a 400 body. Returns True if something changed
         (so the call should be retried without consuming the retry budget)."""
         low = body.lower()
         changed = False
-        if self._send_temperature and "temperature" in low:
-            self._send_temperature = False  # reasoning models: only default temperature allowed
-            changed = True
-        if self._token_param == "max_tokens" and "max_completion_tokens" in low:
-            self._token_param = "max_completion_tokens"
-            changed = True
-        if json_mode and self._send_json_format and (
-            "response_format" in low or "json_object" in low or "json mode" in low
-        ):
-            self._send_json_format = False  # backend can't constrain to JSON; prompts still ask for it
-            changed = True
+        with self._adapt_lock:
+            if self._send_temperature and "temperature" in low:
+                self._send_temperature = False  # reasoning models: only default temperature allowed
+                changed = True
+            if self._token_param == "max_tokens" and "max_completion_tokens" in low:
+                self._token_param = "max_completion_tokens"
+                changed = True
+            if json_mode and self._send_json_format and (
+                "response_format" in low or "json_object" in low or "json mode" in low
+            ):
+                self._send_json_format = False  # backend can't constrain to JSON; prompts still ask for it
+                changed = True
         return changed
 
     def _build_payload(self, system: str, user: str, temperature: float,
                        json_mode: bool, max_tokens: int) -> dict:
+        # Snapshot the adaptation flags under the lock so a payload is built from one
+        # consistent view even if another thread is adapting concurrently.
+        with self._adapt_lock:
+            send_temperature = self._send_temperature
+            token_param = self._token_param
+            send_json_format = self._send_json_format
         payload: dict = {
             "model": self.model,
             "messages": [
                 {"role": "system", "content": system},
                 {"role": "user", "content": user},
             ],
-            self._token_param: max_tokens,
+            token_param: max_tokens,
         }
-        if self._send_temperature:
+        if send_temperature:
             payload["temperature"] = temperature
-        if json_mode and self._send_json_format:
+        if json_mode and send_json_format:
             payload["response_format"] = {"type": "json_object"}
         return payload
 

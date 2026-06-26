@@ -105,6 +105,21 @@ def test_parse_rubric_skips_malformed_entries():
     ]
 
 
+def test_parse_rubric_forces_category_to_match_weight_sign():
+    # The judge keys scoring off `category` alone, so a contradictory pair must be normalized:
+    # a negative weight is always "negative" (a penalty), a non-negative weight "positive",
+    # regardless of what the model claimed. Otherwise a penalty would be miscounted as credit.
+    rubric = _parse_rubric([
+        {"criterion": "penalty mislabeled positive", "weight": -4, "category": "positive"},
+        {"criterion": "credit mislabeled negative", "weight": 6, "category": "negative"},
+        {"criterion": "garbage category", "weight": 3, "category": "banana"},
+    ])
+    cats = {c.criterion: c.category for c in rubric}
+    assert cats["penalty mislabeled positive"] == "negative"
+    assert cats["credit mislabeled negative"] == "positive"
+    assert cats["garbage category"] == "positive"
+
+
 def test_parse_rubric_handles_dict_wrapper_and_garbage():
     assert _parse_rubric(None) == []
     assert _parse_rubric("foo") == []

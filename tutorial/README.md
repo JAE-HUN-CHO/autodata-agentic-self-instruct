@@ -54,7 +54,7 @@ latency. Catches stale slugs and access problems before the long run.
 
 Expected output (timings vary):
 
-```
+```text
 [OK   ] challenger/judge/qv    moonshotai/kimi-k2.6                      1.20s  reply=' PROBE_OK'
 [OK   ] strong_solver          qwen/qwen3.5-397b-a17b                   11.85s  reply='PROBE_OK'
 [OK   ] weak_solver            qwen/qwen3-next-80b-a3b-instruct         32.93s  reply='PROBE_OK'
@@ -77,7 +77,7 @@ python -m autodata.cli \
 
 What you see (per-step elapsed time is logged so you can tell what's slow):
 
-```
+```text
 [paper] tutorial_paper
   [tutorial_paper] r1: challenger…
   [tutorial_paper] r1: quality_verifier… (+1.5s)
