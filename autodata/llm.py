@@ -42,6 +42,11 @@ class LLMProvider(Protocol):
 _ENV_REF = re.compile(r"^(?:env:(?P<a>[A-Za-z_][A-Za-z0-9_]*)|\$\{(?P<b>[A-Za-z_][A-Za-z0-9_]*)\})$")
 
 
+class _PendingResponse(Exception):
+    """Raised for an async/pending (HTTP 202) response that the synchronous client can't
+    consume. Carried separately so it is NOT swept into the transient retry path."""
+
+
 def resolve_api_key(value: str) -> str:
     """Resolve an api_key config value.
 
@@ -152,9 +157,22 @@ class OpenAICompatibleProvider:
                 resp = requests.post(url, headers=headers, json=payload, timeout=self.timeout)
                 if resp.status_code == 400 and self._adapt_from_400(resp.text, json_mode):
                     continue  # retry immediately with the adapted payload; not a real failure
+                if resp.status_code == 202:
+                    # NVIDIA NIM returns 202 Accepted for async/long-running requests that must
+                    # be polled via the returned NVCF-REQID, not consumed inline. raise_for_status
+                    # wouldn't catch it, so the body has no `choices`; failing loudly here avoids
+                    # silently re-submitting (and possibly duplicating) the job on retry.
+                    req_id = resp.headers.get("NVCF-REQID", "<none>")
+                    raise _PendingResponse(
+                        f"endpoint returned 202 Accepted (async pending, NVCF-REQID={req_id}); "
+                        f"this model is running in async mode, which this synchronous client "
+                        f"does not poll"
+                    )
                 resp.raise_for_status()
                 data = resp.json()
                 return data["choices"][0]["message"]["content"]
+            except _PendingResponse as e:  # non-retryable: retrying would duplicate the request
+                raise RuntimeError(f"[{self.name}] {e}") from e
             except Exception as e:  # network / 5xx / non-adaptable 400 -> retry with backoff
                 last_err = e
                 attempts_left -= 1

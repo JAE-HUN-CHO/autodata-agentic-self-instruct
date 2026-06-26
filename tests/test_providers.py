@@ -3,7 +3,8 @@
 We inject a fake `requests` module so no network is used: it lets us assert that
 OpenAICompatibleProvider resolves keys from the environment and adapts its request shape to
 backend 400s (reasoning models that reject `temperature` / want `max_completion_tokens`, and
-NIM models that reject `response_format`).
+NIM models that reject `response_format`), and that an async 202 is surfaced rather than
+silently retried.
 
 Run:  python tests/test_providers.py   (or)   python -m pytest -q
 """
@@ -11,7 +12,7 @@ from __future__ import annotations
 
 import os
 import sys
-import types
+from contextlib import contextmanager
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
@@ -20,10 +21,11 @@ from autodata.llm import OpenAICompatibleProvider, resolve_api_key
 
 # --- fake requests -----------------------------------------------------------
 class _FakeResp:
-    def __init__(self, status_code: int, body: str = "", content: str = "ok"):
+    def __init__(self, status_code: int, body: str = "", content: str = "ok", headers=None):
         self.status_code = status_code
         self.text = body
         self._content = content
+        self.headers = headers or {}
 
     def raise_for_status(self):
         if self.status_code >= 400:
@@ -44,8 +46,19 @@ class _FakeRequests:
         return self._responses.pop(0)
 
 
+@contextmanager
 def _with_fake_requests(fake):
-    sys.modules["requests"] = fake  # provider does `import requests` lazily inside complete()
+    # provider does `import requests` lazily inside complete(); save & restore the real module
+    # so a fake never leaks into later tests sharing this pytest process.
+    old = sys.modules.get("requests")
+    sys.modules["requests"] = fake
+    try:
+        yield
+    finally:
+        if old is None:
+            sys.modules.pop("requests", None)
+        else:
+            sys.modules["requests"] = old
 
 
 def _provider(**kw):
@@ -78,8 +91,8 @@ def test_resolve_api_key_missing_env_raises():
 # --- happy path: standard chat model ----------------------------------------
 def test_complete_happy_path_sends_expected_payload():
     fake = _FakeRequests([_FakeResp(200, content="hello")])
-    _with_fake_requests(fake)
-    out = _provider().complete("sys", "usr", temperature=0.9, json_mode=True, max_tokens=100)
+    with _with_fake_requests(fake):
+        out = _provider().complete("sys", "usr", temperature=0.9, json_mode=True, max_tokens=100)
     assert out == "hello"
     p = fake.payloads[0]
     assert p["temperature"] == 0.9
@@ -94,8 +107,8 @@ def test_adapts_to_reasoning_model_400s():
         _FakeResp(400, body="Use 'max_completion_tokens' instead of 'max_tokens'."),
         _FakeResp(200, content="reasoned"),
     ])
-    _with_fake_requests(fake)
-    out = _provider().complete("sys", "usr", temperature=0.9, max_tokens=64)
+    with _with_fake_requests(fake):
+        out = _provider().complete("sys", "usr", temperature=0.9, max_tokens=64)
     assert out == "reasoned"
     final = fake.payloads[-1]
     assert "temperature" not in final              # dropped
@@ -111,8 +124,8 @@ def test_adapts_when_response_format_unsupported():
         _FakeResp(400, body="response_format is not supported by this model"),
         _FakeResp(200, content="{\"ok\": 1}"),
     ])
-    _with_fake_requests(fake)
-    out = _provider().complete("sys", "usr", json_mode=True)
+    with _with_fake_requests(fake):
+        out = _provider().complete("sys", "usr", json_mode=True)
     assert out == "{\"ok\": 1}"
     assert "response_format" not in fake.payloads[-1]
 
@@ -124,11 +137,26 @@ def test_adaptation_is_sticky_across_calls():
         _FakeResp(200, content="a"),
         _FakeResp(200, content="b"),
     ])
-    _with_fake_requests(fake)
-    prov = _provider()
-    assert prov.complete("s", "u") == "a"
-    assert prov.complete("s", "u") == "b"          # second call already omits temperature
+    with _with_fake_requests(fake):
+        prov = _provider()
+        assert prov.complete("s", "u") == "a"
+        assert prov.complete("s", "u") == "b"      # second call already omits temperature
     assert "temperature" not in fake.payloads[-1]
+
+
+# --- NIM async 202: surfaced loudly, not silently retried -------------------
+def test_async_202_raises_without_retrying():
+    fake = _FakeRequests([_FakeResp(202, headers={"NVCF-REQID": "req-123"})])
+    with _with_fake_requests(fake):
+        try:
+            _provider(name="nim").complete("s", "u")
+        except RuntimeError as e:
+            assert "202" in str(e) and "req-123" in str(e)
+        else:
+            raise AssertionError("expected RuntimeError on 202 async response")
+    # the request was sent exactly once -- no duplicate re-submission on retry
+    assert len(fake.payloads) == 1
+    assert fake._responses == []
 
 
 if __name__ == "__main__":
