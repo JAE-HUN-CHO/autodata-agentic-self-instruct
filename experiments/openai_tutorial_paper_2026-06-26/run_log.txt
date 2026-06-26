@@ -1,0 +1,77 @@
+[paper] tutorial_paper
+  [tutorial_paper] r1: challenger…
+  [tutorial_paper] r1: quality_verifier… (+10.7s)
+  [tutorial_paper] r1: weak×3… (+12.6s)
+  [tutorial_paper] r1: TOO_EASY (weak_avg 0.679 > 0.65) [20.8s]
+  [tutorial_paper] r2: challenger…
+  [tutorial_paper] r2: quality_verifier… (+8.8s)
+  [tutorial_paper] r2: weak×3… (+10.5s)
+  [tutorial_paper] r2: strong×3… (+16.5s)
+  [tutorial_paper] r2: FAILED_STRONG (strong_avg 0.517 < 0.65) [29.3s]
+  [tutorial_paper] r3: challenger…
+  [tutorial_paper] r3: quality_verifier… (+9.1s)
+  [tutorial_paper] r3: weak×3… (+10.8s)
+  [tutorial_paper] r3: TOO_EASY (degenerate all-zero weak rollouts) [17.4s]
+  [tutorial_paper] r4: challenger…
+  [tutorial_paper] r4: quality_verifier… (+8.2s)
+  [tutorial_paper] r4: weak×3… (+10.0s)
+  [tutorial_paper] r4: strong×3… (+16.1s)
+  [tutorial_paper] r4: FAILED_STRONG (strong_avg 0.028 < 0.65) [27.5s]
+  [tutorial_paper] r5: challenger…
+  [tutorial_paper] r5: quality_verifier… (+10.9s)
+  [tutorial_paper] r5: weak×3… (+12.6s)
+  [tutorial_paper] r5: strong×3… (+20.4s)
+  [tutorial_paper] r5: FAILED_STRONG (strong_avg 0.241 < 0.65) [42.3s]
+  [tutorial_paper] r6: challenger…
+  [tutorial_paper] r6: quality_verifier… (+15.9s)
+  [tutorial_paper] r6: weak×3… (+18.8s)
+  [tutorial_paper] r6: TOO_EASY (weak_avg 0.793 > 0.65) [25.5s]
+  [tutorial_paper] r7: challenger…
+  [tutorial_paper] r7: quality_verifier… (+23.7s)
+  [tutorial_paper] r7: weak×3… (+25.2s)
+  [tutorial_paper] r7: strong×3… (+33.1s)
+  [tutorial_paper] r7: FAILED_STRONG (strong_avg 0.190 < 0.65) [45.0s]
+  [tutorial_paper] r8: challenger…
+  [tutorial_paper] r8: quality_verifier… (+15.6s)
+  [tutorial_paper] r8: weak×3… (+17.6s)
+  [tutorial_paper] r8: strong×3… (+25.6s)
+  [tutorial_paper] r8: FAILED_STRONG (strong_avg 0.274 < 0.65) [46.0s]
+  [tutorial_paper] r9: challenger…
+  [tutorial_paper] r9: quality_verifier… (+11.6s)
+  [tutorial_paper] r9: weak×3… (+13.4s)
+  [tutorial_paper] r9: strong×3… (+23.0s)
+  [tutorial_paper] r9: FAILED_STRONG (strong_avg 0.259 < 0.65) [38.5s]
+  [tutorial_paper] r10: challenger…
+  [tutorial_paper] r10: quality_verifier… (+10.1s)
+  [tutorial_paper] r10: weak×3… (+12.3s)
+  [tutorial_paper] r10: strong×3… (+19.6s)
+  [tutorial_paper] r10: FAILED_STRONG (strong_avg 0.370 < 0.65) [31.3s]
+  [tutorial_paper] r11: challenger…
+  [tutorial_paper] r11: quality_verifier… (+9.0s)
+  [tutorial_paper] r11: weak×3… (+10.9s)
+  [tutorial_paper] r11: strong×3… (+17.5s)
+  [tutorial_paper] r11: FAILED_STRONG (strong_avg 0.614 < 0.65) [32.8s]
+  [tutorial_paper] r12: challenger…
+  [tutorial_paper] r12: quality_verifier… (+9.8s)
+  [tutorial_paper] r12: weak×3… (+12.6s)
+  [tutorial_paper] r12: strong×3… (+22.3s)
+  [tutorial_paper] r12: FAILED_STRONG (strong_avg 0.218 < 0.65) [38.7s]
+  [tutorial_paper] REJECTED after 12 rounds
+[paper] tutorial_paper done in 395.2s (accepted=False, rounds=12)
+
+=== corpus stats ===
+{
+  "papers_processed": 1,
+  "papers_accepted": 0,
+  "acceptance_rate": 0.0,
+  "mean_rounds_to_accept": null,
+  "accepted_weak_avg": null,
+  "accepted_strong_avg": null,
+  "accepted_gap_avg": null,
+  "failure_mode_counts": {
+    "TOO_EASY": 3,
+    "FAILED_STRONG": 9
+  }
+}
+
+dataset -> /tmp/openai_tutorial_paper_out/dataset.jsonl
