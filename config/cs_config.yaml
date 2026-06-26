@@ -1,0 +1,48 @@
+# Agentic Self-Instruct -- CS research-paper task configuration.
+# Models below mirror the paper (Kimi-K2.6 orchestrator/challenger/judge/QV,
+# Qwen3.5-397B strong solver, Qwen3.5-4B weak solver). For offline runs the
+# base_url/model fields are ignored and a deterministic MockProvider is used.
+
+papers_path: examples
+
+acceptance_criteria:        # exact thresholds from Sec 3.1 "Criteria"
+  weak_avg_max: 0.65
+  weak_attempt_max: 0.75
+  strong_avg_min: 0.60      # set to 0.65 to match the Sec 3.1 prose
+  strong_avg_max: 0.95
+  gap_min: 0.20
+
+loop:
+  n_attempts: 3             # each solver invoked 3x to reduce variance
+  max_rounds: 12            # paper: mean 6.59 rounds, long tail past 10
+
+sampling:
+  challenger: 0.9
+  weak_solver: 0.7
+  strong_solver: 0.7
+  judge: 0.0
+  quality_verifier: 0.0
+
+# Point these at your own vLLM OpenAI-compatible endpoints (one per role is fine even if
+# several share a base_url). Example assumes weak+judge on one H200, strong on another.
+models:
+  challenger:
+    model: "kimi-k2.6"
+    base_url: "http://localhost:8001/v1"
+    api_key: "EMPTY"
+  quality_verifier:
+    model: "kimi-k2.6"
+    base_url: "http://localhost:8001/v1"
+    api_key: "EMPTY"
+  judge:
+    model: "kimi-k2.6"
+    base_url: "http://localhost:8001/v1"
+    api_key: "EMPTY"
+  strong_solver:
+    model: "Qwen3.5-397B-A17B"
+    base_url: "http://localhost:8002/v1"
+    api_key: "EMPTY"
+  weak_solver:
+    model: "Qwen3.5-4B"
+    base_url: "http://localhost:8003/v1"
+    api_key: "EMPTY"

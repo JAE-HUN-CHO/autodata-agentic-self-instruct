@@ -1,0 +1,88 @@
+# Phase 1: Algorithm Extraction
+# Paper: Autodata / Agentic Self-Instruct (FAIR at Meta, arXiv 2606.25996v1)
+# Scope of this implementation: the CS-research-paper instantiation (Sec 3.1, App C.1),
+# which has the cleanest, fully-specified hard-coded acceptance criteria.
+
+paper:
+  title: "Autodata: An agentic data scientist to create high quality synthetic data"
+  arxiv: "2606.25996v1"
+  date: "2026-06-25"
+
+core_idea: >
+  An orchestrator agent acts as a data scientist. It directs a Challenger to write a
+  (context, question, reference_answer, weighted_rubric) example from a source document,
+  then tests that example against a WEAK and a STRONG solver. A rubric judge scores each
+  solver answer. The example is accepted only if it discriminates the two solvers by a
+  target margin. On failure the orchestrator feeds the failure mode back to the Challenger
+  and a NEW question is generated from a different angle. Loop until accepted or budget out.
+
+key_algorithms:
+  - name: "Agentic Self-Instruct outer loop (per document)"
+    section: "3.1, App C.1, Fig 2/7"
+    complexity: "Medium"
+    pseudocode: |
+      def generate_for_paper(paper, max_rounds):
+          failures = []          # grouped by mode: TOO_EASY | FAILED_STRONG | FAILED_QV
+          for round in 1..max_rounds:
+              qa = challenger(paper, failures)               # context+question+ref+rubric
+              qv = quality_verifier(qa, paper)
+              if not qv.passed:
+                  failures.add(FAILED_QV, qa, qv.feedback); continue
+              weak = [eval_rubric(weak_solver(qa), qa.rubric) for _ in range(n_attempts)]
+              if not weak_pass(weak):                         # save compute: weak first
+                  failures.add(TOO_EASY, qa, weak); continue
+              strong = [eval_rubric(strong_solver(qa), qa.rubric) for _ in range(n_attempts)]
+              if not strong_pass(strong): 
+                  failures.add(FAILED_STRONG, qa, strong); continue
+              gap = mean(strong) - mean(weak)
+              if gap < gap_threshold:
+                  failures.add(FAILED_STRONG, qa, {gap}); continue
+              return ACCEPTED(qa, weak, strong, gap, round)
+          return REJECTED(failures)
+
+  - name: "Rubric-based scoring (judge)"
+    section: "3.1; rubric design in App C.1 (Fig 8/9)"
+    complexity: "Simple"
+    pseudocode: |
+      # rubric = list of {criterion, weight(int), category in [positive, negative]}
+      # judge marks each criterion satisfied (1) / not (0) given the solver answer.
+      # CS paper uses weighted criteria; legal variant uses per-criterion binary.
+      def eval_rubric(answer, rubric):
+          earned  = sum(w for (sat,w) in marks if category==positive and sat)
+          penalty = sum(|w| for (sat,w) in marks if category==negative and sat)
+          max_pos = sum(w for w in rubric if category==positive)
+          return clamp((earned - penalty) / max_pos, 0, 1)
+
+acceptance_criteria_CS:        # exact thresholds from Sec 3.1 "Criteria"
+  weak_avg_max: 0.65           # weak solver average <= 0.65
+  weak_attempt_max: 0.75       # best single weak attempt <= 0.75 (no high outliers)
+  weak_no_zero: true           # WEAK_PASSED requires no all-zero degenerate
+  strong_avg_min: 0.60         # strong solver average >= 0.60 (paper uses 0.65 in some places; 0.60 in App C.1)
+  strong_avg_max: 0.95         # strong solver average < 0.95 (not trivially saturated)
+  gap_min: 0.20                # (strong_avg - weak_avg) >= 20 percentage points
+
+hyperparameters:
+  n_attempts_per_solver: 3     # each solver invoked 3x to reduce variance (Sec 3.1)
+  max_rounds_per_paper: 12     # paper mean=6.59 rounds, long tail past 10
+  models:
+    orchestrator: "Kimi-K2.6"
+    challenger:   "Kimi-K2.6"
+    quality_verifier: "Kimi-K2.6"
+    judge:        "Kimi-K2.6"
+    strong_solver: "Qwen3.5-397B-A17B"
+    weak_solver:   "Qwen3.5-4B"
+  rubric:
+    n_criteria: [10, 15]
+    positive: { count: [7, 10], weight: [1, 10] }
+    negative: { count: [3, 5],  weight: [-10, -1] }
+
+phase1_to_phase2:
+  algorithms_found: 2
+  key_algorithms:
+    - { name: "Agentic Self-Instruct outer loop", section: "3.1", complexity: "Medium" }
+    - { name: "Rubric judge",                     section: "3.1", complexity: "Simple" }
+  hyperparameters_count: 12
+  critical_equations: "rubric score (weighted, normalized); gap = strong_avg - weak_avg"
+  missing_info:
+    - "Exact judge prompt wording (paraphrased in App C; reimplemented functionally)."
+    - "strong_avg_min stated as 0.65 in Sec3.1 prose, 0.60 in App C.1 prompt -> config flag."

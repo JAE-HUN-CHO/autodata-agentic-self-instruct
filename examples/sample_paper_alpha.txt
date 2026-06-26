@@ -1,0 +1,6 @@
+Title: Adaptive Gradient Clipping for Stable Low-Precision Training (mock corpus item)
+Abstract: We study how per-layer adaptive clipping thresholds interact with fp8 training
+dynamics. We show that coupling the clip threshold to the running variance of activations
+prevents loss spikes that fixed-threshold clipping misses, and we analyze the regime where
+this fails. Sections cover the method, the variance-coupling derivation, ablations over
+threshold schedules, and a failure analysis on very deep stacks.

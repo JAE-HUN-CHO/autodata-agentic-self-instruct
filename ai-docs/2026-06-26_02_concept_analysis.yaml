@@ -1,0 +1,58 @@
+# Phase 2: Concept Analysis
+# System architecture and component data-flow for Agentic Self-Instruct (CS variant).
+
+components:
+  - id: LLMProvider
+    role: "OpenAI-compatible chat client. One instance per logical role so different roles can point at different vLLM/OpenAI/Anthropic-gateway endpoints. Includes a deterministic MockProvider for offline testing."
+    inputs: ["system_prompt", "user_prompt", "temperature", "json_mode"]
+    outputs: ["text or parsed JSON"]
+
+  - id: Challenger
+    role: "Reads the source paper, produces a QAItem (context, question, reference_answer, rubric[]). On refinement rounds receives prior failures grouped by mode and must produce a NEW question from a different angle."
+    depends_on: [LLMProvider]
+
+  - id: Solver
+    role: "Answers a question given its context. Two instances: weak and strong. Strong may run at higher temperature/aggregation; here parameterized by model + sampling."
+    depends_on: [LLMProvider]
+
+  - id: QualityVerifier
+    role: "Checks answer-leakage (can the answer be built from context alone?), recall-vs-reasoning, and rubric well-formedness (counts of positive/negative criteria, total in range)."
+    depends_on: [LLMProvider]
+
+  - id: RubricJudge
+    role: "Given a solver answer + rubric, marks each criterion satisfied/not and returns a normalized [0,1] score. Core measurement primitive."
+    depends_on: [LLMProvider]
+
+  - id: Orchestrator
+    role: "Runs the per-paper loop: challenger -> QV -> weak eval -> strong eval -> gap check, with compute-saving early exits and failure-mode feedback. Emits RoundResult records and a final accept/reject."
+    depends_on: [Challenger, Solver, QualityVerifier, RubricJudge]
+
+  - id: CLI / Runner
+    role: "Loads config + corpus of papers, runs the orchestrator over each, writes accepted dataset (JSONL) + per-paper trajectory logs + corpus statistics (Table 1 style)."
+    depends_on: [Orchestrator]
+
+data_flow: |
+  paper.txt
+    -> Challenger -> QAItem(context, question, ref, rubric)
+    -> QualityVerifier -> pass/fail(+feedback)
+    -> [weak Solver x N] -> RubricJudge -> weak_scores
+    -> [strong Solver x N] -> RubricJudge -> strong_scores
+    -> Orchestrator acceptance check -> AcceptedExample | feedback->Challenger (next round)
+  Orchestrator -> Runner -> dataset.jsonl + trajectories/*.json + stats.json
+
+phase2_to_phase3:
+  components_count: 7
+  implementation_complexity: "Medium"
+  key_dependencies:
+    - "Challenger -> LLMProvider"
+    - "RubricJudge -> LLMProvider"
+    - "Orchestrator -> {Challenger, Solver, QualityVerifier, RubricJudge}"
+    - "Runner -> Orchestrator"
+  experiments_to_reproduce:
+    - "Table 1: corpus quality stats (weak avg, strong avg, gap, rounds) for CoT vs Agentic."
+    - "Loop analysis: failure-mode breakdown (~80% TOO_EASY at pre-acceptance rounds)."
+  success_criteria:
+    - "Orchestrator enforces exact CS acceptance thresholds."
+    - "Runs end-to-end on mock provider with zero network (tests pass)."
+    - "Same code runs against a real vLLM endpoint by changing config only."
+    - "Produces JSONL dataset + per-paper trajectory + aggregate stats."

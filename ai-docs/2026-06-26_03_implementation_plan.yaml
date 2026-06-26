@@ -1,0 +1,65 @@
+# Phase 3: Implementation Plan
+# Build order follows dependency topology; each file is complete and runnable.
+
+file_structure:
+  autodata/__init__.py:        "package exports"
+  autodata/schemas.py:         "dataclasses: RubricCriterion, QAItem, SolverEval, RoundResult, PaperResult; JSON (de)serialization"
+  autodata/llm.py:             "LLMProvider protocol; OpenAICompatibleProvider (vLLM/OpenAI); MockProvider (deterministic offline)"
+  autodata/prompts.py:         "system prompts for challenger, solver, quality_verifier, judge (functional reimplementation of App C.1 behavior)"
+  autodata/subagents.py:       "Challenger, Solver, QualityVerifier classes wrapping prompts + provider + parsing"
+  autodata/rubric_eval.py:     "RubricJudge: per-criterion marking -> normalized weighted score"
+  autodata/orchestrator.py:    "AgenticSelfInstruct: per-paper loop + AcceptanceCriteria with exact CS thresholds"
+  autodata/cli.py:             "Runner + argparse entry point; writes dataset.jsonl, trajectories, stats.json"
+  config/cs_config.yaml:       "criteria thresholds, model routing, sampling, paths"
+  examples/sample_paper.txt:   "tiny synthetic 'paper' for offline demo"
+  tests/test_orchestrator.py:  "mock-provider tests for acceptance logic + end-to-end run"
+  requirements.txt:            "pyyaml, requests (openai optional)"
+  README.md:                   "what it is, how to run offline + against vLLM, mapping to paper"
+
+implementation_components:
+  schemas:
+    - "RubricCriterion(criterion:str, weight:int, category:'positive'|'negative')"
+    - "QAItem(context, question, reference_answer, rubric:list[RubricCriterion], question_type, reasoning_tags)"
+    - "SolverEval(score:float, per_criterion:dict, raw_answer:str)"
+    - "RoundResult(round, status, weak_scores, strong_scores, gap, qa, feedback)"
+    - "PaperResult(paper_id, accepted:bool, accepted_qa, rounds:list[RoundResult])"
+  llm:
+    - "Provider.complete(system, user, temperature, json_mode) -> str"
+    - "OpenAICompatibleProvider: POST {base_url}/chat/completions, bearer key, retries"
+    - "MockProvider: seeded, returns structured JSON keyed by role tag in system prompt; difficulty knob drives weak/strong score separation so the loop demonstrably accepts/rejects"
+  rubric_eval:
+    - "judge marks criteria via provider JSON; normalize (earned-penalty)/max_pos clamp[0,1]"
+    - "no-network path: deterministic marking from MockProvider"
+  orchestrator:
+    - "AcceptanceCriteria.check(weak_scores, strong_scores) -> (passed, mode, detail)"
+    - "early exit: QV -> weak -> strong (compute saving as in paper)"
+    - "failure feedback grouped TOO_EASY / FAILED_STRONG / FAILED_QV passed to challenger"
+
+validation_approach:
+  - "tests/test_orchestrator.py: (a) criteria unit tests at boundary values; (b) MockProvider tuned 'easy' paper -> rejected via TOO_EASY; (c) 'discriminative' paper -> accepted; (d) full Runner over examples/ writes dataset.jsonl"
+  - "smoke: python -m autodata.cli --config config/cs_config.yaml --offline"
+
+environment_setup:
+  python: ">=3.10"
+  deps: ["pyyaml>=6", "requests>=2.28"]
+  optional: ["openai>=1.0  # only if using OpenAIProvider sdk path"]
+  run_offline: "python -m autodata.cli --config config/cs_config.yaml --offline --papers examples"
+  run_vllm: "set provider.base_url to your vLLM OpenAI endpoint, drop --offline"
+
+implementation_strategy:
+  order:
+    - schemas.py
+    - llm.py
+    - prompts.py
+    - rubric_eval.py
+    - subagents.py
+    - orchestrator.py
+    - cli.py
+    - config + examples + tests + README + requirements
+  principle: "working first; exact thresholds faithful to paper; provider-agnostic so it runs on Jaehoon's H200 vLLM by config change."
+
+phase3_to_phase4:
+  file_order: [schemas.py, llm.py, prompts.py, rubric_eval.py, subagents.py, orchestrator.py, cli.py, config, examples, tests, README, requirements]
+  current_file: schemas.py
+  completed_files: []
+  blocking_dependencies: "none (schemas has no internal deps)"
