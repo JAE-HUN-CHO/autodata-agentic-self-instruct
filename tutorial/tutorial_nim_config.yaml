@@ -1,0 +1,73 @@
+# Tutorial-tuned NVIDIA NIM configuration.
+#
+# Differences from config/nvidia_nim_config.yaml:
+#   * loop.max_rounds reduced (6 instead of 12) -- tutorials should finish in minutes.
+#   * loop.n_attempts reduced (2 instead of 3) -- fewer solver calls per round.
+#     The paper uses 3 to suppress variance; 2 is enough to *demonstrate* the gap test
+#     without doubling wall-clock.
+#   * loop.parallel_attempts: true -- fan the attempts across a tiny thread pool. On
+#     NIM the per-call latency dominates, so concurrency cuts a round to ~1/n the time.
+#
+# Models are exactly the paper's lineup, mapped to NIM catalog slugs:
+#   challenger / judge / quality_verifier -> moonshotai/kimi-k2.6           (paper: Kimi-K2.6)
+#   strong_solver                         -> qwen/qwen3.5-397b-a17b         (paper: Qwen3.5-397B-A17B)
+#   weak_solver                           -> qwen/qwen3-next-80b-a3b-instruct (paper: Qwen3.5-4B)
+#
+# The paper's Qwen3.5-4B is not hosted on NIM; qwen3-next-80b-a3b-instruct (3B active
+# params, MoE) is the smallest available Qwen and preserves the strong/weak gap.
+#
+# Usage:
+#   export NVIDIA_API_KEY=nvapi-...
+#   python -m autodata.cli \
+#       --config tutorial/tutorial_nim_config.yaml \
+#       --papers tutorial/papers \
+#       --out   tutorial/output \
+#       --limit 1
+
+papers_path: tutorial/papers
+
+acceptance_criteria:        # paper Sec 3.1 thresholds, unchanged
+  weak_avg_max: 0.65
+  weak_attempt_max: 0.75
+  strong_avg_min: 0.60
+  strong_avg_max: 0.95
+  gap_min: 0.20
+
+loop:
+  n_attempts: 2             # tutorial speedup; paper default = 3
+  max_rounds: 6             # tutorial speedup; paper default = 12
+  parallel_attempts: true   # fan attempts across a thread pool (network-bound on NIM)
+
+sampling:                   # paper defaults
+  challenger: 0.9
+  weak_solver: 0.7
+  strong_solver: 0.7
+  judge: 0.0
+  quality_verifier: 0.0
+
+models:
+  challenger:
+    model: "moonshotai/kimi-k2.6"
+    base_url: "https://integrate.api.nvidia.com/v1"
+    api_key: "env:NVIDIA_API_KEY"
+    max_retries: 5            # NIM bursts can rate-limit; honor Retry-After then try a few more times
+  quality_verifier:
+    model: "moonshotai/kimi-k2.6"
+    base_url: "https://integrate.api.nvidia.com/v1"
+    api_key: "env:NVIDIA_API_KEY"
+    max_retries: 5            # NIM bursts can rate-limit; honor Retry-After then try a few more times
+  judge:
+    model: "moonshotai/kimi-k2.6"
+    base_url: "https://integrate.api.nvidia.com/v1"
+    api_key: "env:NVIDIA_API_KEY"
+    max_retries: 5            # NIM bursts can rate-limit; honor Retry-After then try a few more times
+  strong_solver:
+    model: "qwen/qwen3.5-397b-a17b"
+    base_url: "https://integrate.api.nvidia.com/v1"
+    api_key: "env:NVIDIA_API_KEY"
+    max_retries: 5            # NIM bursts can rate-limit; honor Retry-After then try a few more times
+  weak_solver:
+    model: "qwen/qwen3-next-80b-a3b-instruct"
+    base_url: "https://integrate.api.nvidia.com/v1"
+    api_key: "env:NVIDIA_API_KEY"
+    max_retries: 5            # NIM bursts can rate-limit; honor Retry-After then try a few more times

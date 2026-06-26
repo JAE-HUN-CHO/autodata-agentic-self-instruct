@@ -1,0 +1,37 @@
+# Reference: actual stdout from a real NIM run on 2026-06-26.
+#
+# This is a PARTIAL trace -- the run hit a 429 rate-limit on the judge before any
+# paper finished, so no dataset.jsonl was written. It is included to show:
+#   (a) the realistic per-step latency you should expect (Qwen3 cold start dominates r1),
+#   (b) the kinds of failure modes you actually see on real models -- FAILED_STRONG when
+#       the question is hard enough that the strong solver also struggles, then TOO_EASY
+#       when the challenger overcorrects in the next round,
+#   (c) why the 429 handling matters: even with parallel_attempts=true the judge gets
+#       called n_attempts * 2 times per round (once per weak attempt, once per strong),
+#       which is enough to trip NIM's per-key rate window on a multi-round run.
+#
+# Reproduce with:
+#   export NVIDIA_API_KEY=nvapi-...
+#   python -m autodata.cli \
+#       --config tutorial/tutorial_nim_config.yaml \
+#       --papers tutorial/papers --out tutorial/output --limit 1
+#
+# Your exact numbers will differ (temperature > 0 sampling) but the shape should match.
+
+[paper] tutorial_paper
+  [tutorial_paper] r1: challenger…
+  [tutorial_paper] r1: quality_verifier… (+13.6s)
+  [tutorial_paper] r1: weak×2… (+18.7s)
+  [tutorial_paper] r1: strong×2… (+123.5s)
+  [tutorial_paper] r1: FAILED_STRONG (strong_avg 0.445 < 0.6) [209.6s]
+  [tutorial_paper] r2: challenger…
+  [tutorial_paper] r2: quality_verifier… (+16.0s)
+  [tutorial_paper] r2: weak×2… (+21.8s)
+  [tutorial_paper] r2: TOO_EASY (weak_avg 0.775 > 0.65) [245.0s]
+  [tutorial_paper] r3: challenger…
+  [tutorial_paper] r3: quality_verifier… (+33.2s)
+  [tutorial_paper] r3: weak×2… (+41.0s)
+  [tutorial_paper] r3: strong×2… (+211.1s)
+RuntimeError: [judge] completion failed after 3 tries: 429 Too Many Requests
+# ^ This 429 is what motivated the new Retry-After-aware backoff in autodata/llm.py
+#   and the per-role max_retries: 5 in tutorial_nim_config.yaml.

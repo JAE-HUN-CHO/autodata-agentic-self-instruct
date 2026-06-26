@@ -1,0 +1,50 @@
+Title: Variance-Coupled Gradient Clipping for fp8 Training of Deep Transformer Stacks
+       (Tutorial mock paper used only as Agentic Self-Instruct input)
+
+Abstract
+We investigate how per-layer adaptive gradient-clipping thresholds interact with fp8
+training dynamics in deep transformer stacks (>40 layers). We show that coupling the
+clip threshold to the *exponential moving variance* of layer-wise activations
+(rather than to a fixed global percentile) prevents the catastrophic loss spikes
+that fixed-threshold clipping consistently misses around step ~6k of a 70B-parameter
+pre-training run. We then analyze the regime in which the variance-coupling itself
+fails -- specifically, when activation variance is non-stationary across micro-batches
+because of curriculum-style data mixing, the coupled threshold lags the true tail
+and the same spike pattern reappears, delayed by ~400 steps. We close with an
+ablation over threshold schedules and a failure case on a 96-layer stack.
+
+1. Setup
+We train a decoder-only transformer with rotary embeddings, RMSNorm, and SwiGLU MLPs
+in fp8 (E4M3 weights, E5M2 gradients) on a 700B-token mixture. Activation statistics
+are tracked layer-by-layer; per-layer clip thresholds are updated every 32 steps with
+exponential moving average (EMA) momentum beta = 0.98.
+
+2. Method: variance-coupling
+The clip threshold tau_l for layer l is set to
+        tau_l = k * sqrt(V_l)
+where V_l is the EMA of per-layer activation variance and k is a fixed multiplier
+(k = 6 in all reported runs). Crucially, tau is recomputed in fp32 on a CPU shadow
+copy of the moments, so the EMA itself does not suffer from fp8 underflow.
+
+3. Findings
+3.1 With a fixed global threshold (the prior art baseline) we observe a sharp loss
+    spike at step 6,100 ± 200 in 7/8 seeds; coupling tau to sqrt(V_l) suppresses the
+    spike in all 8 seeds, at no measurable throughput cost.
+3.2 Removing the fp32 shadow copy (i.e. computing the EMA in fp8) restores the spike
+    in 5/8 seeds, confirming that fp8 underflow on small-magnitude variance is the
+    mechanism, not the schedule.
+3.3 With curriculum-style mixing (synthetic-first, web-second, code-third) the
+    variance is non-stationary across micro-batches; tau lags the true tail by
+    ~400 steps and a spike reappears around step 6,500. A *two-timescale* EMA
+    (fast beta = 0.9 stacked on top of slow beta = 0.99) closes the gap.
+
+4. Ablations
+We sweep k in {3, 4.5, 6, 9}. k = 3 over-clips (training loss plateaus); k = 9 fails
+to suppress the spike (effectively unclipped). The "sweet spot" k = 6 is stable across
+model widths from 1.3B to 70B but degrades at the 96-layer 130B scale, where k must be
+relaxed to ~7.5 to avoid over-clipping the deepest layers.
+
+5. Limitations
+The CPU shadow copy adds a constant ~0.6% wall-clock overhead at our batch size; this
+is negligible at scale but would be significant for inference-time use. The method has
+not been tested on encoder-decoder architectures or on int8 weight quantization.
