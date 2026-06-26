@@ -1,0 +1,89 @@
+[paper] sample_paper_alpha
+  [sample_paper_alpha] r1: challenger…
+  [sample_paper_alpha] r1: quality_verifier… (+9.7s)
+  [sample_paper_alpha] r1: weak×3… (+11.1s)
+  [sample_paper_alpha] r1: strong×3… (+18.7s)
+  [sample_paper_alpha] r1: FAILED_STRONG (strong_avg 0.474 < 0.65) [31.2s]
+  [sample_paper_alpha] r2: challenger…
+  [sample_paper_alpha] r2: quality_verifier… (+7.3s)
+  [sample_paper_alpha] r2: weak×3… (+8.7s)
+  [sample_paper_alpha] r2: strong×3… (+20.5s)
+  [sample_paper_alpha] r2: FAILED_STRONG (strong_avg 0.452 < 0.65) [30.4s]
+  [sample_paper_alpha] r3: challenger…
+  [sample_paper_alpha] r3: quality_verifier… (+10.9s)
+  [sample_paper_alpha] r3: weak×3… (+12.3s)
+  [sample_paper_alpha] r3: strong×3… (+19.6s)
+  [sample_paper_alpha] r3: FAILED_STRONG (strong_avg 0.306 < 0.65) [28.6s]
+  [sample_paper_alpha] r4: challenger…
+  [sample_paper_alpha] r4: quality_verifier… (+23.0s)
+  [sample_paper_alpha] r4: weak×3… (+24.3s)
+  [sample_paper_alpha] r4: strong×3… (+37.7s)
+  [sample_paper_alpha] r4: FAILED_STRONG (strong_avg 0.333 < 0.65) [50.7s]
+  [sample_paper_alpha] r5: challenger…
+  [sample_paper_alpha] r5: quality_verifier… (+8.6s)
+  [sample_paper_alpha] r5: weak×3… (+10.2s)
+  [sample_paper_alpha] r5: TOO_EASY (weak_avg 0.863 > 0.65) [21.3s]
+  [sample_paper_alpha] r6: challenger…
+  [sample_paper_alpha] r6: quality_verifier… (+10.3s)
+  [sample_paper_alpha] r6: weak×3… (+11.9s)
+  [sample_paper_alpha] r6: strong×3… (+23.9s)
+  [sample_paper_alpha] r6: FAILED_STRONG (strong_avg 0.497 < 0.65) [37.6s]
+  [sample_paper_alpha] r7: challenger…
+  [sample_paper_alpha] r7: quality_verifier… (+9.7s)
+  [sample_paper_alpha] r7: weak×3… (+11.1s)
+  [sample_paper_alpha] r7: TOO_EASY (weak_avg 1.000 > 0.65) [22.2s]
+  [sample_paper_alpha] r8: challenger…
+  [sample_paper_alpha] r8: quality_verifier… (+7.4s)
+  [sample_paper_alpha] r8: weak×3… (+8.7s)
+  [sample_paper_alpha] r8: strong×3… (+17.7s)
+  [sample_paper_alpha] r8: FAILED_STRONG (strong_avg 0.608 < 0.65) [32.8s]
+  [sample_paper_alpha] r9: challenger…
+  [sample_paper_alpha] r9: quality_verifier… (+8.7s)
+  [sample_paper_alpha] r9: weak×3… (+9.9s)
+  [sample_paper_alpha] r9: strong×3… (+18.5s)
+  [sample_paper_alpha] r9: FAILED_STRONG (strong_avg 0.435 < 0.65) [47.6s]
+  [sample_paper_alpha] r10: challenger…
+  [sample_paper_alpha] r10: quality_verifier… (+7.5s)
+  [sample_paper_alpha] r10: weak×3… (+9.1s)
+  [sample_paper_alpha] r10: strong×3… (+14.8s)
+  [sample_paper_alpha] r10: FAILED_STRONG (strong_avg 0.471 < 0.65) [24.5s]
+  [sample_paper_alpha] r11: challenger…
+  [sample_paper_alpha] r11: quality_verifier… (+10.3s)
+  [sample_paper_alpha] r11: weak×3… (+11.9s)
+  [sample_paper_alpha] r11: strong×3… (+20.3s)
+  [sample_paper_alpha] r11: FAILED_STRONG (strong_avg 0.442 < 0.65) [32.2s]
+  [sample_paper_alpha] r12: challenger…
+  [sample_paper_alpha] r12: quality_verifier… (+13.0s)
+  [sample_paper_alpha] r12: weak×3… (+14.5s)
+  [sample_paper_alpha] r12: TOO_EASY (weak_avg 0.929 > 0.65) [25.9s]
+  [sample_paper_alpha] REJECTED after 12 rounds
+[paper] sample_paper_alpha done in 385.0s (accepted=False, rounds=12)
+[paper] sample_paper_beta
+  [sample_paper_beta] r1: challenger…
+  [sample_paper_beta] r1: quality_verifier… (+11.2s)
+  [sample_paper_beta] r1: weak×3… (+14.9s)
+  [sample_paper_beta] r1: strong×3… (+20.4s)
+  [sample_paper_beta] r1: FAILED_STRONG (strong_avg 0.256 < 0.65) [33.5s]
+  [sample_paper_beta] r2: challenger…
+  [sample_paper_beta] r2: quality_verifier… (+10.1s)
+  [sample_paper_beta] r2: weak×3… (+12.0s)
+  [sample_paper_beta] r2: strong×3… (+19.0s)
+  [sample_paper_beta] r2: ACCEPTED (weak=0.396 strong=0.692 gap=0.296) [32.0s]
+[paper] sample_paper_beta done in 65.6s (accepted=True, rounds=2)
+
+=== corpus stats ===
+{
+  "papers_processed": 2,
+  "papers_accepted": 1,
+  "acceptance_rate": 0.5,
+  "mean_rounds_to_accept": 2,
+  "accepted_weak_avg": 0.3962,
+  "accepted_strong_avg": 0.6918,
+  "accepted_gap_avg": 0.2956,
+  "failure_mode_counts": {
+    "FAILED_STRONG": 10,
+    "TOO_EASY": 3
+  }
+}
+
+dataset -> /tmp/openai_paper_out/dataset.jsonl

@@ -1,0 +1,62 @@
+# Agentic Self-Instruct -- OpenAI configuration matching the paper's settings.
+#
+# Paper-faithful knobs from Sec 3.1 / App C.1:
+#   * n_attempts: 3        (paper default; mini/gap configs used 2 for speed)
+#   * max_rounds: 12       (paper default)
+#   * strong_avg_min: 0.65 (Sec 3.1 prose; tighter than App C.1's 0.60)
+#
+# Model lineup pairs gpt-4.1 (strong) with gpt-4.1-nano (weak) so the strong/weak
+# capability gap is real. Orchestration roles (challenger / judge / quality_verifier)
+# run on the cheaper gpt-4.1-mini.
+#
+#   export OPENAI_API_KEY=sk-...
+#   python -m autodata.cli --config config/openai_paper_faithful_config.yaml \
+#       --papers examples --out output
+
+papers_path: examples
+
+acceptance_criteria:
+  weak_avg_max: 0.65
+  weak_attempt_max: 0.75
+  strong_avg_min: 0.65      # paper Sec 3.1 prose (tighter than App C.1's 0.60)
+  strong_avg_max: 0.95
+  gap_min: 0.20
+
+loop:
+  n_attempts: 3             # paper default
+  max_rounds: 12            # paper default
+  parallel_attempts: true
+
+sampling:
+  challenger: 0.9
+  weak_solver: 0.7
+  strong_solver: 0.7
+  judge: 0.0
+  quality_verifier: 0.0
+
+models:
+  challenger:
+    model: "gpt-4.1-mini"
+    base_url: "https://api.openai.com/v1"
+    api_key: "env:OPENAI_API_KEY"
+    max_retries: 5
+  quality_verifier:
+    model: "gpt-4.1-mini"
+    base_url: "https://api.openai.com/v1"
+    api_key: "env:OPENAI_API_KEY"
+    max_retries: 5
+  judge:
+    model: "gpt-4.1-mini"
+    base_url: "https://api.openai.com/v1"
+    api_key: "env:OPENAI_API_KEY"
+    max_retries: 5
+  strong_solver:
+    model: "gpt-4.1"
+    base_url: "https://api.openai.com/v1"
+    api_key: "env:OPENAI_API_KEY"
+    max_retries: 5
+  weak_solver:
+    model: "gpt-4.1-nano"
+    base_url: "https://api.openai.com/v1"
+    api_key: "env:OPENAI_API_KEY"
+    max_retries: 5

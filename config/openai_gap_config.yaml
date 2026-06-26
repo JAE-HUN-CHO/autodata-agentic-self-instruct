@@ -1,0 +1,58 @@
+# Agentic Self-Instruct -- OpenAI configuration with a deliberate strong/weak gap.
+#
+# Sibling of openai_mini_config.yaml. The mini config showed that mini vs nano are too
+# close -- 6/6 rounds rejected. Here we widen the gap by pairing gpt-4.1 (full) as the
+# strong solver against gpt-4.1-nano as the weak solver, keeping the cheaper gpt-4.1-mini
+# on the orchestration roles (challenger / judge / quality_verifier).
+#
+#   export OPENAI_API_KEY=sk-...
+#   python -m autodata.cli --config config/openai_gap_config.yaml \
+#       --papers tutorial/papers --out output --limit 1
+
+papers_path: tutorial/papers
+
+acceptance_criteria:        # paper Sec 3.1 thresholds, unchanged
+  weak_avg_max: 0.65
+  weak_attempt_max: 0.75
+  strong_avg_min: 0.60
+  strong_avg_max: 0.95
+  gap_min: 0.20
+
+loop:
+  n_attempts: 2
+  max_rounds: 6
+  parallel_attempts: true
+
+sampling:
+  challenger: 0.9
+  weak_solver: 0.7
+  strong_solver: 0.7
+  judge: 0.0
+  quality_verifier: 0.0
+
+models:
+  challenger:
+    model: "gpt-4.1-mini"
+    base_url: "https://api.openai.com/v1"
+    api_key: "env:OPENAI_API_KEY"
+    max_retries: 5
+  quality_verifier:
+    model: "gpt-4.1-mini"
+    base_url: "https://api.openai.com/v1"
+    api_key: "env:OPENAI_API_KEY"
+    max_retries: 5
+  judge:
+    model: "gpt-4.1-mini"
+    base_url: "https://api.openai.com/v1"
+    api_key: "env:OPENAI_API_KEY"
+    max_retries: 5
+  strong_solver:
+    model: "gpt-4.1"            # bigger model -> opens the gap
+    base_url: "https://api.openai.com/v1"
+    api_key: "env:OPENAI_API_KEY"
+    max_retries: 5
+  weak_solver:
+    model: "gpt-4.1-nano"
+    base_url: "https://api.openai.com/v1"
+    api_key: "env:OPENAI_API_KEY"
+    max_retries: 5
