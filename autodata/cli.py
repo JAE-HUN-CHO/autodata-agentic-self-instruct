@@ -14,6 +14,7 @@ from __future__ import annotations
 import argparse
 import json
 import os
+import time
 from statistics import mean
 
 import yaml
@@ -59,6 +60,7 @@ def build_pipeline(cfg: dict, offline: bool) -> AgenticSelfInstruct:
         judge=judge, quality_verifier=qv, criteria=crit,
         n_attempts=loop.get("n_attempts", 3),
         max_rounds=loop.get("max_rounds", 12),
+        parallel_attempts=loop.get("parallel_attempts", True),
         verbose=True,
     )
 
@@ -100,6 +102,8 @@ def main(argv=None):
     ap.add_argument("--papers", default=None, help="dir or file of source papers (.txt/.md)")
     ap.add_argument("--out", default="output")
     ap.add_argument("--offline", action="store_true", help="use deterministic MockProvider")
+    ap.add_argument("--limit", type=int, default=None,
+                    help="process at most N papers from the corpus (tutorial / smoke runs)")
     args = ap.parse_args(argv)
 
     with open(args.config, encoding="utf-8") as f:
@@ -107,6 +111,8 @@ def main(argv=None):
 
     papers_path = args.papers or cfg.get("papers_path", "examples")
     papers = load_papers(papers_path)
+    if args.limit is not None and args.limit > 0:
+        papers = papers[: args.limit]
     pipeline = build_pipeline(cfg, args.offline)
 
     os.makedirs(args.out, exist_ok=True)
@@ -117,8 +123,11 @@ def main(argv=None):
     dataset_path = os.path.join(args.out, "dataset.jsonl")
     with open(dataset_path, "w", encoding="utf-8") as ds:
         for pid, text in papers:
+            t0 = time.time()
             print(f"[paper] {pid}")
             res = pipeline.run_paper(pid, text)
+            print(f"[paper] {pid} done in {time.time()-t0:.1f}s "
+                  f"(accepted={res.accepted}, rounds={res.n_rounds})")
             results.append(res)
             with open(os.path.join(traj_dir, f"{pid}.json"), "w", encoding="utf-8") as tf:
                 tf.write(res.to_json())

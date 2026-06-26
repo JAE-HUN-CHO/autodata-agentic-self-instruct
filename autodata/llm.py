@@ -47,6 +47,21 @@ class _PendingResponse(Exception):
     consume. Carried separately so it is NOT swept into the transient retry path."""
 
 
+def _parse_retry_after(value: Optional[str]) -> Optional[float]:
+    """Parse the Retry-After response header.
+
+    Per RFC 7231 it can be either an integer number of seconds or an HTTP-date. NIM uses
+    the seconds form; we still tolerate a small float and ignore anything we can't parse
+    (the caller falls back to a default delay).
+    """
+    if not value:
+        return None
+    try:
+        return max(0.0, float(value.strip()))
+    except ValueError:
+        return None
+
+
 def resolve_api_key(value: str) -> str:
     """Resolve an api_key config value.
 
@@ -168,6 +183,18 @@ class OpenAICompatibleProvider:
                         f"this model is running in async mode, which this synchronous client "
                         f"does not poll"
                     )
+                if resp.status_code == 429:
+                    # Rate-limited. NIM (and most OpenAI-compatible gateways) send a
+                    # Retry-After header — honor it instead of the geometric backoff, which is
+                    # tuned for transient 5xx and is far too short to clear a rate-limit window.
+                    retry_after = _parse_retry_after(resp.headers.get("Retry-After"))
+                    last_err = RuntimeError(f"429 Too Many Requests ({resp.text[:120]})")
+                    attempts_left -= 1
+                    if attempts_left <= 0:
+                        break
+                    # cap so a hostile / misconfigured server can't pin us indefinitely
+                    time.sleep(min(retry_after if retry_after is not None else 30, 60))
+                    continue
                 resp.raise_for_status()
                 data = resp.json()
                 return data["choices"][0]["message"]["content"]

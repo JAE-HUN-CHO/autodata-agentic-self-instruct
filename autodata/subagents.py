@@ -13,6 +13,44 @@ from . import prompts
 from .rubric_eval import _extract_json
 
 
+def _parse_rubric(raw_rubric) -> list[RubricCriterion]:
+    """Defensively parse a model-generated rubric list.
+
+    Real LLM outputs occasionally drop a key, return a non-numeric weight, or wrap the rubric
+    in a dict instead of a list. We skip malformed entries (with a printed warning so the
+    behaviour is visible in trajectories) rather than crashing the whole pipeline mid-round.
+    Downstream the QV may still reject the QA if the rubric ends up too sparse to be useful.
+    """
+    if not isinstance(raw_rubric, list):
+        # Some models nest the rubric under a wrapper key; try one level of unwrap.
+        if isinstance(raw_rubric, dict):
+            for v in raw_rubric.values():
+                if isinstance(v, list):
+                    raw_rubric = v
+                    break
+            else:
+                return []
+        else:
+            return []
+
+    out: list[RubricCriterion] = []
+    for c in raw_rubric:
+        if not isinstance(c, dict):
+            continue
+        # Tolerate a couple of common key aliases the models drift into.
+        crit_text = c.get("criterion") or c.get("name") or c.get("description")
+        weight = c.get("weight", c.get("points"))
+        if not crit_text or weight is None:
+            continue
+        try:
+            weight_i = int(weight)
+        except (TypeError, ValueError):
+            continue
+        category = str(c.get("category", "positive" if weight_i >= 0 else "negative"))
+        out.append(RubricCriterion(criterion=str(crit_text), weight=weight_i, category=category))
+    return out
+
+
 class Challenger:
     def __init__(self, provider: LLMProvider, temperature: float = 0.9):
         self.provider = provider
@@ -26,14 +64,7 @@ class Challenger:
             json_mode=True,
         )
         data = _extract_json(raw)
-        rubric = [
-            RubricCriterion(
-                criterion=str(c["criterion"]),
-                weight=int(c["weight"]),
-                category=str(c.get("category", "positive")),
-            )
-            for c in data.get("rubric", [])
-        ]
+        rubric = _parse_rubric(data.get("rubric"))
         qa = QAItem(
             context=str(data.get("context", "")),
             question=str(data.get("question", "")),

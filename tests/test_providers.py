@@ -144,6 +144,44 @@ def test_adaptation_is_sticky_across_calls():
     assert "temperature" not in fake.payloads[-1]
 
 
+# --- NIM 429: rate-limited; honor Retry-After and recover ------------------
+def test_429_retries_and_honors_retry_after(monkeypatch=None):
+    import autodata.llm as llm_mod
+    fake = _FakeRequests([
+        _FakeResp(429, body="rate limited", headers={"Retry-After": "0"}),
+        _FakeResp(200, content="recovered"),
+    ])
+    slept = []
+    original_sleep = llm_mod.time.sleep
+    llm_mod.time.sleep = lambda s: slept.append(s)  # capture without actually waiting
+    try:
+        with _with_fake_requests(fake):
+            out = _provider().complete("s", "u")
+    finally:
+        llm_mod.time.sleep = original_sleep
+    assert out == "recovered"
+    assert slept == [0.0]                # honored the Retry-After: 0
+    assert len(fake.payloads) == 2       # retried after the rate limit
+
+
+def test_429_falls_back_to_default_when_no_retry_after():
+    import autodata.llm as llm_mod
+    fake = _FakeRequests([
+        _FakeResp(429, body="rate limited"),
+        _FakeResp(200, content="recovered"),
+    ])
+    slept = []
+    original_sleep = llm_mod.time.sleep
+    llm_mod.time.sleep = lambda s: slept.append(s)
+    try:
+        with _with_fake_requests(fake):
+            out = _provider().complete("s", "u")
+    finally:
+        llm_mod.time.sleep = original_sleep
+    assert out == "recovered"
+    assert slept == [30]                 # default rate-limit wait when header absent
+
+
 # --- NIM async 202: surfaced loudly, not silently retried -------------------
 def test_async_202_raises_without_retrying():
     fake = _FakeRequests([_FakeResp(202, headers={"NVCF-REQID": "req-123"})])
