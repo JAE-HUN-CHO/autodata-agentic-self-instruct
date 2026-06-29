@@ -33,6 +33,7 @@ class HardnessCriteria:
 
 @dataclass
 class HardnessVerdict:
+    """Outcome of the hardness gate for one group: status, kept negatives, and diagnostics."""
     status: str                 # ACCEPTED / TOO_EASY / NO_NEGATIVES
     kept: list[Candidate]       # negatives to emit (hard first, then optional easy filler)
     n_hard: int

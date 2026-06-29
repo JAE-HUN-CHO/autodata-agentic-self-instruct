@@ -37,14 +37,17 @@ _BODY_FIELDS = (
 
 
 def _norm(s: Any) -> str:
+    """Whitespace-stripped string."""
     return re.sub(r"\s+", "", str(s or ""))
 
 
 def _truncate(text: str) -> str:
+    """Apply the optional serving-parity char cap (no-op when RERANKER_MAX_DOC_CHARS is None)."""
     return text[:RERANKER_MAX_DOC_CHARS] if RERANKER_MAX_DOC_CHARS else text
 
 
 def _coalesce_body(row: dict[str, Any]) -> str:
+    """First non-empty body field in the live ``_candidate_text`` order."""
     for f in _BODY_FIELDS:
         v = str(row.get(f) or "").strip()
         if v:
@@ -93,6 +96,7 @@ def candidate_text(row: dict[str, Any]) -> str:
 
 
 def article_text(a: Article) -> str:
+    """Render an :class:`Article` exactly as the reranker sees it (law-prefixed)."""
     return candidate_text({
         "law_name": a.law_name, "clause_num": a.clause_num,
         "clause_title": a.clause_title, "clause_content": a.clause_content,
@@ -100,6 +104,7 @@ def article_text(a: Article) -> str:
 
 
 def authority_text(a: Authority) -> str:
+    """Render an :class:`Authority` (판례/해석례 …) with its law-type prefix."""
     return candidate_text({
         "law": a.law, "num": a.case_number, "title": a.title, "answer": a.body,
     })

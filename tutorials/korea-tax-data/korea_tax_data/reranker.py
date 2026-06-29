@@ -37,14 +37,18 @@ class MockReranker:
     """
 
     def __init__(self, law_aware: bool = False):
+        """``law_aware=False`` (default) ignores the law-name prefix, reproducing problem B."""
         self.law_aware = law_aware
 
     @staticmethod
     def _strip_law_prefix(doc: str) -> str:
-        # Drop a leading "법령명 제N조" header so the law-blind scorer can't use it.
-        return re.sub(r"^[가-힣A-Za-z]+\s*제\s*\d+\s*조(?:의\s*\d+)?", "", doc, count=1)
+        # Drop a leading "법령명 제N조" header so the law-blind scorer can't use it. The law name
+        # may contain spaces/parens ("상속세 및 증여세법", "국세기본법 시행령"), so allow them (non-greedy
+        # up to the 제N조 token).
+        return re.sub(r"^[가-힣A-Za-z0-9·ㆍ()\- ]+?\s*제\s*\d+\s*조(?:의\s*\d+)?", "", doc, count=1)
 
     def score(self, query: str, docs: list[str]) -> list[float]:
+        """Soft lexical overlap of query tokens against each doc, in roughly [0, 1+]."""
         q = set(_tokens(query))
         if not q:
             return [0.0] * len(docs)
@@ -70,13 +74,21 @@ class CrossEncoderReranker:
     """
 
     def __init__(self, model_path: str = "BAAI/bge-reranker-v2-m3", max_length: int = 2048):
+        """Load a CrossEncoder (HF id or local fine-tuned checkpoint). Imported lazily."""
         from sentence_transformers import CrossEncoder  # noqa: PLC0415
         self._ce = CrossEncoder(model_path, max_length=max_length)
 
     def score(self, query: str, docs: list[str]) -> list[float]:
+        """Score each ``(query, doc)`` pair; higher = more relevant. Empty docs -> ``[]``."""
         if not docs:
             return []
         import math  # noqa: PLC0415
         raw = self._ce.predict([(query, d) for d in docs])
         # NaN guard (mirrors eval.py): map NaN to -inf so it never beats a real score.
-        return [(-math.inf if isinstance(s, float) and math.isnan(s) else float(s)) for s in raw]
+        # predict() returns a numpy array, so normalize via float() BEFORE isnan — a bare
+        # isinstance(s, float) check would let a np.float32('nan') slip through.
+        out: list[float] = []
+        for s in raw:
+            v = float(s)
+            out.append(-math.inf if math.isnan(v) else v)
+        return out

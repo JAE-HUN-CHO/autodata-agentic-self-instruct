@@ -32,6 +32,7 @@ _STATUTE = re.compile(r"^(?P<law>.+?)\s*제\s*(?P<num>\d+)\s*조(?:의\s*(?P<sub
 
 
 def _norm(s: Any) -> str:
+    """Whitespace-stripped string key for law-name comparison."""
     return re.sub(r"\s+", "", str(s or ""))
 
 
@@ -45,20 +46,42 @@ def parse_statute_ref(ref: str) -> tuple[str, str] | None:
 
 
 class CorpusProvider(Protocol):
-    def issues(self, limit: int | None = None) -> list[Issue]: ...
-    def positives(self, issue: Issue) -> list[Article]: ...
-    def secondaries(self, issue: Issue) -> list[Article]: ...
+    """Data layer the builder reads from (offline JSONL or real Neo4j)."""
+
+    def issues(self, limit: int | None = None) -> list[Issue]:
+        """The tax issues (쟁점) to turn into training rows."""
+        ...
+
+    def positives(self, issue: Issue) -> list[Article]:
+        """Labelled primary-statute articles for an issue (the gold positives)."""
+        ...
+
+    def secondaries(self, issue: Issue) -> list[Article]:
+        """Secondary-statute articles for an issue (bonus negatives)."""
+        ...
+
     def siblings(self, article: Article, window: int, k: int,
-                 exclude: set[tuple[str, str]]) -> list[Article]: ...
-    def retrieve_pool(self, query: str, k: int) -> list[Article]: ...
-    def authorities(self, query: str, k: int) -> list[Authority]: ...
+                 exclude: set[tuple[str, str]]) -> list[Article]:
+        """Same-law articles within ``window`` of ``article`` (the Fix #1 raw material)."""
+        ...
+
+    def retrieve_pool(self, query: str, k: int) -> list[Article]:
+        """Scattered retrieve-pool articles for ``query`` (auxiliary negatives)."""
+        ...
+
+    def authorities(self, query: str, k: int) -> list[Authority]:
+        """Authority docs (판례/해석례 …) for ``query`` (small negatives)."""
+        ...
 
 
 # ---------------------------------------------------------------------------
 # Offline provider — bundled synthetic corpus.
 # ---------------------------------------------------------------------------
 class JsonlCorpusProvider:
+    """Deterministic offline corpus backed by a bundled JSON file (no network)."""
+
     def __init__(self, corpus_path: str | Path):
+        """Load articles/authorities/issues and build the (law, num) and per-law indexes."""
         data = json.loads(Path(corpus_path).read_text(encoding="utf-8"))
         self._articles = [Article(a["law_name"], str(a["clause_num"]),
                                   a.get("clause_title", ""), a.get("clause_content", ""))
@@ -84,9 +107,11 @@ class JsonlCorpusProvider:
             self._by_law[law].sort(key=lambda x: (x.article_int if x.article_int is not None else 1e9))
 
     def issues(self, limit: int | None = None) -> list[Issue]:
+        """All issues (optionally capped at ``limit`` for smoke runs)."""
         return self._issues[:limit] if limit else list(self._issues)
 
     def _resolve_refs(self, refs: list[str]) -> list[Article]:
+        """Resolve statute refs like ``"소득세법 제70조"`` to indexed :class:`Article` rows."""
         out: list[Article] = []
         for ref in refs:
             parsed = parse_statute_ref(ref)
@@ -98,9 +123,11 @@ class JsonlCorpusProvider:
         return out
 
     def positives(self, issue: Issue) -> list[Article]:
+        """Resolve the issue's primary statutes to gold positive articles."""
         return self._resolve_refs(issue.primary_statutes)
 
     def secondaries(self, issue: Issue) -> list[Article]:
+        """Resolve the issue's secondary statutes (used as bonus negatives)."""
         return self._resolve_refs(issue.secondary_statutes)
 
     def siblings(self, article: Article, window: int, k: int,
@@ -145,10 +172,12 @@ class JsonlCorpusProvider:
 
 
 def _tokens(text: str) -> list[str]:
+    """Hangul/alnum tokens of ``text`` (for the offline lexical retrieve stand-in)."""
     return re.findall(r"[가-힣A-Za-z0-9]+", str(text or ""))
 
 
 def _overlap(q: set[str], doc_tokens: list[str]) -> int:
+    """Count query tokens that appear in (or substring-match) the doc tokens."""
     d = set(doc_tokens)
     return sum(1 for t in q if any(t in w or w in t for w in d))
 
@@ -169,6 +198,7 @@ class Neo4jCorpusProvider:
                         "BasicRule", "ExecutionStandardSection")
 
     def __init__(self, uri: str | None = None, user: str | None = None, password: str | None = None):
+        """Open a Neo4j driver (args fall back to NEO4J_* env vars). ``neo4j`` imported lazily."""
         from neo4j import GraphDatabase  # noqa: PLC0415
         self._drv = GraphDatabase.driver(
             uri or os.environ.get("NEO4J_URI", "bolt://127.0.0.1:7693"),
@@ -177,9 +207,11 @@ class Neo4jCorpusProvider:
         )
 
     def close(self) -> None:
+        """Close the Neo4j driver."""
         self._drv.close()
 
     def issues(self, limit: int | None = None) -> list[Issue]:
+        """Fetch TaxIssue nodes that carry primary statutes (optionally capped at ``limit``)."""
         cy = """
         MATCH (t:TaxIssue)
         WHERE t.primary_statutes IS NOT NULL AND size(t.primary_statutes) > 0
@@ -217,9 +249,11 @@ class Neo4jCorpusProvider:
         return out
 
     def positives(self, issue: Issue) -> list[Article]:
+        """Resolve the issue's primary statutes to gold positive articles (exact pair match)."""
         return self._clauses_for_refs(issue.primary_statutes)
 
     def secondaries(self, issue: Issue) -> list[Article]:
+        """Resolve the issue's secondary statutes (bonus negatives)."""
         return self._clauses_for_refs(issue.secondary_statutes)
 
     def siblings(self, article: Article, window: int, k: int,
@@ -254,6 +288,7 @@ class Neo4jCorpusProvider:
 
     def _siblings_no_apoc(self, article: Article, window: int, k: int,
                           exclude: set[tuple[str, str]]) -> list[Article]:
+        """Sibling lookup fallback when APOC is unavailable: scan same-law clauses in Python."""
         cy = """
         MATCH (c) WHERE any(l IN labels(c) WHERE l IN $labels)
           AND replace(c.law_name,' ','') = $law AND c.clause_content IS NOT NULL
@@ -286,4 +321,14 @@ class Neo4jCorpusProvider:
         )
 
     def authorities(self, query: str, k: int) -> list[Authority]:
-        return []  # optional: add a full-text / vector query over authority nodes
+        """Authority (판례/해석례 …) negatives — opt-in stub, like :meth:`retrieve_pool`.
+
+        Raising (rather than returning ``[]``) makes the offline/real divergence explicit:
+        ``NegativeChallenger`` guards this lane with ``authority_k > 0`` + ``try/except
+        NotImplementedError``, so the real path runs sibling-only until you wire a full-text /
+        vector query over authority nodes here.
+        """
+        raise NotImplementedError(
+            "Wire an authority lookup (full-text/vector over 판례/해석례 nodes) to enable "
+            "authority negatives on the real path; sibling negatives work without it."
+        )

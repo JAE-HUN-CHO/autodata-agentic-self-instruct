@@ -49,8 +49,12 @@ class Article:
 
     @property
     def article_int(self) -> int | None:
-        """Leading integer of the article number (제133조의2 -> 133). Used for sibling windows."""
-        m = re.match(r"\d+", str(self.clause_num))
+        """First integer in the article number (133의2 -> 133, 제70조 -> 70). Sibling windows.
+
+        Uses ``search`` (not ``match``) so a Korean-prefixed form like "제70조" still yields 70;
+        otherwise ``corpus.siblings`` would see ``None`` and silently skip sibling negatives.
+        """
+        m = re.search(r"\d+", str(self.clause_num))
         return int(m.group(0)) if m else None
 
 
@@ -65,7 +69,7 @@ class Authority:
 
 @dataclass
 class Issue:
-    """A tax issue (쟁점) with its user-side query expressions and labelled positives."""
+    """A tax issue (쟁점): user-side query expressions plus labelled primary/secondary statutes."""
     issue_id: str
     name: str = ""
     user_expressions: list[str] = field(default_factory=list)
@@ -123,6 +127,7 @@ class IssueResult:
     leaked: bool = False
 
     def to_dict(self) -> dict[str, Any]:
+        """Serializable view: examples + per-round log for trajectory inspection."""
         return {
             "issue_id": self.issue_id,
             "leaked": self.leaked,
@@ -132,4 +137,5 @@ class IssueResult:
         }
 
     def to_json(self, indent: int = 2) -> str:
+        """Pretty JSON of :meth:`to_dict` (UTF-8, non-ASCII preserved)."""
         return json.dumps(self.to_dict(), ensure_ascii=False, indent=indent)

@@ -24,6 +24,7 @@ _ALLOWLIST = "조문·별표·부칙·판례·심판례·해석례·기본통칙
 
 
 def _extract_json(text: str) -> dict:
+    """Best-effort parse of the first JSON object in a model response ({} on failure)."""
     text = (text or "").strip()
     if text.startswith("```"):
         text = text.strip("`")
@@ -42,10 +43,12 @@ class LLMRoles:
     """Paraphrase / false-negative / positive-discovery helpers over an optional provider."""
 
     def __init__(self, provider=None, enabled: bool = True):
+        """Wrap an optional provider; with no provider every role becomes a deterministic no-op."""
         self.provider = provider
         self.enabled = enabled and provider is not None
 
     def _json(self, prompt: str, default: Any) -> Any:
+        """Call the provider in JSON mode, returning ``default`` if disabled or on any error."""
         if not self.enabled:
             return default
         try:
@@ -56,8 +59,8 @@ class LLMRoles:
         data = _extract_json(raw)
         return data if data else default
 
-    # role 1 — paraphrase the query into n meaning-preserving single questions
     def paraphrase(self, query: str, n: int = 2) -> list[str]:
+        """Role 1 — return up to ``n`` meaning-preserving single-question rewrites of ``query``."""
         if not self.enabled or n <= 0:
             return []
         p = (f"다음 세무 질문을 의미가 같은 다른 표현 {n}개로 바꿔라(각각 단일 질문). "
@@ -65,9 +68,9 @@ class LLMRoles:
         out = self._json(p, {"queries": []})
         return [str(q).strip() for q in (out.get("queries") or []) if str(q).strip()][:n]
 
-    # role 3 — find unlabelled positives among candidate docs (returns selected indices)
     def find_positives(self, query: str, pos_titles: list[str],
                        candidates: list[dict[str, Any]]) -> list[int]:
+        """Role 3 — indices of candidate docs that are actually answers (unlabelled positives)."""
         if not self.enabled or not candidates:
             return []
         lst = "\n".join(f'{c["i"]}: {c["text"][:90]}' for c in candidates)
@@ -79,8 +82,8 @@ class LLMRoles:
         idxs = {c["i"] for c in candidates}
         return [i for i in (out.get("positives") or []) if isinstance(i, int) and i in idxs]
 
-    # role 2 — flag negatives that are actually answers (false negatives) -> drop / promote
     def false_negatives(self, query: str, negatives: list[str], k: int = 8) -> list[int]:
+        """Role 2 — indices (within the first ``k``) of negatives that are actually answers."""
         if not self.enabled or not negatives:
             return []
         sub = negatives[:k]

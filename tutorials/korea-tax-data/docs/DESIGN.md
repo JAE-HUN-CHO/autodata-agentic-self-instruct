@@ -15,7 +15,7 @@ reranker **cannot separate the positive from the negative**. A negative the rera
 scores far below the positive teaches nothing; a negative it ranks at/above the positive is
 precisely the mistake fine-tuning must correct. So:
 
-```
+```text
 autodata:   accept if  strong_avg − weak_avg ≥ gap_min
 here:       accept if  count{ neg : score(neg) ≥ min(score(pos)) − margin } ≥ min_hard_neg
 ```
@@ -45,7 +45,7 @@ its paraphrase / false-negative / positive-discovery roles.
 
 ## The per-query loop (`AgenticRerankerData.run_query`)
 
-```
+```text
 for round = 1..max_rounds:
     cands = NegativeChallenger.generate(positives, query, round, exclude)   # sibling-first
     cands = LLM.find_positives(...)   → promote unlabelled positives out of negatives
@@ -80,4 +80,3 @@ query** the v2 builder never had. Same interface, two backends, identical loop o
 | `hardness.min_hard_neg`      | 3       | accept threshold |
 | `loop.max_rounds`            | 4       | escalation budget |
 | `doc_text.RERANKER_MAX_DOC_CHARS` | None | None = full text; 3000 = match live serving truncation exactly |
-```

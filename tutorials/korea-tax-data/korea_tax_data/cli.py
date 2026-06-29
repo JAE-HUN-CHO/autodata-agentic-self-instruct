@@ -35,6 +35,7 @@ from .reranker import MockReranker
 
 
 def _resolve(path: str) -> Path:
+    """Resolve a relative path against the tutorial root (absolute paths pass through)."""
     p = Path(path)
     return p if p.is_absolute() else (ROOT / p)
 
@@ -56,10 +57,17 @@ def _expand_env(obj):
 
 
 def _load_config(path: str) -> dict:
-    return _expand_env(yaml.safe_load(Path(path).read_text(encoding="utf-8")) or {})
+    # Resolve the config path CWD-first, then fall back to the tutorial root, so
+    # `--config config/offline.yaml` works whether or not the CWD is the tutorial dir
+    # (consistent with how _resolve() treats the relative paths inside the config).
+    p = Path(path)
+    if not p.exists():
+        p = _resolve(path)
+    return _expand_env(yaml.safe_load(p.read_text(encoding="utf-8")) or {})
 
 
 def _build_corpus(cfg: dict):
+    """Construct the corpus provider (jsonl offline or neo4j real) from config."""
     c = cfg.get("corpus", {})
     ctype = c.get("type", "jsonl")
     if ctype == "jsonl":
@@ -71,6 +79,7 @@ def _build_corpus(cfg: dict):
 
 
 def _build_reranker(cfg: dict, model_override: str | None = None, law_aware: bool | None = None):
+    """Construct the reranker scorer (mock or CrossEncoder) from config / overrides."""
     r = cfg.get("reranker", {})
     model = model_override or r.get("model", "mock")
     la = r.get("law_aware", False) if law_aware is None else law_aware
@@ -81,6 +90,7 @@ def _build_reranker(cfg: dict, model_override: str | None = None, law_aware: boo
 
 
 def _build_llm(cfg: dict) -> LLMRoles:
+    """Construct LLM roles; disabled config yields deterministic no-op roles."""
     lc = cfg.get("llm", {})
     if not lc.get("enabled"):
         return LLMRoles(provider=None)
@@ -90,6 +100,7 @@ def _build_llm(cfg: dict) -> LLMRoles:
 
 
 def _engine(cfg: dict, corpus, reranker, llm) -> AgenticRerankerData:
+    """Assemble the agentic engine (challenger + hardness criteria + loop) from config."""
     challenger = NegativeChallenger(corpus, NegConfig(**cfg.get("negatives", {})))
     criteria = HardnessCriteria(**cfg.get("hardness", {}))
     loop = LoopConfig(**cfg.get("loop", {}))
@@ -98,6 +109,7 @@ def _engine(cfg: dict, corpus, reranker, llm) -> AgenticRerankerData:
 
 
 def cmd_build(args) -> int:
+    """`build` subcommand: run the agentic loop over the corpus and write the trainset."""
     cfg = _load_config(args.config)
     corpus = _build_corpus(cfg)
     reranker = _build_reranker(cfg)
@@ -115,6 +127,7 @@ def cmd_build(args) -> int:
 
 
 def cmd_split(args) -> int:
+    """`split` subcommand: issue-level train/eval/test split of the trainset."""
     from .split import write_splits  # noqa: PLC0415
     cfg = _load_config(args.config)
     out_dir = _resolve(cfg.get("output", "output"))
@@ -126,6 +139,7 @@ def cmd_split(args) -> int:
 
 
 def cmd_eval(args) -> int:
+    """`eval` subcommand: offline A/B (recall/MRR/nDCG) over a split."""
     from .eval import eval_split  # noqa: PLC0415
     cfg = _load_config(args.config)
     out_dir = _resolve(cfg.get("output", "output"))
@@ -137,6 +151,7 @@ def cmd_eval(args) -> int:
 
 
 def main(argv=None) -> int:
+    """Parse args and dispatch to the build / split / eval subcommand."""
     ap = argparse.ArgumentParser(description="Korea-tax reranker training-data generator")
     sub = ap.add_subparsers(dest="cmd", required=True)
 

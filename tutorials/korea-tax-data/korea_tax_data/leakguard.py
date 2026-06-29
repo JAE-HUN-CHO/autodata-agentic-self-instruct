@@ -23,11 +23,23 @@ from .schemas import Issue
 
 
 def _norm(s) -> str:
+    """Whitespace-stripped law-name key."""
     return re.sub(r"\s+", "", str(s or ""))
 
 
 def _digits(s) -> tuple[str, ...]:
+    """All digit runs in a clause number (``47의2`` -> ``("47", "2")``)."""
     return tuple(re.findall(r"\d+", str(s or "")))
+
+
+def keyword_bag(keywords: list, n: int = 6) -> str:
+    """Render a search-keyword bag the SAME way the builder forms its keyword query shape.
+
+    Shared by ``builder.query_shapes`` and :func:`load_heldout` so the held-out exact-match
+    filter sees the identical string the builder would emit — otherwise a held-out issue's
+    keyword-bag shape could slip past the filter.
+    """
+    return " ".join(str(k) for k in (keywords or [])[:n]).strip()
 
 
 @dataclass
@@ -59,9 +71,13 @@ def load_heldout(gold_path: str | Path, issues: list[Issue]) -> HeldOut:
             held.query_strings |= exprs
             held.query_strings |= {str(v).strip() for v in it.aliases}
             held.query_strings |= {str(v).strip() for v in it.search_keywords}
+            bag = keyword_bag(it.search_keywords)   # same shape the builder emits
+            if bag:
+                held.query_strings.add(bag)
     return held
 
 
 def pos_overlaps_heldout(positives, arts_keys: set[tuple[str, tuple[str, ...]]]) -> bool:
+    """True if any positive's ``(law, digits)`` matches a held-out gold article."""
     keys = {(_norm(p.law_name), _digits(p.clause_num)) for p in positives}
     return bool(keys & arts_keys)

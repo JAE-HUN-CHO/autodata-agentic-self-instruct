@@ -18,7 +18,7 @@ from pathlib import Path
 from typing import Any
 
 from .corpus import CorpusProvider
-from .leakguard import HeldOut, pos_overlaps_heldout
+from .leakguard import HeldOut, keyword_bag, pos_overlaps_heldout
 from .llm_roles import LLMRoles
 from .negatives import article_identity
 from .orchestrator import AgenticRerankerData
@@ -27,6 +27,7 @@ from .schemas import Issue, IssueResult, LEAKED, RoundResult
 
 @dataclass
 class BuildConfig:
+    """Build knobs: how many query shapes per issue and how many LLM paraphrases to add."""
     max_query_shapes: int = 4
     paraphrase_n: int = 0      # LLM paraphrases per issue (0 = off; offline default)
 
@@ -42,7 +43,7 @@ def query_shapes(issue: Issue, cfg: BuildConfig, llm: LLMRoles,
         if q and q.strip():
             shapes.append(q.strip())
     if issue.search_keywords:
-        shapes.append(" ".join(str(k) for k in issue.search_keywords[:6]).strip())
+        shapes.append(keyword_bag(issue.search_keywords))   # same render the leak guard indexes
     if cfg.paraphrase_n and shapes:
         shapes += llm.paraphrase(shapes[0], cfg.paraphrase_n)
 
@@ -57,8 +58,11 @@ def query_shapes(issue: Issue, cfg: BuildConfig, llm: LLMRoles,
 
 
 class Builder:
+    """Drives the agentic loop over a corpus and writes the FlagEmbedding trainset + trajectories."""
+
     def __init__(self, corpus: CorpusProvider, engine: AgenticRerankerData,
                  heldout: HeldOut, llm: LLMRoles, cfg: BuildConfig | None = None):
+        """Bind the corpus, agentic engine, held-out guard, LLM roles, and build config."""
         self.corpus = corpus
         self.engine = engine
         self.heldout = heldout
@@ -66,6 +70,7 @@ class Builder:
         self.cfg = cfg or BuildConfig()
 
     def build_issue(self, issue: Issue) -> IssueResult:
+        """Leak-guard one issue, then run every query shape through the agentic loop."""
         res = IssueResult(issue_id=issue.issue_id)
         if issue.issue_id in self.heldout.issue_ids:
             res.leaked = True
@@ -90,6 +95,7 @@ class Builder:
 
     def run(self, out_path: str | Path, traj_dir: str | Path | None = None,
             limit: int | None = None) -> dict[str, Any]:
+        """Build all issues, stream rows to ``out_path``, write trajectories, return stats."""
         out_path = Path(out_path)
         out_path.parent.mkdir(parents=True, exist_ok=True)
         traj = Path(traj_dir) if traj_dir else None

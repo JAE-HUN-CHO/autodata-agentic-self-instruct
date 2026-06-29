@@ -30,8 +30,11 @@ llm:
 negatives:
   sibling_window: 6
   sibling_k: 8
-  pool_k: 4
-  authority_k: 2
+  # pool_k / authority_k default to 0 here because Neo4jCorpusProvider.retrieve_pool and
+  # .authorities are opt-in stubs (see corpus.py). Sibling negatives — the Fix #1 emphasis —
+  # work out of the box. Raise these AFTER you wire those two methods to your live graph.
+  pool_k: 0
+  authority_k: 0
   window_step: 8
   max_window: 60
 

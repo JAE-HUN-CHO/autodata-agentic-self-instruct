@@ -50,20 +50,28 @@ def test_pool_disabled_and_unavailable_does_not_crash():
     c = _corpus()
 
     class NoPoolCorpus:
+        def __init__(self):
+            self.pool_calls = 0
+
         def __getattr__(self, name):
             return getattr(c, name)
 
         def retrieve_pool(self, *a, **k):
+            self.pool_calls += 1
             raise NotImplementedError("no live retriever")
 
     issue = next(i for i in c.issues() if i.issue_id == "A-001")
-    ch = NegativeChallenger(NoPoolCorpus(), NegConfig(pool_k=0, sibling_k=5))
+    no_pool = NoPoolCorpus()
+    ch = NegativeChallenger(no_pool, NegConfig(pool_k=0, sibling_k=5))
     cands = ch.generate(c.positives(issue), "장기보유특별공제", 1, set())
     assert cands                                              # siblings/authority still produced
     assert all(x.source != NEG_POOL for x in cands)          # no pool negs
-    # and even with pool_k>0, a raising retriever degrades gracefully (no crash)
-    ch2 = NegativeChallenger(NoPoolCorpus(), NegConfig(pool_k=3, sibling_k=5))
+    assert no_pool.pool_calls == 0                            # pool_k=0 never calls retrieve_pool
+    # and even with pool_k>0, a raising retriever is called once and degrades gracefully
+    raising = NoPoolCorpus()
+    ch2 = NegativeChallenger(raising, NegConfig(pool_k=3, sibling_k=5))
     assert ch2.generate(c.positives(issue), "장기보유특별공제", 1, set())
+    assert raising.pool_calls == 1
 
 
 def test_positives_never_appear_as_negatives():

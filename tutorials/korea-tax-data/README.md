@@ -61,12 +61,17 @@ guard.
 ### Tests
 
 ```bash
-pip install pytest && python -m pytest -q     # 18 tests
+pip install pytest && python -m pytest -q     # 19 tests
 ```
 
 ## Real path (Neo4j 7693 + bge-reranker-v2-m3 + OpenAI)
 
-Swap the config; the commands are identical.
+Swap the config; the commands are identical. The LLM-role provider is reused from this repo's
+`autodata.llm`, which speaks the OpenAI-compatible `/v1/chat/completions` interface — so the same
+config runs against **OpenAI, a self-hosted vLLM endpoint, or NVIDIA NIM** by changing only
+`llm.provider.base_url`/`model` (see the host repo's
+[`paper/`](../../paper/) and NIM tutorial for the provider lineup). The hardness-judge reranker
+is independent and stays `bge-reranker-v2-m3` (or a fine-tuned checkpoint).
 
 ```bash
 export NEO4J_URI=bolt://127.0.0.1:7693 NEO4J_USERNAME=neo4j NEO4J_PASSWORD=...
@@ -92,7 +97,7 @@ work **without** the live graph.
 
 ## Layout
 
-```
+```text
 korea_tax_data/
   schemas.py        Article / Issue / Candidate / RerankerExample (+ accept-status constants)
   doc_text.py       Fix #2 — law-name-prefixed candidate_text (train == inference)
@@ -109,7 +114,7 @@ config/             offline.yaml + neo4j_crossencoder.yaml
 data/               sample_corpus.json + sample_heldout.json (synthetic)
 scripts/train.sh    FlagEmbedding fine-tune (isolated env)
 docs/               DESIGN.md (mapping) + ANALYSIS.md (post-mortem confirmation)
-tests/              18 tests (offline, deterministic)
+tests/              19 tests (offline, deterministic)
 ```
 
 ## Honest limits
@@ -123,4 +128,3 @@ tests/              18 tests (offline, deterministic)
 - This generates and validates **data**; it does not claim a green A/B. The post-mortem
   ([`docs/ANALYSIS.md`](docs/ANALYSIS.md)) is explicit that the prior FT regressed, so treat the
   real-CE A/B as the gate before shipping any checkpoint.
-```

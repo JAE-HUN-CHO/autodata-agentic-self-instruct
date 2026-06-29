@@ -24,12 +24,14 @@ from .reranker import MockReranker, RerankerScorer
 
 
 def _ndcg(ranked_is_pos: list[bool], n_pos: int) -> float:
+    """nDCG@10 for a ranking given which positions are positives and the positive count."""
     dcg = sum(1 / math.log2(i + 2) for i, ok in enumerate(ranked_is_pos[:10]) if ok)
     idcg = sum(1 / math.log2(i + 2) for i in range(min(n_pos, 10)))
     return dcg / idcg if idcg else 0.0
 
 
 def build_scorer(model: str, law_aware: bool = False) -> RerankerScorer:
+    """Return a MockReranker for ``"mock"`` else a CrossEncoderReranker for the model id/path."""
     if model.lower() in ("mock", "mock-reranker"):
         return MockReranker(law_aware=law_aware)
     from .reranker import CrossEncoderReranker  # noqa: PLC0415
@@ -38,6 +40,7 @@ def build_scorer(model: str, law_aware: bool = False) -> RerankerScorer:
 
 def eval_rows(rows: list[dict[str, Any]], scorer: RerankerScorer,
               k_list=(1, 5, 10)) -> dict[str, Any]:
+    """Score each row's pos+neg, rank, and average recall@k / MRR / nDCG@10 over rows."""
     rec = {k: [] for k in k_list}
     mrr, ndcg = [], []
     used = 0
@@ -71,6 +74,7 @@ def eval_rows(rows: list[dict[str, Any]], scorer: RerankerScorer,
 
 
 def eval_split(split_path: str | Path, model: str, law_aware: bool = False) -> dict[str, Any]:
+    """Load a split JSONL, build the chosen scorer, and return its metrics dict."""
     rows = [json.loads(line) for line in Path(split_path).open(encoding="utf-8")]
     scorer = build_scorer(model, law_aware=law_aware)
     out = {"model": model, "law_aware": law_aware, "split": str(split_path), **eval_rows(rows, scorer)}

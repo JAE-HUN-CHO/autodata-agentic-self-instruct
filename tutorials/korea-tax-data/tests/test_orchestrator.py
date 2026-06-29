@@ -43,7 +43,7 @@ def test_hardness_rejects_easy_negatives():
 def test_run_query_emits_example():
     c, eng = _engine()
     issue = next(i for i in c.issues() if i.issue_id == "A-001")
-    ex, rounds = eng.run_query(issue.user_expressions[0], c.positives(issue), "A-001")
+    ex, _rounds = eng.run_query(issue.user_expressions[0], c.positives(issue), "A-001")
     assert ex is not None
     assert ex.pos and ex.neg
     assert all(p != n for p in ex.pos for n in ex.neg)   # pos and neg disjoint

@@ -28,12 +28,15 @@ from .schemas import (
 
 @dataclass
 class LoopConfig:
+    """Per-query loop knobs: round budget, exhaust behavior, and LLM-teacher candidate count."""
     max_rounds: int = 4
     emit_on_exhaust: bool = True   # keep the last attempt even if never fully "hard" (yield)
     llm_refine_topk: int = 20      # how many top candidates the LLM teacher inspects
 
 
 class AgenticRerankerData:
+    """The per-query accept/refine loop combining challenger, reranker, and hardness gate."""
+
     def __init__(
         self,
         corpus: CorpusProvider,
@@ -44,6 +47,7 @@ class AgenticRerankerData:
         loop: LoopConfig | None = None,
         verbose: bool = False,
     ):
+        """Wire the corpus, reranker, challenger, hardness criteria, LLM roles and loop config."""
         self.corpus = corpus
         self.reranker = reranker
         self.challenger = challenger
@@ -53,6 +57,7 @@ class AgenticRerankerData:
         self.verbose = verbose
 
     def _log(self, msg: str) -> None:
+        """Print a progress line when verbose."""
         if self.verbose:
             print(msg, flush=True)
 
@@ -127,6 +132,7 @@ class AgenticRerankerData:
 
 
 def _count_sources(cands: list[Candidate]) -> dict[str, int]:
+    """Tally kept negatives by source (sibling / pool / authority) for provenance."""
     counts = {NEG_SIBLING: 0, NEG_POOL: 0, NEG_AUTHORITY: 0}
     for c in cands:
         counts[c.source] = counts.get(c.source, 0) + 1

@@ -30,14 +30,17 @@ from .schemas import (
 
 
 def _norm(s) -> str:
+    """Whitespace-stripped law-name key."""
     return re.sub(r"\s+", "", str(s or ""))
 
 
 def _digits(s) -> tuple[str, ...]:
+    """All digit runs in a clause number (``47의2`` -> ``("47", "2")``)."""
     return tuple(re.findall(r"\d+", str(s or "")))
 
 
 def article_identity(a: Article) -> tuple[str, tuple[str, ...]]:
+    """Dedup/leak key for an article: ``(law_name_norm, digit-runs)``."""
     return (_norm(a.law_name), _digits(a.clause_num))
 
 
@@ -53,7 +56,10 @@ class NegConfig:
 
 
 class NegativeChallenger:
+    """Proposes hard negatives for a (query, positives) group, sibling-first and escalating."""
+
     def __init__(self, corpus: CorpusProvider, cfg: NegConfig | None = None):
+        """Bind a corpus and a negative-mix config (defaults are sibling-heavy)."""
         self.corpus = corpus
         self.cfg = cfg or NegConfig()
 
@@ -114,19 +120,26 @@ class NegativeChallenger:
                 if len(out) > before:
                     added += 1
 
-        # 3) authority — smallest.
-        added = 0
-        for auth in self.corpus.authorities(query, k=self.cfg.authority_k * 3):
-            if added >= self.cfg.authority_k:
-                break
-            ident = (_norm(auth.law), _digits(auth.case_number))
-            if ident in seen:
-                continue
-            text = authority_text(auth)
-            if len(text) < 30:
-                continue
-            seen.add(ident)
-            out.append(Candidate(text=text, identity=ident, source=NEG_AUTHORITY))
-            added += 1
+        # 3) authority — smallest. Guarded like the pool lane: skipped when disabled or when
+        #    the provider has no authority lookup wired (Neo4j stub), so authority_k never
+        #    silently diverges by crashing the real path.
+        if self.cfg.authority_k > 0:
+            try:
+                auths = self.corpus.authorities(query, k=self.cfg.authority_k * 3)
+            except NotImplementedError:
+                auths = []
+            added = 0
+            for auth in auths:
+                if added >= self.cfg.authority_k:
+                    break
+                ident = (_norm(auth.law), _digits(auth.case_number))
+                if ident in seen:
+                    continue
+                text = authority_text(auth)
+                if len(text) < 30:
+                    continue
+                seen.add(ident)
+                out.append(Candidate(text=text, identity=ident, source=NEG_AUTHORITY))
+                added += 1
 
         return out
