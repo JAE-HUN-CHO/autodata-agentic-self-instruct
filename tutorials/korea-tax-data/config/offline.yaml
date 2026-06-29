@@ -1,0 +1,41 @@
+# Offline path — no Neo4j, no GPU, no network. Deterministic.
+# Mirrors autodata's `--offline` mock run: synthetic corpus + mock reranker + LLM roles off.
+verbose: true
+output: output
+
+corpus:
+  type: jsonl
+  path: data/sample_corpus.json
+
+heldout: data/sample_heldout.json
+
+reranker:
+  type: mock          # MockReranker (lexical, deterministic)
+  model: mock
+  law_aware: false    # false = law-blind (reproduces problem B); flip to see Fix #2's signal
+
+llm:
+  enabled: false      # offline: paraphrase / teacher roles degrade to conservative no-ops
+
+# Fix #1 — sibling-heavy negative mix (the analysis's prescription).
+negatives:
+  sibling_window: 6   # same-law article-number radius around each positive
+  sibling_k: 6        # siblings per positive (primary negatives)
+  pool_k: 2           # scattered cross-law pool negatives (small auxiliary)
+  authority_k: 1      # 판례/해석례 negatives (smallest)
+  window_step: 6      # window growth per escalation round
+  max_window: 40
+
+# Hardness gate — autodata's accept/reject ported to rerankers.
+hardness:
+  margin: 0.10        # neg is "hard" if score >= min_positive_score - margin
+  min_hard_neg: 3     # accept only with >= this many hard negatives
+  max_neg: 12
+
+loop:
+  max_rounds: 4       # escalate the sibling window up to this many times
+  emit_on_exhaust: true
+
+build:
+  max_query_shapes: 4
+  paraphrase_n: 0     # LLM paraphrases per issue (needs llm.enabled)
