@@ -97,15 +97,22 @@ class NegativeChallenger:
             for sib in self.corpus.siblings(pos, window=window, k=sibling_k, exclude=pos_keys):
                 _add(sib, NEG_SIBLING)
 
-        # 2) pool — auxiliary, capped.
-        added = 0
-        for art in self.corpus.retrieve_pool(query, k=self.cfg.pool_k * 6):
-            if added >= self.cfg.pool_k:
-                break
-            before = len(out)
-            _add(art, NEG_POOL)
-            if len(out) > before:
-                added += 1
+        # 2) pool — auxiliary, capped. Skipped when disabled (pool_k <= 0) or when the provider
+        #    has no retriever wired (Neo4jCorpusProvider.retrieve_pool is an opt-in stub), so the
+        #    sibling/authority-only real path runs without a live retriever instead of crashing.
+        if self.cfg.pool_k > 0:
+            try:
+                pool = self.corpus.retrieve_pool(query, k=self.cfg.pool_k * 6)
+            except NotImplementedError:
+                pool = []
+            added = 0
+            for art in pool:
+                if added >= self.cfg.pool_k:
+                    break
+                before = len(out)
+                _add(art, NEG_POOL)
+                if len(out) > before:
+                    added += 1
 
         # 3) authority — smallest.
         added = 0

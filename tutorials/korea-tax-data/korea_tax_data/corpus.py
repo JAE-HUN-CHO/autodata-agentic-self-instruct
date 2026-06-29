@@ -195,10 +195,14 @@ class Neo4jCorpusProvider:
                           secondary_statutes=list(r["sec"])) for r in s.run(cy)]
 
     def _clauses_for_refs(self, refs: list[str]) -> list[Article]:
-        nums = [p[1] for p in (parse_statute_ref(r) for r in refs) if p]
-        laws = {_norm(p[0]) for p in (parse_statute_ref(r) for r in refs) if p}
-        if not nums:
+        pairs = [p for p in (parse_statute_ref(r) for r in refs) if p]
+        if not pairs:
             return []
+        # Match each (law, num) PAIR exactly. Unwinding only the numbers and filtering by a law
+        # *set* would admit the cross-product (LawA 제2조 for a "LawA 제1조 | LawB 제2조" issue),
+        # injecting wrong gold positives. We narrow the query by num, then keep only real pairs.
+        want = {(_norm(law), num) for law, num in pairs}
+        nums = list({num for _, num in pairs})
         cy = """
         UNWIND $nums AS n
         MATCH (c) WHERE any(l IN labels(c) WHERE l IN $labels) AND c.clause_num = n
@@ -207,8 +211,8 @@ class Neo4jCorpusProvider:
         """
         out: list[Article] = []
         with self._drv.session() as s:
-            for r in s.run(cy, nums=list(dict.fromkeys(nums)), labels=list(self.CLAUSE_LABELS)):
-                if _norm(r["law"]) in laws and r["body"]:
+            for r in s.run(cy, nums=nums, labels=list(self.CLAUSE_LABELS)):
+                if (_norm(r["law"]), str(r["num"])) in want and r["body"]:
                     out.append(Article(r["law"], str(r["num"]), r["title"], r["body"]))
         return out
 

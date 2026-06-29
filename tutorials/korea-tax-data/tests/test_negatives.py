@@ -45,6 +45,27 @@ def test_escalation_widens_window():
     assert sib3 >= sib1                                # wider window -> at least as many siblings
 
 
+def test_pool_disabled_and_unavailable_does_not_crash():
+    # pool_k=0 must skip retrieve_pool entirely, even if the provider's stub would raise.
+    c = _corpus()
+
+    class NoPoolCorpus:
+        def __getattr__(self, name):
+            return getattr(c, name)
+
+        def retrieve_pool(self, *a, **k):
+            raise NotImplementedError("no live retriever")
+
+    issue = next(i for i in c.issues() if i.issue_id == "A-001")
+    ch = NegativeChallenger(NoPoolCorpus(), NegConfig(pool_k=0, sibling_k=5))
+    cands = ch.generate(c.positives(issue), "장기보유특별공제", 1, set())
+    assert cands                                              # siblings/authority still produced
+    assert all(x.source != NEG_POOL for x in cands)          # no pool negs
+    # and even with pool_k>0, a raising retriever degrades gracefully (no crash)
+    ch2 = NegativeChallenger(NoPoolCorpus(), NegConfig(pool_k=3, sibling_k=5))
+    assert ch2.generate(c.positives(issue), "장기보유특별공제", 1, set())
+
+
 def test_positives_never_appear_as_negatives():
     c = _corpus()
     issue = next(i for i in c.issues() if i.issue_id == "A-002")  # two positives

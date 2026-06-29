@@ -39,8 +39,24 @@ def _resolve(path: str) -> Path:
     return p if p.is_absolute() else (ROOT / p)
 
 
+def _expand_env(obj):
+    """Recursively expand ``$VAR`` / ``${VAR}`` in config string values from the environment.
+
+    Without this, ``uri: ${NEO4J_URI}`` reaches the Neo4j driver as the literal string. Unknown
+    variables are left untouched (os.path.expandvars semantics). The ``env:VAR`` api_key form has
+    no ``$`` and is handled later by autodata's ``resolve_api_key``.
+    """
+    if isinstance(obj, str):
+        return os.path.expandvars(obj)
+    if isinstance(obj, dict):
+        return {k: _expand_env(v) for k, v in obj.items()}
+    if isinstance(obj, list):
+        return [_expand_env(v) for v in obj]
+    return obj
+
+
 def _load_config(path: str) -> dict:
-    return yaml.safe_load(Path(path).read_text(encoding="utf-8")) or {}
+    return _expand_env(yaml.safe_load(Path(path).read_text(encoding="utf-8")) or {})
 
 
 def _build_corpus(cfg: dict):
