@@ -1,0 +1,14 @@
+# Offline path (mock corpus + mock reranker) needs only:
+pyyaml>=6.0
+
+# Real path — install as needed:
+# neo4j>=5.0                 # Neo4jCorpusProvider (read the 7693 graph)
+# sentence-transformers>=2.2 # CrossEncoderReranker (bge-reranker-v2-m3 hardness judge + eval)
+# openai>=1.0                # LLM roles via autodata.llm (or any OpenAI-compatible endpoint)
+
+# Training (separate isolated env — see scripts/train.sh / SPEC §5.5):
+# FlagEmbedding              # reranker.encoder_only.base finetuner
+# transformers<5             # FlagEmbedding 1.4.0 is incompatible with transformers 5.x
+
+# Tests:
+# pytest>=7

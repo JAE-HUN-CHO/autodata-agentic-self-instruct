@@ -1,0 +1,13 @@
+{
+  "_comment": "Held-out gold for the leak-guard demo (analog of csv64_as_gold.json). Each item has a question string and its gold articles `arts` as [law_name, clause_num] pairs. The builder string-bridges these questions to corpus issues (via user_expressions) and drops the whole issue + sibling expressions + any pos overlapping `arts`. Here it intentionally collides with issue A-003 so the offline run demonstrates a non-zero drop.",
+  "items": [
+    {
+      "q": "프리랜서인데 종합소득세 신고는 언제까지 해야 하나요",
+      "arts": [["소득세법", "70"]]
+    },
+    {
+      "q": "양도소득세 신고 기한이 지나면 가산세가 붙나요",
+      "arts": [["국세기본법", "47의2"]]
+    }
+  ]
+}

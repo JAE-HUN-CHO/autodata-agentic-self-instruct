@@ -1,0 +1,53 @@
+# Real path — Neo4j 7693 corpus + bge-reranker-v2-m3 hardness judge + OpenAI LLM roles.
+# Requires: neo4j driver + reachable graph, sentence-transformers + (ideally) GPU, OpenAI key.
+# The live reranker SERVER is never touched here; this only reads the graph and scores locally.
+verbose: true
+output: output
+
+corpus:
+  type: neo4j
+  uri: ${NEO4J_URI}          # bolt://127.0.0.1:7693
+  user: ${NEO4J_USERNAME}
+  password: ${NEO4J_PASSWORD}
+  # NOTE: Neo4jCorpusProvider.retrieve_pool is a NotImplementedError stub — wire your live
+  # graph (build_ce_trainset.pool_for_query) there to enable pool negatives. Sibling +
+  # authority negatives work without it, which is exactly the Fix #1 emphasis.
+
+heldout: ../../experiments/csv64_as_gold.json   # point at your real held-out gold
+
+reranker:
+  type: crossencoder
+  model: BAAI/bge-reranker-v2-m3   # or a fine-tuned checkpoint path for re-mining
+  law_aware: true                   # real CE always sees full text incl. the law prefix
+
+llm:
+  enabled: true
+  provider:                         # autodata.llm.build_provider config (OpenAI-compatible)
+    model: gpt-5-mini
+    base_url: https://api.openai.com/v1
+    api_key: env:OPENAI_API_KEY
+
+negatives:
+  sibling_window: 6
+  sibling_k: 8
+  # pool_k / authority_k default to 0 here because Neo4jCorpusProvider.retrieve_pool and
+  # .authorities are opt-in stubs (see corpus.py). Sibling negatives — the Fix #1 emphasis —
+  # work out of the box. Raise these AFTER you wire those two methods to your live graph.
+  pool_k: 0
+  authority_k: 0
+  window_step: 8
+  max_window: 60
+
+hardness:
+  margin: 0.05        # tighter for a real CE whose scores are better separated
+  min_hard_neg: 4
+  max_neg: 16
+
+loop:
+  max_rounds: 5
+  emit_on_exhaust: true
+  llm_refine_topk: 30
+
+build:
+  max_query_shapes: 4
+  paraphrase_n: 2
